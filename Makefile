@@ -19,7 +19,6 @@ deploy: bundle
 	@sleep 1
 	command rm -rf $(INSTALL_DIR)/$(BUNDLE)
 	ditto $(BUNDLE) $(INSTALL_DIR)/$(BUNDLE)
-	@# Stamp icon for Finder/Launchpad (workaround without Xcode)
 	@osascript -e 'use framework "AppKit"' \
 		-e 'set iconImage to current application'\''s NSImage'\''s alloc()'\''s initWithContentsOfFile:"$(INSTALL_DIR)/$(BUNDLE)/Contents/Resources/AppIcon.icns"' \
 		-e 'current application'\''s NSWorkspace'\''s sharedWorkspace()'\''s setIcon:iconImage forFile:"$(INSTALL_DIR)/$(BUNDLE)" options:0'
