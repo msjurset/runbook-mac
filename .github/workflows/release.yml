@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: swift build -c release
+
+      - name: Run tests
+        run: swift test
+
+      - name: Create app bundle
+        run: make bundle
+
+      - name: Create release archive
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent Runbook.app dist/Runbook-${{ steps.version.outputs.VERSION }}.zip
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes

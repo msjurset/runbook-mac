@@ -13,5 +13,10 @@ let package = Package(
             dependencies: ["Yams"],
             path: "Sources/RunbookMac"
         ),
+        .testTarget(
+            name: "RunbookMacTests",
+            dependencies: ["RunbookMac", "Yams"],
+            path: "Tests/RunbookMacTests"
+        ),
     ]
 )
