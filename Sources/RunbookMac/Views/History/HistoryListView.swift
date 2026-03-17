@@ -37,6 +37,11 @@ struct HistoryListView: View {
             }
         }
         .navigationTitle("History")
+        .toolbar {
+            ToolbarItem {
+                ContextualHelpButton(topic: .history)
+            }
+        }
         .onAppear { store.loadAll() }
     }
 }

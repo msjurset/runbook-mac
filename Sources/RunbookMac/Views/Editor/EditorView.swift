@@ -23,10 +23,7 @@ struct EditorView: View {
 
             Divider()
 
-            TextEditor(text: $content)
-                .font(.system(.body, design: .monospaced))
-                .scrollContentBackground(.hidden)
-                .padding(4)
+            CodeEditorView(text: $content)
 
             Divider()
 
@@ -121,9 +118,7 @@ struct NewRunbookSheet: View {
                         TextField("my-runbook", text: $name)
                             .textFieldStyle(.roundedBorder)
                     }
-                    TextEditor(text: $content)
-                        .font(.system(.body, design: .monospaced))
-                        .scrollContentBackground(.hidden)
+                    CodeEditorView(text: $content)
                         .border(.quaternary)
                 }
             }

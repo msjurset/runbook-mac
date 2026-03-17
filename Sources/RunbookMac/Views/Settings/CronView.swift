@@ -54,6 +54,11 @@ struct CronView: View {
             }
         }
         .navigationTitle("Schedules")
+        .toolbar {
+            ToolbarItem {
+                ContextualHelpButton(topic: .scheduling)
+            }
+        }
         .onAppear { loadCronList() }
     }
 

@@ -60,6 +60,11 @@ struct PullView: View {
             }
         }
         .navigationTitle("Repositories")
+        .toolbar {
+            ToolbarItem {
+                ContextualHelpButton(topic: .sharing)
+            }
+        }
         .onAppear { loadRepoList() }
     }
 
