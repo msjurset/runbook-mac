@@ -1,0 +1,10 @@
+CLAUDE.md
+.claude/
+.idea/
+.vscode/
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/

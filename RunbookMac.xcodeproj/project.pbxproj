@@ -1,0 +1,449 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6186CE907B72B46105E8C251 /* RunbookTemplate.swift */; };
+		1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABD0CE21FF9D702931139C6 /* PullView.swift */; };
+		1DD4D74E1E9EC6D05A7FD334 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5AFE58FB57721606C9B698 /* SidebarView.swift */; };
+		205C8AAD43486C811A3CC83E /* RunbookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16728D341AAA5E045724C12B /* RunbookStore.swift */; };
+		325C20E98C164472237F967A /* RunbookDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */; };
+		3301C6EDF50860453B3F5C0F /* RunbookCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */; };
+		681A38280F137D35F730200B /* Runbook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7A0CEB2509E0193227459 /* Runbook.swift */; };
+		79D00221968321CC23B11E21 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903AE94578B481DF93417F4E /* ContentView.swift */; };
+		89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949B77A269FC72599A8F0255 /* DetailRouter.swift */; };
+		8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881E00043C83C723B38239FB /* CronView.swift */; };
+		A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */; };
+		AC551E23167EA6A3C9B4DEEE /* RunnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0D67639431669D6B8761AB /* RunnerView.swift */; };
+		B008C469A67B4E31257D7495 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */; };
+		B8D984B123EF1B3012592590 /* RunbookMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */; };
+		C13B2EF5C28F1BC9CF99571B /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 9D557545F675C9DFEC970E26 /* Yams */; };
+		F115592111DECB13249CA0BC /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE2117A9A20356902D8E66D /* EditorView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		16728D341AAA5E045724C12B /* RunbookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookStore.swift; sourceTree = "<group>"; };
+		1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
+		220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookMacApp.swift; sourceTree = "<group>"; };
+		53F7A0CEB2509E0193227459 /* Runbook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runbook.swift; sourceTree = "<group>"; };
+		5F0D67639431669D6B8761AB /* RunnerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerView.swift; sourceTree = "<group>"; };
+		6186CE907B72B46105E8C251 /* RunbookTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookTemplate.swift; sourceTree = "<group>"; };
+		6DE2117A9A20356902D8E66D /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		72660AB731F640ADD6429811 /* RunbookMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RunbookMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E5AFE58FB57721606C9B698 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		881E00043C83C723B38239FB /* CronView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronView.swift; sourceTree = "<group>"; };
+		903AE94578B481DF93417F4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		949B77A269FC72599A8F0255 /* DetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailRouter.swift; sourceTree = "<group>"; };
+		96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookDetailView.swift; sourceTree = "<group>"; };
+		9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
+		D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookCLI.swift; sourceTree = "<group>"; };
+		EABD0CE21FF9D702931139C6 /* PullView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4DDD2CA4EFB0B958AAFE6DA2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C13B2EF5C28F1BC9CF99571B /* Yams in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0862FBAC53E727BD4C9F03B4 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		203485BD1A5EFB806685C662 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				72660AB731F640ADD6429811 /* RunbookMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3EA5C0114173432C55EE637C /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */,
+				53F7A0CEB2509E0193227459 /* Runbook.swift */,
+				6186CE907B72B46105E8C251 /* RunbookTemplate.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		46EFDBA85C4266E98FBAD174 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				6DE2117A9A20356902D8E66D /* EditorView.swift */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		6BE88390901B76CCE923CA98 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				949B77A269FC72599A8F0255 /* DetailRouter.swift */,
+				96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */,
+				5F0D67639431669D6B8761AB /* RunnerView.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
+		79D998F6716012AEF52471C1 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */,
+				16728D341AAA5E045724C12B /* RunbookStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7CEE00774B9BB753D918215C /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				7E5AFE58FB57721606C9B698 /* SidebarView.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		88F76342EF2B2BA2389A3A2D /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				881E00043C83C723B38239FB /* CronView.swift */,
+				EABD0CE21FF9D702931139C6 /* PullView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		8AE71E248E6D405027BC90D2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				903AE94578B481DF93417F4E /* ContentView.swift */,
+				6BE88390901B76CCE923CA98 /* Detail */,
+				46EFDBA85C4266E98FBAD174 /* Editor */,
+				0862FBAC53E727BD4C9F03B4 /* History */,
+				88F76342EF2B2BA2389A3A2D /* Settings */,
+				7CEE00774B9BB753D918215C /* Sidebar */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		8B64BE01B303C5A79D140D8B /* RunbookMac */ = {
+			isa = PBXGroup;
+			children = (
+				220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */,
+				3EA5C0114173432C55EE637C /* Models */,
+				79D998F6716012AEF52471C1 /* Services */,
+				8AE71E248E6D405027BC90D2 /* Views */,
+			);
+			name = RunbookMac;
+			path = Sources/RunbookMac;
+			sourceTree = "<group>";
+		};
+		D1F3A0B3C60B4E94111690B2 = {
+			isa = PBXGroup;
+			children = (
+				8B64BE01B303C5A79D140D8B /* RunbookMac */,
+				203485BD1A5EFB806685C662 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B9765F5333C35A76EA5037AD /* RunbookMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D6D168DED6A0BBEDFB14311 /* Build configuration list for PBXNativeTarget "RunbookMac" */;
+			buildPhases = (
+				54AD3F616EB855FD1B15B8AD /* Sources */,
+				4DDD2CA4EFB0B958AAFE6DA2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RunbookMac;
+			packageProductDependencies = (
+				9D557545F675C9DFEC970E26 /* Yams */,
+			);
+			productName = RunbookMac;
+			productReference = 72660AB731F640ADD6429811 /* RunbookMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7D57211E0AF14C6F08755AFC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 54BFAB8146BE86A396F24A3B /* Build configuration list for PBXProject "RunbookMac" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D1F3A0B3C60B4E94111690B2;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				062D07C165A15F1366EFBE02 /* XCRemoteSwiftPackageReference "Yams" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 203485BD1A5EFB806685C662 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B9765F5333C35A76EA5037AD /* RunbookMac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		54AD3F616EB855FD1B15B8AD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79D00221968321CC23B11E21 /* ContentView.swift in Sources */,
+				8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */,
+				89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */,
+				F115592111DECB13249CA0BC /* EditorView.swift in Sources */,
+				B008C469A67B4E31257D7495 /* HistoryListView.swift in Sources */,
+				A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */,
+				1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */,
+				681A38280F137D35F730200B /* Runbook.swift in Sources */,
+				3301C6EDF50860453B3F5C0F /* RunbookCLI.swift in Sources */,
+				325C20E98C164472237F967A /* RunbookDetailView.swift in Sources */,
+				B8D984B123EF1B3012592590 /* RunbookMacApp.swift in Sources */,
+				205C8AAD43486C811A3CC83E /* RunbookStore.swift in Sources */,
+				0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */,
+				AC551E23167EA6A3C9B4DEEE /* RunnerView.swift in Sources */,
+				1DD4D74E1E9EC6D05A7FD334 /* SidebarView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		51938559F810C6C94246F940 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Runbook;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.msjurset.runbook-mac";
+				PRODUCT_NAME = Runbook;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		BFEE9D503928656C20B02127 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C1E268A6BC01175114CF8B9D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D5F8E069634050365E1124BF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Runbook;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.msjurset.runbook-mac";
+				PRODUCT_NAME = Runbook;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4D6D168DED6A0BBEDFB14311 /* Build configuration list for PBXNativeTarget "RunbookMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5F8E069634050365E1124BF /* Debug */,
+				51938559F810C6C94246F940 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		54BFAB8146BE86A396F24A3B /* Build configuration list for PBXProject "RunbookMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFEE9D503928656C20B02127 /* Debug */,
+				C1E268A6BC01175114CF8B9D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		062D07C165A15F1366EFBE02 /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9D557545F675C9DFEC970E26 /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 062D07C165A15F1366EFBE02 /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 7D57211E0AF14C6F08755AFC /* Project object */;
+}
