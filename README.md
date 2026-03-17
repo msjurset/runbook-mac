@@ -31,7 +31,17 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 
 ## Install
 
+### Homebrew
+
+```sh
+brew install --cask msjurset/tap/runbook-mac
 ```
+
+This also installs the `runbook` CLI if you don't already have it.
+
+### From source
+
+```sh
 make deploy
 ```
 

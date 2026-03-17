@@ -36,3 +36,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes
+
+      - name: Update Homebrew cask
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          SHA256=$(shasum -a 256 dist/Runbook-${VERSION}.zip | cut -d ' ' -f 1)
+          git clone https://x-access-token:${TAP_TOKEN}@github.com/msjurset/homebrew-tap.git /tmp/homebrew-tap
+          cd /tmp/homebrew-tap
+          sed -i '' "s|version \".*\"|version \"${VERSION}\"|" Casks/runbook-mac.rb
+          sed -i '' "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Casks/runbook-mac.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/runbook-mac.rb
+          git commit -m "runbook-mac ${VERSION}"
+          git push
