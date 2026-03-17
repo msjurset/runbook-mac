@@ -2,6 +2,10 @@
 
 Native macOS app for browsing, executing, and managing operational runbooks. A GUI frontend for the [runbook](https://github.com/msjurset/runbook) CLI tool.
 
+![Runbook detail view](screenshot1.png)
+
+![YAML editor with syntax highlighting](screenshot2.png)
+
 ## Features
 
 - **Browse Runbooks** — Sidebar navigation of all runbooks in `~/.runbook/books/` with automatic discovery of subdirectories (pulled repos)
