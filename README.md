@@ -27,7 +27,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 ## Requirements
 
 - macOS 15.0 (Sequoia) or later
-- [runbook](https://github.com/msjurset/runbook) CLI installed at `~/.local/bin/runbook`
+- [runbook](https://github.com/msjurset/runbook) CLI installed and available in your `PATH`
 
 ## Install
 
