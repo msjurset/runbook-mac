@@ -1,0 +1,378 @@
+import SwiftUI
+
+/// Draws a serpentine step pipeline entirely in Canvas for pixel-perfect layout.
+struct StepFlowCanvas: View {
+    let steps: [Step]
+    let colorScheme: ColorScheme
+
+    // Layout constants
+    private let pillHeight: CGFloat = 24
+    private let pillPadding: CGFloat = 12
+    private let arrowLength: CGFloat = 20
+    private let rowGap: CGFloat = 4
+    private let fontSize: CGFloat = 11
+    private let turnRadius: CGFloat = 10
+
+    @State private var computedHeight: CGFloat = 30
+
+    var body: some View {
+        GeometryReader { geo in
+            let layout = computeLayout(width: geo.size.width)
+            Canvas { context, size in
+                drawPipeline(context: context, layout: layout, size: size)
+            }
+            .onAppear { computedHeight = layout.totalHeight }
+            .onChange(of: geo.size.width) { _, _ in
+                computedHeight = computeLayout(width: geo.size.width).totalHeight
+            }
+        }
+        .frame(height: computedHeight)
+    }
+
+    // MARK: - Layout computation
+
+    private struct PillLayout {
+        var step: Step
+        var rect: CGRect
+        var row: Int
+        var reversed: Bool
+    }
+
+    private struct PipelineLayout {
+        var pills: [PillLayout]
+        var rows: Int
+        var totalHeight: CGFloat
+    }
+
+    private func measurePill(_ step: Step) -> CGFloat {
+        let name = abbreviate(step.name, max: 22)
+        // Approximate: 7pt per char + padding + color bar
+        return CGFloat(name.count) * 7.0 + pillPadding * 2 + 8
+    }
+
+    private func computeLayout(width: CGFloat) -> PipelineLayout {
+        guard !steps.isEmpty else {
+            return PipelineLayout(pills: [], rows: 0, totalHeight: 0)
+        }
+
+        var pills: [PillLayout] = []
+        var row = 0
+        var x: CGFloat = 0
+        let availableWidth = width
+
+        // Assign pills to rows
+        var rowAssignments: [[Int]] = [[]] // indices into pills
+
+        for (i, step) in steps.enumerated() {
+            let pillW = measurePill(step)
+            let needed = x > 0 ? pillW + arrowLength : pillW
+
+            if x + needed > availableWidth && x > 0 {
+                row += 1
+                x = 0
+                rowAssignments.append([])
+            }
+
+            let pill = PillLayout(
+                step: step,
+                rect: .zero, // computed below
+                row: row,
+                reversed: row % 2 == 1
+            )
+            pills.append(pill)
+            rowAssignments[row].append(i)
+            x += needed
+        }
+
+        // Now compute actual positions with serpentine
+        let totalRows = row + 1
+        let normalGap = rowGap + turnRadius  // gap when side-exit turn
+        let bottomExitGap = rowGap + turnRadius + 14  // extra space for bottom-exit turns
+
+        // First pass: position pills and detect which transitions need extra space
+        var rowYPositions: [CGFloat] = [0]
+        for rowIdx in 1..<totalRows {
+            let prevIndices = rowAssignments[rowIdx - 1]
+            let currIndices = rowAssignments[rowIdx]
+            guard let lastPillIdx = prevIndices.last, let nextPillIdx = currIndices.first else {
+                rowYPositions.append(rowYPositions.last! + pillHeight + normalGap)
+                continue
+            }
+
+            // Check if this turn will be a bottom-exit
+            // We need the source pill rect and target center — estimate them
+            let prevReversed = (rowIdx - 1) % 2 == 1
+            let sourcePillW = measurePill(pills[lastPillIdx].step)
+            let nextReversed = rowIdx % 2 == 1
+
+            // Estimate source pill X range
+            var prevX: CGFloat = 0
+            for (j, idx) in prevIndices.enumerated() {
+                let pw = measurePill(pills[idx].step)
+                if idx == lastPillIdx {
+                    if prevReversed {
+                        // Source pill is at the left end of the R→L row
+                        // Its minX is prevX (after subtracting)
+                    }
+                    break
+                }
+                prevX += measurePill(pills[idx].step) + arrowLength
+            }
+
+            // Simpler: estimate target center and check overlap with source pill width
+            // For now, use a heuristic: if rows have very different item counts, likely needs bottom-exit
+            // Actually, let's just use extra gap for ALL transitions — it's only 14px more
+            // and it makes the flow cleaner
+            let gap = bottomExitGap
+            rowYPositions.append(rowYPositions.last! + pillHeight + gap)
+        }
+
+        for rowIdx in 0..<totalRows {
+            let reversed = rowIdx % 2 == 1
+            let indices = rowAssignments[rowIdx]
+            let y = rowYPositions[rowIdx]
+
+            var cx: CGFloat
+            if reversed {
+                cx = availableWidth
+            } else {
+                cx = 0
+            }
+
+            for (j, pillIdx) in indices.enumerated() {
+                let pillW = measurePill(pills[pillIdx].step)
+
+                if reversed {
+                    if j > 0 { cx -= arrowLength }
+                    cx -= pillW
+                    pills[pillIdx].rect = CGRect(x: cx, y: y, width: pillW, height: pillHeight)
+                } else {
+                    if j > 0 { cx += arrowLength }
+                    pills[pillIdx].rect = CGRect(x: cx, y: y, width: pillW, height: pillHeight)
+                    cx += pillW
+                }
+            }
+        }
+
+        let totalHeight = (rowYPositions.last ?? 0) + pillHeight + 12
+
+        return PipelineLayout(pills: pills, rows: totalRows, totalHeight: totalHeight)
+    }
+
+    // MARK: - Drawing
+
+    private func drawPipeline(context: GraphicsContext, layout: PipelineLayout, size: CGSize) {
+        let lineColor = colorScheme == .dark ? Color.white.opacity(0.4) : Color.black.opacity(0.35)
+
+        // Draw pills FIRST (bottom layer)
+        for pill in layout.pills {
+            drawPill(context: context, pill: pill)
+        }
+
+        // Draw arrows ON TOP so arrowheads aren't hidden behind pills
+        for (i, pill) in layout.pills.enumerated() {
+            if i < layout.pills.count - 1 {
+                let next = layout.pills[i + 1]
+
+                if pill.row == next.row {
+                    // Same row: horizontal arrow — start/end at pill edges
+                    let fromX = pill.reversed ? pill.rect.minX : pill.rect.maxX
+                    let toX = next.reversed ? next.rect.maxX : next.rect.minX
+                    let y = pill.rect.midY
+
+                    drawArrow(context: context, from: CGPoint(x: fromX, y: y), to: CGPoint(x: toX, y: y), color: lineColor)
+                } else {
+                    // Different row: serpentine turn
+                    // From: exit side of current pill
+                    let fromX = pill.reversed ? pill.rect.minX : pill.rect.maxX
+                    let fromY = pill.rect.midY
+                    // To: the FLOW-ENTRY side of next pill (opposite of where between-pill arrows connect)
+                    // For R→L row: flow enters from left side of pill
+                    // For L→R row: flow enters from right side of pill... wait, no:
+                    // Actually: enter the pill from the side the between-pill arrows come FROM
+                    // R→L row: arrows go right-to-left, so first pill receives from its LEFT
+                    // L→R row: arrows go left-to-right, so first pill receives from its RIGHT... no
+                    // Simpler: the turn enters the pill from the SAME side as the edge
+                    // But we want it on the opposite side. Let's make it wrap around:
+                    let toY = next.rect.midY
+
+                    let edgeX: CGFloat
+                    if !pill.reversed {
+                        edgeX = min(size.width - 4, max(pill.rect.maxX, next.rect.maxX) + 14)
+                    } else {
+                        edgeX = max(4, min(pill.rect.minX, next.rect.minX) - 14)
+                    }
+
+                    // Connect to the TOP CENTER of the next pill
+                    let entryPoint = CGPoint(x: next.rect.midX, y: next.rect.minY)
+
+                    drawTurnArrow(context: context,
+                                  from: CGPoint(x: fromX, y: fromY),
+                                  sourcePillRect: pill.rect,
+                                  edge: CGPoint(x: edgeX, y: fromY),
+                                  to: entryPoint,
+                                  color: lineColor)
+                }
+            }
+        }
+    }
+
+    private func drawPill(context: GraphicsContext, pill: PillLayout) {
+        let rect = pill.rect
+        let cornerRadius: CGFloat = 6
+        let bgColor = pillBgColor(pill.step)
+        let borderColor = pillBorderColor(pill.step)
+        let barColor = pillBarColor(pill.step)
+
+        // Background
+        let path = RoundedRectangle(cornerRadius: cornerRadius).path(in: rect)
+        context.fill(path, with: .color(bgColor))
+        context.stroke(path, with: .color(borderColor), lineWidth: 0.8)
+
+        // Color bar on left
+        let barRect = CGRect(x: rect.minX + 3, y: rect.minY + 4, width: 3, height: rect.height - 8)
+        context.fill(RoundedRectangle(cornerRadius: 1.5).path(in: barRect), with: .color(barColor))
+
+        // Label
+        let name = abbreviate(pill.step.name, max: 22)
+        let textColor = colorScheme == .dark ? Color.white.opacity(0.8) : Color.black.opacity(0.75)
+        let text = Text(name).font(.system(size: fontSize, weight: .medium))
+        context.draw(text, at: CGPoint(x: rect.midX + 3, y: rect.midY), anchor: .center)
+    }
+
+    private func drawArrow(context: GraphicsContext, from: CGPoint, to: CGPoint, color: Color) {
+        let dir: ArrowDir = to.x > from.x ? .right : .left
+        let headLen: CGFloat = 10
+
+        var path = Path()
+        path.move(to: from)
+        let lineEnd: CGPoint
+        switch dir {
+        case .right: lineEnd = CGPoint(x: to.x - headLen, y: to.y)
+        case .left: lineEnd = CGPoint(x: to.x + headLen, y: to.y)
+        }
+        path.addLine(to: lineEnd)
+        context.stroke(path, with: .color(color), lineWidth: 1.3)
+
+        let headColor = colorScheme == .dark ? Color.white.opacity(0.85) : Color.black.opacity(0.7)
+        drawArrowhead(context: context, at: to, direction: dir, color: headColor)
+    }
+
+    private enum ArrowDir { case left, right }
+
+    private func drawArrowhead(context: GraphicsContext, at point: CGPoint, direction: ArrowDir, color: Color) {
+        let len: CGFloat = 10
+        let width: CGFloat = 6
+        var head = Path()
+        switch direction {
+        case .right:
+            head.move(to: CGPoint(x: point.x - len, y: point.y - width))
+            head.addLine(to: point)
+            head.addLine(to: CGPoint(x: point.x - len, y: point.y + width))
+            head.closeSubpath()
+        case .left:
+            head.move(to: CGPoint(x: point.x + len, y: point.y - width))
+            head.addLine(to: point)
+            head.addLine(to: CGPoint(x: point.x + len, y: point.y + width))
+            head.closeSubpath()
+        }
+        context.fill(head, with: .color(color))
+    }
+
+    private func drawTurnArrow(context: GraphicsContext, from: CGPoint, sourcePillRect: CGRect, edge: CGPoint, to: CGPoint, color: Color) {
+        // to = top center of the next pill
+        let r: CGFloat = 6
+        let headLen: CGFloat = 10
+        let headColor = colorScheme == .dark ? Color.white.opacity(0.85) : Color.black.opacity(0.7)
+
+        // If target center X is INSIDE the source pill's left/right borders,
+        // exit from BOTTOM of source pill (straight down).
+        // Otherwise, exit from the SIDE (horizontal then curve down).
+        let sourceOverlapsTarget = to.x >= sourcePillRect.minX && to.x <= sourcePillRect.maxX
+
+        var path = Path()
+
+        if sourceOverlapsTarget {
+            // Exit from bottom center of source pill, go straight down
+            let exitPoint = CGPoint(x: sourcePillRect.midX, y: sourcePillRect.maxY)
+            path.move(to: exitPoint)
+            path.addLine(to: CGPoint(x: exitPoint.x, y: to.y - headLen))
+
+            // If target X is different, add a curve to reach it
+            if abs(exitPoint.x - to.x) > r * 2 {
+                // Go down partway, curve horizontal, then down to target
+                let midY = (exitPoint.y + to.y - headLen) / 2
+                path = Path()
+                path.move(to: exitPoint)
+                path.addLine(to: CGPoint(x: exitPoint.x, y: midY - r))
+                if to.x > exitPoint.x {
+                    path.addQuadCurve(to: CGPoint(x: exitPoint.x + r, y: midY), control: CGPoint(x: exitPoint.x, y: midY))
+                    path.addLine(to: CGPoint(x: to.x - r, y: midY))
+                    path.addQuadCurve(to: CGPoint(x: to.x, y: midY + r), control: CGPoint(x: to.x, y: midY))
+                } else {
+                    path.addQuadCurve(to: CGPoint(x: exitPoint.x - r, y: midY), control: CGPoint(x: exitPoint.x, y: midY))
+                    path.addLine(to: CGPoint(x: to.x + r, y: midY))
+                    path.addQuadCurve(to: CGPoint(x: to.x, y: midY + r), control: CGPoint(x: to.x, y: midY))
+                }
+                path.addLine(to: CGPoint(x: to.x, y: to.y - headLen))
+            }
+        } else {
+            // Normal case: horizontal toward target X, curve, then straight down
+            path.move(to: from)
+            let curveX = to.x + (from.x > to.x ? r : -r)
+            path.addLine(to: CGPoint(x: curveX, y: from.y))
+
+            path.addQuadCurve(
+                to: CGPoint(x: to.x, y: from.y + r),
+                control: CGPoint(x: to.x, y: from.y)
+            )
+            path.addLine(to: CGPoint(x: to.x, y: to.y - headLen))
+        }
+
+        context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: 1.3, lineCap: .round, lineJoin: .round))
+
+        // Downward arrowhead into pill top
+        var head = Path()
+        head.move(to: CGPoint(x: to.x - 6, y: to.y - headLen))
+        head.addLine(to: to)
+        head.addLine(to: CGPoint(x: to.x + 6, y: to.y - headLen))
+        head.closeSubpath()
+        context.fill(head, with: .color(headColor))
+    }
+
+    // MARK: - Colors
+
+    private func pillBgColor(_ step: Step) -> Color {
+        let isDark = colorScheme == .dark
+        if step.confirm != nil { return isDark ? Color(red: 0.2, green: 0.15, blue: 0.08) : Color(red: 1, green: 0.95, blue: 0.88) }
+        switch step.type {
+        case "ssh": return isDark ? Color(red: 0.08, green: 0.18, blue: 0.2) : Color(red: 0.88, green: 0.96, blue: 0.96)
+        case "http": return isDark ? Color(red: 0.08, green: 0.2, blue: 0.1) : Color(red: 0.88, green: 0.97, blue: 0.88)
+        default: return isDark ? Color(red: 0.08, green: 0.12, blue: 0.22) : Color(red: 0.88, green: 0.92, blue: 0.98)
+        }
+    }
+
+    private func pillBorderColor(_ step: Step) -> Color {
+        let isDark = colorScheme == .dark
+        if step.confirm != nil { return isDark ? Color.orange.opacity(0.4) : Color.orange.opacity(0.4) }
+        switch step.type {
+        case "ssh": return isDark ? Color.teal.opacity(0.4) : Color.teal.opacity(0.4)
+        case "http": return isDark ? Color.green.opacity(0.4) : Color.green.opacity(0.4)
+        default: return isDark ? Color.blue.opacity(0.3) : Color.blue.opacity(0.3)
+        }
+    }
+
+    private func pillBarColor(_ step: Step) -> Color {
+        if step.confirm != nil { return .orange }
+        switch step.type {
+        case "ssh": return .teal
+        case "http": return .green
+        default: return .blue
+        }
+    }
+
+    private func abbreviate(_ s: String, max: Int) -> String {
+        if s.count <= max { return s }
+        return String(s.prefix(max - 1)) + "…"
+    }
+}

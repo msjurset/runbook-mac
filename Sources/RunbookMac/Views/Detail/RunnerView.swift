@@ -58,19 +58,29 @@ struct RunnerView: View {
 
             // Controls
             HStack {
-                Button("Close") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
-                Spacer()
-                if isRunning {
+                if isDone {
+                    Button("Close") { dismiss() }
+                        .keyboardShortcut(.defaultAction)
+                    Spacer()
+                    Button("Run Again") {
+                        success = nil
+                        startRun()
+                    }
+                } else if isRunning {
+                    Button("Close") { dismiss() }
+                        .keyboardShortcut(.cancelAction)
+                    Spacer()
                     ProgressView()
                         .controlSize(.small)
                         .padding(.trailing, 4)
                     Text("Running...")
                         .foregroundStyle(.secondary)
                 } else {
+                    Button("Close") { dismiss() }
+                        .keyboardShortcut(.cancelAction)
+                    Spacer()
                     Button("Run") { startRun() }
                         .keyboardShortcut(.defaultAction)
-                        .disabled(isRunning)
                 }
             }
             .padding()
@@ -86,6 +96,8 @@ struct RunnerView: View {
         }
     }
 
+    private var isDone: Bool { success != nil && !isRunning }
+
     private func variableInputs(_ defs: [VariableDef]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Variables")
@@ -96,12 +108,20 @@ struct RunnerView: View {
                     Text(v.name)
                         .font(.body.monospaced())
                         .frame(width: 120, alignment: .trailing)
-                    TextField(v.default ?? "", text: binding(for: v.name))
-                        .textFieldStyle(.roundedBorder)
-                    if v.required == true {
-                        Text("required")
-                            .font(.caption2)
-                            .foregroundStyle(.red)
+                    if isDone {
+                        Text(vars[v.name] ?? v.default ?? "")
+                            .font(.body.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        TextField(v.default ?? "", text: binding(for: v.name))
+                            .textFieldStyle(.roundedBorder)
+                            .disabled(isRunning)
+                        if v.required == true {
+                            Text("required")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
             }

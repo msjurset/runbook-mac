@@ -46,8 +46,10 @@ actor RunbookCLI {
     }
 
     /// Remove a cron entry.
-    func cronRemove(name: String) async throws -> String {
-        try await captureOutput(args: ["cron", "remove", name])
+    func cronRemove(name: String, schedule: String? = nil) async throws -> String {
+        var args = ["cron", "remove", name]
+        if let schedule { args.append(schedule) }
+        return try await captureOutput(args: args)
     }
 
     /// Pull a repo or file.
