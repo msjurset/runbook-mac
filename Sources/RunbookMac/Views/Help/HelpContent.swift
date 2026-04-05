@@ -245,7 +245,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
             return [
                 .heading("From the App"),
                 .numbered([
-                    "Select a runbook in the sidebar",
+                    "Select a runbook from the list",
                     "Click the Run (▶) button in the toolbar",
                     "Fill in any variable values",
                     "Click Run to start execution",

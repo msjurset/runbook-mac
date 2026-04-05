@@ -1,7 +1,7 @@
 import SwiftUI
 
-enum NavigationItem: Hashable {
-    case runbook(Runbook)
+enum SidebarItem: Hashable {
+    case runbooks
     case history
     case cron
     case pull
@@ -9,14 +9,37 @@ enum NavigationItem: Hashable {
 
 struct ContentView: View {
     @Environment(RunbookStore.self) private var store
-    @State private var selection: NavigationItem?
+    @State private var sidebarSelection: SidebarItem? = .runbooks
+    @State private var selectedRunbook: Runbook?
     @State private var showNewRunbook = false
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(selection: $selection, showNewRunbook: $showNewRunbook)
+            SidebarView(
+                selection: $sidebarSelection,
+                showNewRunbook: $showNewRunbook
+            )
         } detail: {
-            DetailRouter(selection: selection)
+            switch sidebarSelection {
+            case .runbooks:
+                RunbookBrowserView(selectedRunbook: $selectedRunbook)
+            case .history:
+                HistoryListView()
+                    .accessibilityIdentifier("detail.history")
+            case .cron:
+                CronView()
+                    .accessibilityIdentifier("detail.schedules")
+            case .pull:
+                PullView()
+                    .accessibilityIdentifier("detail.repositories")
+            case nil:
+                ContentUnavailableView(
+                    "Select a Section",
+                    systemImage: "sidebar.left",
+                    description: Text("Choose a section from the sidebar.")
+                )
+                .accessibilityIdentifier("detail.empty")
+            }
         }
         .sheet(isPresented: $showNewRunbook) {
             NewRunbookSheet { name, content in
@@ -24,9 +47,14 @@ struct ContentView: View {
                 store.loadAll()
             }
         }
+        .onChange(of: sidebarSelection) {
+            if sidebarSelection != .runbooks {
+                selectedRunbook = nil
+            }
+        }
         .onAppear {
             store.loadAll()
         }
-        .frame(minWidth: 800, minHeight: 500)
+        .frame(minWidth: 900, minHeight: 500)
     }
 }

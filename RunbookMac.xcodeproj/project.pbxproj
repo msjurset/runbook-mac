@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0C223B1C65826E8816D6D6F3 /* EditableConfigRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */; };
 		0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6186CE907B72B46105E8C251 /* RunbookTemplate.swift */; };
+		191F6AF3529288C2ACB2A6BC /* RunbookBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFE4234E6D65D2A77ECA6CCE /* RunbookBrowserView.swift */; };
 		1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABD0CE21FF9D702931139C6 /* PullView.swift */; };
 		1DD4D74E1E9EC6D05A7FD334 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5AFE58FB57721606C9B698 /* SidebarView.swift */; };
 		205C8AAD43486C811A3CC83E /* RunbookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16728D341AAA5E045724C12B /* RunbookStore.swift */; };
@@ -20,7 +21,6 @@
 		681A38280F137D35F730200B /* Runbook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7A0CEB2509E0193227459 /* Runbook.swift */; };
 		6DFBBE6F4BB217ECCE6985FA /* CodeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A20D5593F789162677669B /* CodeEditorView.swift */; };
 		79D00221968321CC23B11E21 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903AE94578B481DF93417F4E /* ContentView.swift */; };
-		89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949B77A269FC72599A8F0255 /* DetailRouter.swift */; };
 		8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881E00043C83C723B38239FB /* CronView.swift */; };
 		8DB1E984E61B1403FAFE9F17 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75989586D609EE7D7A30E955 /* HelpView.swift */; };
 		A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */; };
@@ -33,6 +33,7 @@
 		C19733FB10AA16D912C2BB4D /* HelpContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA784B5B11DEA018E8954DF /* HelpContent.swift */; };
 		DD8318CD98612BC0A90FDB95 /* RunbookUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FA8541D1FE8E8FD275C138 /* RunbookUITests.swift */; };
 		F115592111DECB13249CA0BC /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE2117A9A20356902D8E66D /* EditorView.swift */; };
+		F4ED976919B0D5ABF0CFA588 /* RunbookListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EF16125CD4D711571F9E2C /* RunbookListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,11 +65,12 @@
 		7E5AFE58FB57721606C9B698 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		881E00043C83C723B38239FB /* CronView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronView.swift; sourceTree = "<group>"; };
 		903AE94578B481DF93417F4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		949B77A269FC72599A8F0255 /* DetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailRouter.swift; sourceTree = "<group>"; };
 		96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookDetailView.swift; sourceTree = "<group>"; };
 		9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
 		A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableConfigRow.swift; sourceTree = "<group>"; };
 		A57EC2A005C87F47F05D159B /* RunbookMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunbookMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFE4234E6D65D2A77ECA6CCE /* RunbookBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookBrowserView.swift; sourceTree = "<group>"; };
+		D1EF16125CD4D711571F9E2C /* RunbookListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookListView.swift; sourceTree = "<group>"; };
 		D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookCLI.swift; sourceTree = "<group>"; };
 		DBB580015BDA4DD97030C983 /* YAMLCompletionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YAMLCompletionProvider.swift; sourceTree = "<group>"; };
 		EABD0CE21FF9D702931139C6 /* PullView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullView.swift; sourceTree = "<group>"; };
@@ -146,7 +148,6 @@
 		6BE88390901B76CCE923CA98 /* Detail */ = {
 			isa = PBXGroup;
 			children = (
-				949B77A269FC72599A8F0255 /* DetailRouter.swift */,
 				A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */,
 				96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */,
 				5F0D67639431669D6B8761AB /* RunnerView.swift */,
@@ -167,6 +168,8 @@
 		7CEE00774B9BB753D918215C /* Sidebar */ = {
 			isa = PBXGroup;
 			children = (
+				CFE4234E6D65D2A77ECA6CCE /* RunbookBrowserView.swift */,
+				D1EF16125CD4D711571F9E2C /* RunbookListView.swift */,
 				7E5AFE58FB57721606C9B698 /* SidebarView.swift */,
 			);
 			path = Sidebar;
@@ -312,7 +315,6 @@
 				79D00221968321CC23B11E21 /* ContentView.swift in Sources */,
 				B2C984601023E62C96EAEF53 /* CronDescription.swift in Sources */,
 				8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */,
-				89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */,
 				0C223B1C65826E8816D6D6F3 /* EditableConfigRow.swift in Sources */,
 				F115592111DECB13249CA0BC /* EditorView.swift in Sources */,
 				C19733FB10AA16D912C2BB4D /* HelpContent.swift in Sources */,
@@ -322,8 +324,10 @@
 				B6293BE249C3D2C49BA50E8E /* MermaidFlowView.swift in Sources */,
 				1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */,
 				681A38280F137D35F730200B /* Runbook.swift in Sources */,
+				191F6AF3529288C2ACB2A6BC /* RunbookBrowserView.swift in Sources */,
 				3301C6EDF50860453B3F5C0F /* RunbookCLI.swift in Sources */,
 				325C20E98C164472237F967A /* RunbookDetailView.swift in Sources */,
+				F4ED976919B0D5ABF0CFA588 /* RunbookListView.swift in Sources */,
 				B8D984B123EF1B3012592590 /* RunbookMacApp.swift in Sources */,
 				205C8AAD43486C811A3CC83E /* RunbookStore.swift in Sources */,
 				0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */,

@@ -2,34 +2,26 @@ import SwiftUI
 
 struct SidebarView: View {
     @Environment(RunbookStore.self) private var store
-    @Binding var selection: NavigationItem?
+    @Binding var selection: SidebarItem?
     @Binding var showNewRunbook: Bool
 
     var body: some View {
         List(selection: $selection) {
-            Section("Runbooks") {
-                ForEach(store.runbooks) { book in
-                    NavigationLink(value: NavigationItem.runbook(book)) {
-                        Label(book.name, systemImage: "doc.text")
-                    }
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            deleteRunbook(book)
-                        }
-                    }
-                }
+            NavigationLink(value: SidebarItem.runbooks) {
+                Label("Runbooks", systemImage: "doc.text")
             }
+            .accessibilityIdentifier("sidebar.runbooks")
 
             Section("Management") {
-                NavigationLink(value: NavigationItem.history) {
+                NavigationLink(value: SidebarItem.history) {
                     Label("History", systemImage: "clock")
                 }
                 .accessibilityIdentifier("sidebar.history")
-                NavigationLink(value: NavigationItem.cron) {
+                NavigationLink(value: SidebarItem.cron) {
                     Label("Schedules", systemImage: "calendar.badge.clock")
                 }
                 .accessibilityIdentifier("sidebar.schedules")
-                NavigationLink(value: NavigationItem.pull) {
+                NavigationLink(value: SidebarItem.pull) {
                     Label("Repositories", systemImage: "arrow.down.circle")
                 }
                 .accessibilityIdentifier("sidebar.repositories")
@@ -50,14 +42,6 @@ struct SidebarView: View {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
             }
-        }
-    }
-
-    private func deleteRunbook(_ book: Runbook) {
-        try? store.delete(book)
-        store.loadAll()
-        if case .runbook(let selected) = selection, selected == book {
-            selection = nil
         }
     }
 }

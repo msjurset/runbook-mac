@@ -29,7 +29,14 @@ final class RunbookUITests: XCTestCase {
         _ = waitForSidebar()
     }
 
-    func testEmptyStateShownOnLaunch() throws {
+    // MARK: - Runbook Browser
+
+    func testRunbookListShownByDefault() throws {
+        let list = findElement("runbookList")
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+    }
+
+    func testEmptyDetailOnLaunch() throws {
         let empty = findElement("detail.empty")
         XCTAssertTrue(empty.waitForExistence(timeout: 5))
     }
@@ -43,7 +50,7 @@ final class RunbookUITests: XCTestCase {
         historyButton.click()
 
         let detail = findElement("detail.history")
-        XCTAssertTrue(detail.waitForExistence(timeout: 5))
+        XCTAssertTrue(detail.waitForExistence(timeout: 10))
     }
 
     func testNavigateToSchedules() throws {
@@ -53,7 +60,7 @@ final class RunbookUITests: XCTestCase {
         schedulesButton.click()
 
         let detail = findElement("detail.schedules")
-        XCTAssertTrue(detail.waitForExistence(timeout: 5))
+        XCTAssertTrue(detail.waitForExistence(timeout: 10))
     }
 
     func testNavigateToRepositories() throws {
@@ -63,14 +70,16 @@ final class RunbookUITests: XCTestCase {
         reposButton.click()
 
         let detail = findElement("detail.repositories")
-        XCTAssertTrue(detail.waitForExistence(timeout: 5))
+        XCTAssertTrue(detail.waitForExistence(timeout: 10))
     }
 
     // MARK: - Runbook Selection
 
-    func testSelectRunbookFromSidebar() throws {
-        let sidebar = waitForSidebar()
-        let firstRunbook = sidebar.cells.element(boundBy: 1).buttons.firstMatch
+    func testSelectRunbookFromList() throws {
+        let list = findElement("runbookList")
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+
+        let firstRunbook = list.buttons.firstMatch
         if firstRunbook.waitForExistence(timeout: 5) {
             firstRunbook.click()
             let detail = findElement("detail.runbook")

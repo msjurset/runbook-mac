@@ -21,6 +21,7 @@ struct RunbookDetailView: View {
                 historyPreview
             }
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle(runbook.name)
         .toolbar {
