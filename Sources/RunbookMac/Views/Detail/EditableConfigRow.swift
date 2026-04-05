@@ -10,6 +10,15 @@ struct EditableConfigRow: View {
     @State private var editValue: String = ""
     @FocusState private var isFocused: Bool
 
+    private var lineCount: Int {
+        max(1, editValue.components(separatedBy: "\n").count)
+    }
+
+    private var editorHeight: CGFloat {
+        let lines = min(lineCount, 10)
+        return CGFloat(lines) * 16 + 12
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Text(label)
@@ -18,11 +27,20 @@ struct EditableConfigRow: View {
                 .frame(minWidth: 70, alignment: .trailing)
 
             if isEditing {
-                TextField("", text: $editValue)
+                TextEditor(text: $editValue)
                     .font(.system(.caption, design: .monospaced))
-                    .textFieldStyle(.roundedBorder)
+                    .scrollContentBackground(.hidden)
+                    .padding(4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(.background)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(.blue.opacity(0.5), lineWidth: 1)
+                    )
+                    .frame(height: editorHeight)
                     .focused($isFocused)
-                    .onSubmit { save() }
                     .onChange(of: isFocused) {
                         if !isFocused { save() }
                     }
@@ -52,7 +70,6 @@ struct EditableConfigRow: View {
     private func startEditing() {
         editValue = value
         isEditing = true
-        // Delay focus to next runloop so the TextField is rendered first
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             isFocused = true
         }
