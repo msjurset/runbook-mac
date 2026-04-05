@@ -7,6 +7,7 @@ struct EditorView: View {
     @State private var content: String = ""
     @State private var originalContent: String = ""
     @State private var errorMessage: String?
+    @State private var validationSuccess = false
     @State private var showDiff = false
 
     var body: some View {
@@ -40,6 +41,10 @@ struct EditorView: View {
                     Text(err)
                         .font(.caption)
                         .foregroundStyle(.red)
+                } else if validationSuccess {
+                    Label("Valid", systemImage: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.green)
                 }
             }
             .padding()
@@ -63,14 +68,33 @@ struct EditorView: View {
     }
 
     private func validate() {
-        guard let path = runbook.filePath else { return }
+        errorMessage = nil
+        validationSuccess = false
+
+        // Write current content to a temp file so the CLI validates what's in the editor
+        let tempDir = FileManager.default.temporaryDirectory
+        let tempFile = tempDir.appendingPathComponent("runbook-validate-\(UUID().uuidString).yaml")
+
+        do {
+            try content.write(to: tempFile, atomically: true, encoding: .utf8)
+        } catch {
+            errorMessage = "Could not write temp file: \(error.localizedDescription)"
+            return
+        }
+
         Task {
+            defer { try? FileManager.default.removeItem(at: tempFile) }
             do {
-                let result = try await RunbookCLI.shared.validate(nameOrPath: path)
-                await MainActor.run { errorMessage = nil }
-                _ = result
+                _ = try await RunbookCLI.shared.validate(nameOrPath: tempFile.path)
+                await MainActor.run {
+                    errorMessage = nil
+                    validationSuccess = true
+                }
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    validationSuccess = false
+                }
             }
         }
     }
