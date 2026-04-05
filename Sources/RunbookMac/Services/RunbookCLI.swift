@@ -16,8 +16,9 @@ actor RunbookCLI {
     }
 
     /// Run a runbook by name, streaming output line by line.
-    func run(name: String, vars: [String: String] = [:], onOutput: @escaping @Sendable (String) -> Void) async throws -> Bool {
+    func run(name: String, vars: [String: String] = [:], dryRun: Bool = false, onOutput: @escaping @Sendable (String) -> Void) async throws -> Bool {
         var args = ["run", "--no-tui", "--yes", name]
+        if dryRun { args.insert("--dry-run", at: 1) }
         for (k, v) in vars {
             args += ["--var", "\(k)=\(v)"]
         }

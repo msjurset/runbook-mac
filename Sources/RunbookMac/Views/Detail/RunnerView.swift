@@ -3,6 +3,7 @@ import AppKit
 
 struct RunnerView: View {
     let runbook: Runbook
+    @State var dryRun = false
     @Environment(\.dismiss) private var dismiss
     @State private var output: [String] = []
     @State private var isRunning = false
@@ -30,8 +31,19 @@ struct RunnerView: View {
             // Header
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Run: \(runbook.name)")
-                        .font(.headline)
+                    HStack(spacing: 8) {
+                        Text("\(dryRun ? "Dry Run" : "Run"): \(runbook.name)")
+                            .font(.headline)
+                        if dryRun {
+                            Text("preview")
+                                .font(.caption2)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(.blue.opacity(0.15))
+                                .foregroundStyle(.blue)
+                                .clipShape(Capsule())
+                        }
+                    }
                     if let desc = runbook.description {
                         Text(desc).font(.caption).foregroundStyle(.secondary)
                     }
@@ -112,6 +124,8 @@ struct RunnerView: View {
                     Button("Close") { dismiss() }
                         .keyboardShortcut(.cancelAction)
                     Spacer()
+                    Toggle("Dry Run", isOn: $dryRun)
+                        .toggleStyle(.checkbox)
                     Button("Run") { startRun() }
                         .keyboardShortcut(.defaultAction)
                 }
@@ -335,7 +349,8 @@ struct RunnerView: View {
             do {
                 let result = try await RunbookCLI.shared.run(
                     name: runbook.name,
-                    vars: vars
+                    vars: vars,
+                    dryRun: dryRun
                 ) { line in
                     Task { @MainActor in
                         output.append(line)

@@ -7,6 +7,8 @@ struct RunbookListView: View {
     @State private var showTemplates = true
     @State private var templateToCreate: Runbook?
     @State private var runbookToDuplicate: Runbook?
+    @State private var runbookToRun: Runbook?
+    @State private var runbookToDryRun: Runbook?
 
     private var filteredRunbooks: [Runbook] {
         if searchText.isEmpty {
@@ -33,6 +35,8 @@ struct RunbookListView: View {
                     .foregroundStyle(.secondary)
                 TextField("Filter runbooks", text: $searchText)
                     .textFieldStyle(.roundedBorder)
+                    .textContentType(.none)
+                    .autocorrectionDisabled()
             }
             .padding(8)
 
@@ -59,6 +63,12 @@ struct RunbookListView: View {
             }
             .sheet(item: $runbookToDuplicate) { book in
                 CreateFromTemplateSheet(template: book, isDuplicate: true)
+            }
+            .sheet(item: $runbookToRun) { book in
+                RunnerView(runbook: book)
+            }
+            .sheet(item: $runbookToDryRun) { book in
+                RunnerView(runbook: book, dryRun: true)
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)
@@ -87,6 +97,13 @@ struct RunbookListView: View {
         .padding(.vertical, 2)
         .tag(book)
         .contextMenu {
+            Button("Run", systemImage: "play.fill") {
+                runbookToRun = book
+            }
+            Button("Dry Run", systemImage: "forward.end") {
+                runbookToDryRun = book
+            }
+            Divider()
             Button("Duplicate", systemImage: "plus.doc.on.doc") {
                 runbookToDuplicate = book
             }
