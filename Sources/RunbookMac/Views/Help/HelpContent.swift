@@ -305,6 +305,11 @@ enum HelpTopic: String, CaseIterable, Identifiable {
             return [
                 .heading("App Shortcuts"),
                 .table(headers: ["Shortcut", "Action"], rows: [
+                    ["⌘1", "Go to Runbooks"],
+                    ["⌘2", "Go to History"],
+                    ["⌘3", "Go to Schedules"],
+                    ["⌘4", "Go to Repositories"],
+                    ["⌘K", "Quick jump to runbook by name"],
                     ["⌘N", "New runbook"],
                     ["⌘R", "Refresh runbook list"],
                     ["⌘?", "Open help"],

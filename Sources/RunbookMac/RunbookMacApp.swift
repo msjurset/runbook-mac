@@ -34,6 +34,7 @@ struct RunbookMacApp: App {
                 }
                 .keyboardShortcut("?", modifiers: .command)
             }
+            NavigateCommands()
         }
 
         WindowGroup("Runbook Help", id: "help") {

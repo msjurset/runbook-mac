@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var sidebarSelection: SidebarItem? = .runbooks
     @State private var selectedRunbook: Runbook?
     @State private var showNewRunbook = false
+    @State private var showQuickJump = false
 
     var body: some View {
         NavigationSplitView {
@@ -47,6 +48,9 @@ struct ContentView: View {
                 store.loadAll()
             }
         }
+        .sheet(isPresented: $showQuickJump) {
+            QuickJumpSheet(selectedRunbook: $selectedRunbook, sidebarSelection: $sidebarSelection)
+        }
         .onChange(of: sidebarSelection) {
             if sidebarSelection != .runbooks {
                 selectedRunbook = nil
@@ -56,5 +60,27 @@ struct ContentView: View {
             store.loadAll()
         }
         .frame(minWidth: 900, minHeight: 500)
+        .focusedValue(\.sidebarSelection, $sidebarSelection)
+        .focusedValue(\.showQuickJump, $showQuickJump)
+    }
+}
+
+// Focus values to pass bindings up to the menu bar commands
+struct SidebarSelectionKey: FocusedValueKey {
+    typealias Value = Binding<SidebarItem?>
+}
+
+struct ShowQuickJumpKey: FocusedValueKey {
+    typealias Value = Binding<Bool>
+}
+
+extension FocusedValues {
+    var sidebarSelection: Binding<SidebarItem?>? {
+        get { self[SidebarSelectionKey.self] }
+        set { self[SidebarSelectionKey.self] = newValue }
+    }
+    var showQuickJump: Binding<Bool>? {
+        get { self[ShowQuickJumpKey.self] }
+        set { self[ShowQuickJumpKey.self] = newValue }
     }
 }
