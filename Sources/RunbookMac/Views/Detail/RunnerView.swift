@@ -252,8 +252,19 @@ struct RunnerView: View {
     // MARK: - Save
 
     private func saveToFile() {
+        let logsDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".runbook/logs")
+        try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
+
+        let timestamp = ISO8601DateFormatter.string(
+            from: Date(),
+            timeZone: .current,
+            formatOptions: [.withFullDate, .withTime, .withDashSeparatorInDate]
+        ).replacingOccurrences(of: ":", with: "-")
+
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = "\(runbook.name)-output.log"
+        panel.directoryURL = logsDir
+        panel.nameFieldStringValue = "\(runbook.name)-\(timestamp).log"
         panel.allowedContentTypes = [.plainText]
         if panel.runModal() == .OK, let url = panel.url {
             try? outputText.write(to: url, atomically: true, encoding: .utf8)
