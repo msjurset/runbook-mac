@@ -41,7 +41,21 @@ class RunbookStore {
                 }
             }
         }
-        return books.sorted { $0.name < $1.name }
+        // Deduplicate by name: prefer shallower paths (local over repo)
+        var seen: [String: Runbook] = [:]
+        for book in books {
+            if let existing = seen[book.name] {
+                // Keep the one with the shorter path (closer to books root = local)
+                let existingDepth = existing.filePath?.components(separatedBy: "/").count ?? 0
+                let newDepth = book.filePath?.components(separatedBy: "/").count ?? 0
+                if newDepth < existingDepth {
+                    seen[book.name] = book
+                }
+            } else {
+                seen[book.name] = book
+            }
+        }
+        return seen.values.sorted { $0.name < $1.name }
     }
 
     func loadRunbook(at url: URL) -> Runbook? {
