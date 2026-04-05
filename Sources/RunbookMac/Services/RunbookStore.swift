@@ -5,6 +5,7 @@ import Yams
 @Observable
 class RunbookStore {
     var runbooks: [Runbook] = []
+    var templates: [Runbook] = []
     var historyRecords: [HistoryRecord] = []
 
     private let booksDir: URL
@@ -19,33 +20,51 @@ class RunbookStore {
     // MARK: - Discovery
 
     func loadAll() {
-        runbooks = discoverRunbooks(in: booksDir)
+        let (discovered, discoveredTemplates) = discoverAll(in: booksDir)
+        runbooks = discovered
+        templates = discoveredTemplates
         historyRecords = loadHistory()
     }
 
-    private func discoverRunbooks(in dir: URL) -> [Runbook] {
+    private func discoverAll(in dir: URL) -> (runbooks: [Runbook], templates: [Runbook]) {
+        var books: [Runbook] = []
+        var tmpls: [Runbook] = []
+        scanDirectory(dir, books: &books, templates: &tmpls, inTemplatesDir: false)
+
+        // Deduplicate each set by name: prefer shallower paths (local over repo)
+        books = deduplicate(books)
+        tmpls = deduplicate(tmpls)
+
+        return (books, tmpls)
+    }
+
+    private func scanDirectory(_ dir: URL, books: inout [Runbook], templates: inout [Runbook], inTemplatesDir: Bool) {
         let fm = FileManager.default
         guard let entries = try? fm.contentsOfDirectory(
             at: dir, includingPropertiesForKeys: [.isDirectoryKey]
-        ) else { return [] }
+        ) else { return }
 
-        var books: [Runbook] = []
         for entry in entries {
             if entry.hasDirectoryPath {
-                // Scan subdirectories (pulled repos)
-                books += discoverRunbooks(in: entry)
+                let isTemplatesDir = entry.lastPathComponent.lowercased() == "templates"
+                scanDirectory(entry, books: &books, templates: &templates, inTemplatesDir: inTemplatesDir || isTemplatesDir)
             } else if ["yaml", "yml"].contains(entry.pathExtension.lowercased()) {
                 if var book = loadRunbook(at: entry) {
                     book.filePath = entry.path
-                    books.append(book)
+                    if inTemplatesDir {
+                        templates.append(book)
+                    } else {
+                        books.append(book)
+                    }
                 }
             }
         }
-        // Deduplicate by name: prefer shallower paths (local over repo)
+    }
+
+    private func deduplicate(_ books: [Runbook]) -> [Runbook] {
         var seen: [String: Runbook] = [:]
         for book in books {
             if let existing = seen[book.name] {
-                // Keep the one with the shorter path (closer to books root = local)
                 let existingDepth = existing.filePath?.components(separatedBy: "/").count ?? 0
                 let newDepth = book.filePath?.components(separatedBy: "/").count ?? 0
                 if newDepth < existingDepth {

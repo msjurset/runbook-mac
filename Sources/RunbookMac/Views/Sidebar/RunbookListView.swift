@@ -4,12 +4,22 @@ struct RunbookListView: View {
     @Environment(RunbookStore.self) private var store
     @Binding var selectedRunbook: Runbook?
     @State private var searchText = ""
+    @State private var showTemplates = true
 
     private var filteredRunbooks: [Runbook] {
         if searchText.isEmpty {
             return store.runbooks
         }
         return store.runbooks.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    private var filteredTemplates: [Runbook] {
+        if searchText.isEmpty {
+            return store.templates
+        }
+        return store.templates.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -25,31 +35,19 @@ struct RunbookListView: View {
             .padding(8)
 
             List(selection: $selectedRunbook) {
-                ForEach(filteredRunbooks) { book in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(book.name)
-                            .fontWeight(.medium)
-                        if let desc = book.description, !desc.isEmpty {
-                            Text(desc)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        HStack(spacing: 8) {
-                            Label("\(book.steps.count) steps", systemImage: "list.number")
-                            if let vars = book.variables, !vars.isEmpty {
-                                Label("\(vars.count) vars", systemImage: "textformat.abc")
-                            }
-                        }
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                Section("Runbooks") {
+                    ForEach(filteredRunbooks) { book in
+                        runbookRow(book)
                     }
-                    .padding(.vertical, 2)
-                    .tag(book)
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            deleteRunbook(book)
+                }
+
+                if !filteredTemplates.isEmpty {
+                    Section(isExpanded: $showTemplates) {
+                        ForEach(filteredTemplates) { book in
+                            templateRow(book)
                         }
+                    } header: {
+                        Label("Templates", systemImage: "doc.on.doc")
                     }
                 }
             }
@@ -57,6 +55,67 @@ struct RunbookListView: View {
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .accessibilityIdentifier("runbookList")
+    }
+
+    private func runbookRow(_ book: Runbook) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(book.name)
+                .fontWeight(.medium)
+            if let desc = book.description, !desc.isEmpty {
+                Text(desc)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            HStack(spacing: 8) {
+                Label("\(book.steps.count) steps", systemImage: "list.number")
+                if let vars = book.variables, !vars.isEmpty {
+                    Label("\(vars.count) vars", systemImage: "textformat.abc")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
+        }
+        .padding(.vertical, 2)
+        .tag(book)
+        .contextMenu {
+            Button("Delete", role: .destructive) {
+                deleteRunbook(book)
+            }
+        }
+    }
+
+    private func templateRow(_ book: Runbook) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                Text(book.name)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+                Text("template")
+                    .font(.caption2)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(.orange.opacity(0.15))
+                    .foregroundStyle(.orange)
+                    .clipShape(Capsule())
+            }
+            if let desc = book.description, !desc.isEmpty {
+                Text(desc)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
+            HStack(spacing: 8) {
+                Label("\(book.steps.count) steps", systemImage: "list.number")
+                if let vars = book.variables, !vars.isEmpty {
+                    Label("\(vars.count) vars", systemImage: "textformat.abc")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.quaternary)
+        }
+        .padding(.vertical, 2)
+        .tag(book)
     }
 
     private func deleteRunbook(_ book: Runbook) {
