@@ -11,11 +11,14 @@ struct RunbookListView: View {
     @State private var runbookToDryRun: Runbook?
 
     private var filteredRunbooks: [Runbook] {
-        if searchText.isEmpty {
-            return store.runbooks
-        }
-        return store.runbooks.filter {
+        let base = searchText.isEmpty ? store.runbooks : store.runbooks.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
+        }
+        return base.sorted { a, b in
+            let aPinned = store.isPinned(a)
+            let bPinned = store.isPinned(b)
+            if aPinned != bPinned { return aPinned }
+            return a.name < b.name
         }
     }
 
@@ -77,8 +80,21 @@ struct RunbookListView: View {
 
     private func runbookRow(_ book: Runbook) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(book.name)
-                .fontWeight(.medium)
+            HStack(spacing: 4) {
+                if store.isPinned(book) {
+                    Button {
+                        store.togglePin(book)
+                    } label: {
+                        Image(systemName: "pin.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.blue.opacity(0.7))
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Unpin")
+                }
+                Text(book.name)
+                    .fontWeight(.medium)
+            }
             if let desc = book.description, !desc.isEmpty {
                 Text(desc)
                     .font(.caption)
@@ -104,6 +120,10 @@ struct RunbookListView: View {
                 runbookToDryRun = book
             }
             Divider()
+            Button(store.isPinned(book) ? "Unpin" : "Pin",
+                   systemImage: store.isPinned(book) ? "pin.slash" : "pin") {
+                store.togglePin(book)
+            }
             Button("Duplicate", systemImage: "plus.doc.on.doc") {
                 runbookToDuplicate = book
             }

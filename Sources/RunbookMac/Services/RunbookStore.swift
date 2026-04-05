@@ -7,14 +7,18 @@ class RunbookStore {
     var runbooks: [Runbook] = []
     var templates: [Runbook] = []
     var historyRecords: [HistoryRecord] = []
+    var pinnedNames: Set<String> = []
 
     private let booksDir: URL
     private let historyDir: URL
+    private let pinnedFile: URL
 
     init() {
         let home = FileManager.default.homeDirectoryForCurrentUser
         booksDir = home.appendingPathComponent(".runbook/books")
         historyDir = home.appendingPathComponent(".runbook/history")
+        pinnedFile = home.appendingPathComponent(".runbook/pinned.json")
+        pinnedNames = loadPinned()
     }
 
     // MARK: - Discovery
@@ -111,6 +115,35 @@ class RunbookStore {
     func readRawYAML(for runbook: Runbook) -> String? {
         guard let path = runbook.filePath else { return nil }
         return try? String(contentsOfFile: path, encoding: .utf8)
+    }
+
+    // MARK: - Pinning
+
+    func isPinned(_ runbook: Runbook) -> Bool {
+        pinnedNames.contains(runbook.name)
+    }
+
+    func togglePin(_ runbook: Runbook) {
+        if pinnedNames.contains(runbook.name) {
+            pinnedNames.remove(runbook.name)
+        } else {
+            pinnedNames.insert(runbook.name)
+        }
+        savePinned()
+    }
+
+    private func loadPinned() -> Set<String> {
+        guard let data = try? Data(contentsOf: pinnedFile),
+              let names = try? JSONDecoder().decode([String].self, from: data) else {
+            return []
+        }
+        return Set(names)
+    }
+
+    private func savePinned() {
+        let sorted = pinnedNames.sorted()
+        guard let data = try? JSONEncoder().encode(sorted) else { return }
+        try? data.write(to: pinnedFile)
     }
 
     // MARK: - History
