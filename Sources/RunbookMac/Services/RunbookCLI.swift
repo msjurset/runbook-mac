@@ -89,8 +89,15 @@ actor RunbookCLI {
 
         let handle = pipe.fileHandleForReading
         let stream = handle.bytes.lines
-        for try await line in stream {
-            onOutput(line)
+        do {
+            for try await line in stream {
+                try Task.checkCancellation()
+                onOutput(line)
+            }
+        } catch is CancellationError {
+            process.terminate()
+            process.waitUntilExit()
+            throw CancellationError()
         }
 
         process.waitUntilExit()

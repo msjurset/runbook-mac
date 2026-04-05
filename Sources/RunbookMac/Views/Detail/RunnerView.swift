@@ -7,6 +7,7 @@ struct RunnerView: View {
     @State private var isRunning = false
     @State private var success: Bool?
     @State private var vars: [String: String] = [:]
+    @State private var runTask: Task<Void, Never>?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -73,8 +74,8 @@ struct RunnerView: View {
                     ProgressView()
                         .controlSize(.small)
                         .padding(.trailing, 4)
-                    Text("Running...")
-                        .foregroundStyle(.secondary)
+                    Button("Stop", role: .destructive) { stopRun() }
+                        .keyboardShortcut(".", modifiers: .command)
                 } else {
                     Button("Close") { dismiss() }
                         .keyboardShortcut(.cancelAction)
@@ -150,7 +151,7 @@ struct RunnerView: View {
         success = nil
         isRunning = true
 
-        Task {
+        runTask = Task {
             do {
                 let result = try await RunbookCLI.shared.run(
                     name: runbook.name,
@@ -164,6 +165,12 @@ struct RunnerView: View {
                     success = result
                     isRunning = false
                 }
+            } catch is CancellationError {
+                await MainActor.run {
+                    output.append("Stopped.")
+                    success = false
+                    isRunning = false
+                }
             } catch {
                 await MainActor.run {
                     output.append("Error: \(error.localizedDescription)")
@@ -172,5 +179,9 @@ struct RunnerView: View {
                 }
             }
         }
+    }
+
+    private func stopRun() {
+        runTask?.cancel()
     }
 }
