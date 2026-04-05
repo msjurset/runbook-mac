@@ -7,8 +7,8 @@ struct FilterField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
 
-    func makeNSView(context: Context) -> NSTextField {
-        let field = NSTextField()
+    func makeNSView(context: Context) -> NoAutoFillTextField {
+        let field = NoAutoFillTextField()
         field.placeholderString = placeholder
         field.bezelStyle = .roundedBezel
         field.delegate = context.coordinator
@@ -17,7 +17,7 @@ struct FilterField: NSViewRepresentable {
         return field
     }
 
-    func updateNSView(_ nsView: NSTextField, context: Context) {
+    func updateNSView(_ nsView: NoAutoFillTextField, context: Context) {
         if nsView.stringValue != text {
             nsView.stringValue = text
         }
@@ -38,5 +38,31 @@ struct FilterField: NSViewRepresentable {
             guard let field = obj.object as? NSTextField else { return }
             text.wrappedValue = field.stringValue
         }
+    }
+}
+
+/// NSTextField subclass that refuses all autofill and autocompletion.
+class NoAutoFillTextField: NSTextField {
+    override var allowsCharacterPickerTouchBarItem: Bool {
+        get { false }
+        set {}
+    }
+
+    override func textDidBeginEditing(_ notification: Notification) {
+        super.textDidBeginEditing(notification)
+        // Disable completion on the field editor
+        if let editor = currentEditor() as? NSTextView {
+            editor.isAutomaticTextCompletionEnabled = false
+            editor.isAutomaticSpellingCorrectionEnabled = false
+            editor.isAutomaticTextReplacementEnabled = false
+            editor.isContinuousSpellCheckingEnabled = false
+        }
+    }
+
+    override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
+        if let editor = textObject as? NSTextView {
+            editor.isAutomaticTextCompletionEnabled = false
+        }
+        return super.textShouldBeginEditing(textObject)
     }
 }
