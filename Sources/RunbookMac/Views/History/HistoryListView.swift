@@ -19,8 +19,7 @@ struct HistoryListView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField("Filter by runbook name", text: $filterName)
-                    .textFieldStyle(.roundedBorder)
+                FilterField(placeholder: "Filter by runbook name", text: $filterName)
             }
             .padding()
 

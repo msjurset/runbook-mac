@@ -36,10 +36,7 @@ struct RunbookListView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
-                TextField("Filter runbooks", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .textContentType(.none)
-                    .autocorrectionDisabled()
+                FilterField(placeholder: "Filter runbooks", text: $searchText)
             }
             .padding(8)
 
