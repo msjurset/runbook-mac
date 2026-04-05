@@ -4,6 +4,21 @@ import Foundation
 actor RunbookCLI {
     static let shared = RunbookCLI()
 
+    private var processEnvironment: [String: String] {
+        var env = ProcessInfo.processInfo.environment
+        if env["HOME"] == nil {
+            env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
+        }
+        if let path = env["PATH"] {
+            let extras = ["\(env["HOME"]!)/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
+            let missing = extras.filter { !path.contains($0) }
+            if !missing.isEmpty {
+                env["PATH"] = (missing + [path]).joined(separator: ":")
+            }
+        }
+        return env
+    }
+
     private var binaryPath: String {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         let candidates = [
@@ -81,6 +96,7 @@ actor RunbookCLI {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: binaryPath)
         process.arguments = args
+        process.environment = processEnvironment
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -109,6 +125,7 @@ actor RunbookCLI {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: binaryPath)
         process.arguments = args
+        process.environment = processEnvironment
 
         let pipe = Pipe()
         process.standardOutput = pipe
