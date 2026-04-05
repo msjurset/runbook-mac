@@ -107,7 +107,9 @@ struct RunnerView: View {
                     Button("Close") { dismiss() }
                         .keyboardShortcut(.defaultAction)
                     Spacer()
-                    Button("Run Again") {
+                    Toggle("Dry Run", isOn: $dryRun)
+                        .toggleStyle(.checkbox)
+                    Button(dryRun ? "Run Again" : "Run") {
                         success = nil
                         startRun()
                     }
