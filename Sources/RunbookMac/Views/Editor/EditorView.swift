@@ -5,9 +5,32 @@ struct EditorView: View {
     @Environment(\.dismiss) private var dismiss
     let runbook: Runbook
     @State private var content: String = ""
+    @State private var originalContent: String = ""
     @State private var errorMessage: String?
+    @State private var showDiff = false
 
     var body: some View {
+        VStack(spacing: 0) {
+            if showDiff {
+                DiffView(
+                    original: originalContent,
+                    modified: content,
+                    onConfirm: { confirmSave() },
+                    onCancel: { showDiff = false }
+                )
+            } else {
+                editorContent
+            }
+        }
+        .frame(minWidth: 600, minHeight: 500)
+        .onAppear {
+            let yaml = store.readRawYAML(for: runbook) ?? ""
+            content = yaml
+            originalContent = yaml
+        }
+    }
+
+    private var editorContent: some View {
         VStack(spacing: 0) {
             HStack {
                 Text("Edit: \(runbook.name)")
@@ -32,14 +55,10 @@ struct EditorView: View {
                     .keyboardShortcut(.cancelAction)
                 Spacer()
                 Button("Validate") { validate() }
-                Button("Save") { save() }
+                Button("Save") { reviewChanges() }
                     .keyboardShortcut(.defaultAction)
             }
             .padding()
-        }
-        .frame(minWidth: 600, minHeight: 500)
-        .onAppear {
-            content = store.readRawYAML(for: runbook) ?? ""
         }
     }
 
@@ -56,7 +75,15 @@ struct EditorView: View {
         }
     }
 
-    private func save() {
+    private func reviewChanges() {
+        if content == originalContent {
+            dismiss()
+        } else {
+            showDiff = true
+        }
+    }
+
+    private func confirmSave() {
         guard let path = runbook.filePath else { return }
         let filename = (path as NSString).lastPathComponent
         do {
@@ -65,6 +92,7 @@ struct EditorView: View {
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
+            showDiff = false
         }
     }
 }
