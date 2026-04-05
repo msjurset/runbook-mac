@@ -5,6 +5,8 @@ struct RunbookListView: View {
     @Binding var selectedRunbook: Runbook?
     @State private var searchText = ""
     @State private var showTemplates = true
+    @State private var templateToCreate: Runbook?
+    @State private var runbookToDuplicate: Runbook?
 
     private var filteredRunbooks: [Runbook] {
         if searchText.isEmpty {
@@ -52,6 +54,12 @@ struct RunbookListView: View {
                 }
             }
             .listStyle(.inset(alternatesRowBackgrounds: true))
+            .sheet(item: $templateToCreate) { tmpl in
+                CreateFromTemplateSheet(template: tmpl)
+            }
+            .sheet(item: $runbookToDuplicate) { book in
+                CreateFromTemplateSheet(template: book, isDuplicate: true)
+            }
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .accessibilityIdentifier("runbookList")
@@ -79,6 +87,10 @@ struct RunbookListView: View {
         .padding(.vertical, 2)
         .tag(book)
         .contextMenu {
+            Button("Duplicate", systemImage: "plus.doc.on.doc") {
+                runbookToDuplicate = book
+            }
+            Divider()
             Button("Delete", role: .destructive) {
                 deleteRunbook(book)
             }
@@ -116,6 +128,11 @@ struct RunbookListView: View {
         }
         .padding(.vertical, 2)
         .tag(book)
+        .contextMenu {
+            Button("New from Template", systemImage: "plus.doc.on.doc") {
+                templateToCreate = book
+            }
+        }
     }
 
     private func deleteRunbook(_ book: Runbook) {

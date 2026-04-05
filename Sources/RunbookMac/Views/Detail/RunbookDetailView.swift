@@ -5,7 +5,12 @@ struct RunbookDetailView: View {
     let runbook: Runbook
     @State private var showEditor = false
     @State private var showRunner = false
+    @State private var showCreateFromTemplate = false
     @State private var expandedSteps: Set<Int> = []
+
+    private var isTemplate: Bool {
+        store.templates.contains(where: { $0.id == runbook.id })
+    }
 
     var body: some View {
         ScrollView {
@@ -31,11 +36,19 @@ struct RunbookDetailView: View {
                     showEditor = true
                 }
                 .accessibilityIdentifier("toolbar.edit")
-                Button("Run", systemImage: "play.fill") {
-                    showRunner = true
+                if isTemplate {
+                    Button("New from Template", systemImage: "plus.doc.on.doc") {
+                        showCreateFromTemplate = true
+                    }
+                    .accessibilityIdentifier("toolbar.createFromTemplate")
+                    .tint(.orange)
+                } else {
+                    Button("Run", systemImage: "play.fill") {
+                        showRunner = true
+                    }
+                    .accessibilityIdentifier("toolbar.run")
+                    .tint(.green)
                 }
-                .accessibilityIdentifier("toolbar.run")
-                .tint(.green)
             }
         }
         .sheet(isPresented: $showEditor) {
@@ -43,6 +56,9 @@ struct RunbookDetailView: View {
         }
         .sheet(isPresented: $showRunner) {
             RunnerView(runbook: runbook)
+        }
+        .sheet(isPresented: $showCreateFromTemplate) {
+            CreateFromTemplateSheet(template: runbook)
         }
     }
 
