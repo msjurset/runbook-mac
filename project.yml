@@ -29,3 +29,15 @@ targets:
         ENABLE_APP_SANDBOX: NO
     dependencies:
       - package: Yams
+
+  RunbookMacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - Tests/UITests
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: RunbookMac

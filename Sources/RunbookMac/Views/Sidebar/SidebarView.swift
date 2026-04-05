@@ -24,14 +24,18 @@ struct SidebarView: View {
                 NavigationLink(value: NavigationItem.history) {
                     Label("History", systemImage: "clock")
                 }
+                .accessibilityIdentifier("sidebar.history")
                 NavigationLink(value: NavigationItem.cron) {
                     Label("Schedules", systemImage: "calendar.badge.clock")
                 }
+                .accessibilityIdentifier("sidebar.schedules")
                 NavigationLink(value: NavigationItem.pull) {
                     Label("Repositories", systemImage: "arrow.down.circle")
                 }
+                .accessibilityIdentifier("sidebar.repositories")
             }
         }
+        .accessibilityIdentifier("sidebar")
         .listStyle(.sidebar)
         .navigationTitle("Runbook")
         .toolbar {
@@ -39,6 +43,7 @@ struct SidebarView: View {
                 Button(action: { showNewRunbook = true }) {
                     Label("New Runbook", systemImage: "plus")
                 }
+                .accessibilityIdentifier("toolbar.newRunbook")
             }
             ToolbarItem {
                 Button(action: { store.loadAll() }) {

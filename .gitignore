@@ -9,3 +9,4 @@ xcuserdata/
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 Runbook.app/
+*.xcresult

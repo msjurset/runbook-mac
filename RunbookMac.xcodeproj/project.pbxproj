@@ -7,41 +7,70 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C223B1C65826E8816D6D6F3 /* EditableConfigRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */; };
 		0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6186CE907B72B46105E8C251 /* RunbookTemplate.swift */; };
 		1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABD0CE21FF9D702931139C6 /* PullView.swift */; };
 		1DD4D74E1E9EC6D05A7FD334 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5AFE58FB57721606C9B698 /* SidebarView.swift */; };
 		205C8AAD43486C811A3CC83E /* RunbookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16728D341AAA5E045724C12B /* RunbookStore.swift */; };
+		215AA6CF5B62E7B45C2EEBE3 /* StepFlowCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D64B47791E04DE45DAF1BE /* StepFlowCanvas.swift */; };
 		325C20E98C164472237F967A /* RunbookDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */; };
 		3301C6EDF50860453B3F5C0F /* RunbookCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */; };
+		40ADD9A9A8D6884400A033A3 /* YAMLCompletionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB580015BDA4DD97030C983 /* YAMLCompletionProvider.swift */; };
+		4844AEB14BB7BA036058E3F3 /* YAMLHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF20E63879649BC218999803 /* YAMLHighlighter.swift */; };
 		681A38280F137D35F730200B /* Runbook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F7A0CEB2509E0193227459 /* Runbook.swift */; };
+		6DFBBE6F4BB217ECCE6985FA /* CodeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A20D5593F789162677669B /* CodeEditorView.swift */; };
 		79D00221968321CC23B11E21 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903AE94578B481DF93417F4E /* ContentView.swift */; };
 		89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949B77A269FC72599A8F0255 /* DetailRouter.swift */; };
 		8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881E00043C83C723B38239FB /* CronView.swift */; };
+		8DB1E984E61B1403FAFE9F17 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75989586D609EE7D7A30E955 /* HelpView.swift */; };
 		A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */; };
 		AC551E23167EA6A3C9B4DEEE /* RunnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0D67639431669D6B8761AB /* RunnerView.swift */; };
 		B008C469A67B4E31257D7495 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */; };
+		B6293BE249C3D2C49BA50E8E /* MermaidFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BB72C6A825D0B50A9ABC51 /* MermaidFlowView.swift */; };
 		B8D984B123EF1B3012592590 /* RunbookMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */; };
 		C13B2EF5C28F1BC9CF99571B /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 9D557545F675C9DFEC970E26 /* Yams */; };
+		C19733FB10AA16D912C2BB4D /* HelpContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA784B5B11DEA018E8954DF /* HelpContent.swift */; };
+		DD8318CD98612BC0A90FDB95 /* RunbookUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57FA8541D1FE8E8FD275C138 /* RunbookUITests.swift */; };
 		F115592111DECB13249CA0BC /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE2117A9A20356902D8E66D /* EditorView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1397095D2C22A8146680DF53 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7D57211E0AF14C6F08755AFC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B9765F5333C35A76EA5037AD;
+			remoteInfo = RunbookMac;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		16728D341AAA5E045724C12B /* RunbookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookStore.swift; sourceTree = "<group>"; };
 		1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
 		220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookMacApp.swift; sourceTree = "<group>"; };
+		26D64B47791E04DE45DAF1BE /* StepFlowCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepFlowCanvas.swift; sourceTree = "<group>"; };
+		37A20D5593F789162677669B /* CodeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeEditorView.swift; sourceTree = "<group>"; };
 		53F7A0CEB2509E0193227459 /* Runbook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runbook.swift; sourceTree = "<group>"; };
+		57FA8541D1FE8E8FD275C138 /* RunbookUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookUITests.swift; sourceTree = "<group>"; };
 		5F0D67639431669D6B8761AB /* RunnerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerView.swift; sourceTree = "<group>"; };
 		6186CE907B72B46105E8C251 /* RunbookTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookTemplate.swift; sourceTree = "<group>"; };
+		62BB72C6A825D0B50A9ABC51 /* MermaidFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidFlowView.swift; sourceTree = "<group>"; };
+		6DA784B5B11DEA018E8954DF /* HelpContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpContent.swift; sourceTree = "<group>"; };
 		6DE2117A9A20356902D8E66D /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		72660AB731F640ADD6429811 /* RunbookMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RunbookMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		75989586D609EE7D7A30E955 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		7E5AFE58FB57721606C9B698 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		881E00043C83C723B38239FB /* CronView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronView.swift; sourceTree = "<group>"; };
 		903AE94578B481DF93417F4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		949B77A269FC72599A8F0255 /* DetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailRouter.swift; sourceTree = "<group>"; };
 		96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookDetailView.swift; sourceTree = "<group>"; };
 		9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryListView.swift; sourceTree = "<group>"; };
+		A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableConfigRow.swift; sourceTree = "<group>"; };
+		A57EC2A005C87F47F05D159B /* RunbookMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunbookMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookCLI.swift; sourceTree = "<group>"; };
+		DBB580015BDA4DD97030C983 /* YAMLCompletionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YAMLCompletionProvider.swift; sourceTree = "<group>"; };
 		EABD0CE21FF9D702931139C6 /* PullView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullView.swift; sourceTree = "<group>"; };
+		EF20E63879649BC218999803 /* YAMLHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YAMLHighlighter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +97,27 @@
 			isa = PBXGroup;
 			children = (
 				72660AB731F640ADD6429811 /* RunbookMac.app */,
+				A57EC2A005C87F47F05D159B /* RunbookMacUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		21E11A8660374A7C583A13C7 /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				6DA784B5B11DEA018E8954DF /* HelpContent.swift */,
+				75989586D609EE7D7A30E955 /* HelpView.swift */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
+		3D71ECD4677A21AA7B9C09AD /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				57FA8541D1FE8E8FD275C138 /* RunbookUITests.swift */,
+			);
+			name = UITests;
+			path = Tests/UITests;
 			sourceTree = "<group>";
 		};
 		3EA5C0114173432C55EE637C /* Models */ = {
@@ -85,7 +133,10 @@
 		46EFDBA85C4266E98FBAD174 /* Editor */ = {
 			isa = PBXGroup;
 			children = (
+				37A20D5593F789162677669B /* CodeEditorView.swift */,
 				6DE2117A9A20356902D8E66D /* EditorView.swift */,
+				DBB580015BDA4DD97030C983 /* YAMLCompletionProvider.swift */,
+				EF20E63879649BC218999803 /* YAMLHighlighter.swift */,
 			);
 			path = Editor;
 			sourceTree = "<group>";
@@ -94,6 +145,7 @@
 			isa = PBXGroup;
 			children = (
 				949B77A269FC72599A8F0255 /* DetailRouter.swift */,
+				A26E4DC1965C286AC32691D0 /* EditableConfigRow.swift */,
 				96CD9F653310D5B6D5A6D04B /* RunbookDetailView.swift */,
 				5F0D67639431669D6B8761AB /* RunnerView.swift */,
 			);
@@ -121,7 +173,9 @@
 			isa = PBXGroup;
 			children = (
 				881E00043C83C723B38239FB /* CronView.swift */,
+				62BB72C6A825D0B50A9ABC51 /* MermaidFlowView.swift */,
 				EABD0CE21FF9D702931139C6 /* PullView.swift */,
+				26D64B47791E04DE45DAF1BE /* StepFlowCanvas.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -132,6 +186,7 @@
 				903AE94578B481DF93417F4E /* ContentView.swift */,
 				6BE88390901B76CCE923CA98 /* Detail */,
 				46EFDBA85C4266E98FBAD174 /* Editor */,
+				21E11A8660374A7C583A13C7 /* Help */,
 				0862FBAC53E727BD4C9F03B4 /* History */,
 				88F76342EF2B2BA2389A3A2D /* Settings */,
 				7CEE00774B9BB753D918215C /* Sidebar */,
@@ -155,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				8B64BE01B303C5A79D140D8B /* RunbookMac */,
+				3D71ECD4677A21AA7B9C09AD /* UITests */,
 				203485BD1A5EFB806685C662 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -162,6 +218,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		39F4A20EC1B77ED5A539499E /* RunbookMacUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 134B2D37A689822379350871 /* Build configuration list for PBXNativeTarget "RunbookMacUITests" */;
+			buildPhases = (
+				2E326C8029443942A506B632 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3C261481C2047666CE209C5A /* PBXTargetDependency */,
+			);
+			name = RunbookMacUITests;
+			packageProductDependencies = (
+			);
+			productName = RunbookMacUITests;
+			productReference = A57EC2A005C87F47F05D159B /* RunbookMacUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		B9765F5333C35A76EA5037AD /* RunbookMac */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4D6D168DED6A0BBEDFB14311 /* Build configuration list for PBXNativeTarget "RunbookMac" */;
@@ -190,6 +264,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					39F4A20EC1B77ED5A539499E = {
+						TestTargetID = B9765F5333C35A76EA5037AD;
+					};
 				};
 			};
 			buildConfigurationList = 54BFAB8146BE86A396F24A3B /* Build configuration list for PBXProject "RunbookMac" */;
@@ -210,21 +287,35 @@
 			projectRoot = "";
 			targets = (
 				B9765F5333C35A76EA5037AD /* RunbookMac */,
+				39F4A20EC1B77ED5A539499E /* RunbookMacUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2E326C8029443942A506B632 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD8318CD98612BC0A90FDB95 /* RunbookUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		54AD3F616EB855FD1B15B8AD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6DFBBE6F4BB217ECCE6985FA /* CodeEditorView.swift in Sources */,
 				79D00221968321CC23B11E21 /* ContentView.swift in Sources */,
 				8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */,
 				89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */,
+				0C223B1C65826E8816D6D6F3 /* EditableConfigRow.swift in Sources */,
 				F115592111DECB13249CA0BC /* EditorView.swift in Sources */,
+				C19733FB10AA16D912C2BB4D /* HelpContent.swift in Sources */,
+				8DB1E984E61B1403FAFE9F17 /* HelpView.swift in Sources */,
 				B008C469A67B4E31257D7495 /* HistoryListView.swift in Sources */,
 				A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */,
+				B6293BE249C3D2C49BA50E8E /* MermaidFlowView.swift in Sources */,
 				1DB58FCC0F71F8F78A394C41 /* PullView.swift in Sources */,
 				681A38280F137D35F730200B /* Runbook.swift in Sources */,
 				3301C6EDF50860453B3F5C0F /* RunbookCLI.swift in Sources */,
@@ -234,12 +325,41 @@
 				0F0C9ABE93A14B32C79E9804 /* RunbookTemplate.swift in Sources */,
 				AC551E23167EA6A3C9B4DEEE /* RunnerView.swift in Sources */,
 				1DD4D74E1E9EC6D05A7FD334 /* SidebarView.swift in Sources */,
+				215AA6CF5B62E7B45C2EEBE3 /* StepFlowCanvas.swift in Sources */,
+				40ADD9A9A8D6884400A033A3 /* YAMLCompletionProvider.swift in Sources */,
+				4844AEB14BB7BA036058E3F3 /* YAMLHighlighter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		3C261481C2047666CE209C5A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B9765F5333C35A76EA5037AD /* RunbookMac */;
+			targetProxy = 1397095D2C22A8146680DF53 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		48719836BCF9DF5D8EF16123 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.msjurset.RunbookMacUITests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = RunbookMac;
+			};
+			name = Release;
+		};
 		51938559F810C6C94246F940 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -261,6 +381,24 @@
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
+		};
+		885A12CF2B8CFC47238B7B07 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.msjurset.RunbookMacUITests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = RunbookMac;
+			};
+			name = Debug;
 		};
 		BFEE9D503928656C20B02127 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -406,6 +544,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		134B2D37A689822379350871 /* Build configuration list for PBXNativeTarget "RunbookMacUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				885A12CF2B8CFC47238B7B07 /* Debug */,
+				48719836BCF9DF5D8EF16123 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		4D6D168DED6A0BBEDFB14311 /* Build configuration list for PBXNativeTarget "RunbookMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

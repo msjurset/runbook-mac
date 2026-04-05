@@ -29,9 +29,11 @@ struct RunbookDetailView: View {
                 Button("Edit", systemImage: "pencil") {
                     showEditor = true
                 }
+                .accessibilityIdentifier("toolbar.edit")
                 Button("Run", systemImage: "play.fill") {
                     showRunner = true
                 }
+                .accessibilityIdentifier("toolbar.run")
                 .tint(.green)
             }
         }
