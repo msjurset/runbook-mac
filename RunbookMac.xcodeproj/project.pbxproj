@@ -26,6 +26,7 @@
 		A8F52A054E01C7E3012A09E2 /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */; };
 		AC551E23167EA6A3C9B4DEEE /* RunnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0D67639431669D6B8761AB /* RunnerView.swift */; };
 		B008C469A67B4E31257D7495 /* HistoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB43AE0FDCAF2E452F592C0 /* HistoryListView.swift */; };
+		B2C984601023E62C96EAEF53 /* CronDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15FD3B17A0973A8962C79962 /* CronDescription.swift */; };
 		B6293BE249C3D2C49BA50E8E /* MermaidFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BB72C6A825D0B50A9ABC51 /* MermaidFlowView.swift */; };
 		B8D984B123EF1B3012592590 /* RunbookMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */; };
 		C13B2EF5C28F1BC9CF99571B /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 9D557545F675C9DFEC970E26 /* Yams */; };
@@ -45,6 +46,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		15FD3B17A0973A8962C79962 /* CronDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CronDescription.swift; sourceTree = "<group>"; };
 		16728D341AAA5E045724C12B /* RunbookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookStore.swift; sourceTree = "<group>"; };
 		1E8E21B8E53F10828365ADF7 /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
 		220EB8908AC5C7EDEF5B8054 /* RunbookMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunbookMacApp.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 		79D998F6716012AEF52471C1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				15FD3B17A0973A8962C79962 /* CronDescription.swift */,
 				D5BC86B2FAC976418278DA93 /* RunbookCLI.swift */,
 				16728D341AAA5E045724C12B /* RunbookStore.swift */,
 			);
@@ -307,6 +310,7 @@
 			files = (
 				6DFBBE6F4BB217ECCE6985FA /* CodeEditorView.swift in Sources */,
 				79D00221968321CC23B11E21 /* ContentView.swift in Sources */,
+				B2C984601023E62C96EAEF53 /* CronDescription.swift in Sources */,
 				8C62703FF671F18BC28F8AAF /* CronView.swift in Sources */,
 				89F83F01C1A91041444A9F9A /* DetailRouter.swift in Sources */,
 				0C223B1C65826E8816D6D6F3 /* EditableConfigRow.swift in Sources */,
