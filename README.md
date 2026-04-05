@@ -18,6 +18,9 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Auto-Complete** — Press Tab for context-aware YAML completions (top-level keys, step fields, type values, error policies)
 - **Auto-Indent** — Smart indentation after colon-terminated lines
 - **Templates** — Runbooks in `templates/` directories are shown separately with visual distinction; create new runbooks from templates or duplicate existing ones
+- **Pin Runbooks** — Pin frequently-used runbooks to the top of the list; persisted across sessions
+- **Keyboard Navigation** — ⌘1-4 for sidebar sections, ⌘K to quick-jump to any runbook by name
+- **Diff Preview** — Review changes before saving in the YAML editor
 - **Run History** — Browse all past runs with expandable per-step results, timing, errors, and name filtering
 - **Cron Scheduling** — Add, view, and remove crontab entries from the GUI with natural language descriptions
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
@@ -69,6 +72,7 @@ The shared contract between the app and CLI is:
 - Templates in `templates/` subdirectories (discovered but shown separately)
 - JSON history records in `~/.runbook/history/`
 - Run logs in `~/.runbook/logs/`
+- Pinned runbooks in `~/.runbook/pinned.json`
 - The `runbook` binary in `$PATH` or `~/.local/bin/`
 
 ## Project Structure

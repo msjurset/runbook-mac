@@ -228,6 +228,8 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     "Or select the template and click New from Template in the toolbar",
                 ]),
                 .paragraph("You can also duplicate any existing runbook by right-clicking it and choosing Duplicate."),
+                .heading("Pinning Runbooks"),
+                .paragraph("Right-click a runbook and choose Pin to keep it at the top of the list. Click the pin icon to unpin. Pinned runbooks are persisted across sessions in ~/.runbook/pinned.json."),
             ]
 
         case .editor:
