@@ -50,9 +50,11 @@ enum HelpTopic: String, CaseIterable, Identifiable {
         case .gettingStarted:
             return [
                 .paragraph("Runbook is a personal command center for defining and executing multi-step operational tasks. Runbooks are YAML files stored in ~/.runbook/books/."),
+                .heading("Navigation"),
+                .paragraph("The app uses a three-panel layout: sidebar for sections, a searchable runbook list in the middle, and the detail view on the right. Use the sidebar to switch between Runbooks, History, Schedules, and Repositories. The search bar at the top of the runbook list filters by name."),
                 .heading("Quick Start"),
                 .numbered([
-                    "Create a runbook — Click the + button in the sidebar and choose a template",
+                    "Create a runbook — Click the + button in the toolbar and choose a template, or right-click a template in the list and select New from Template",
                     "Edit the YAML — Customize the steps, variables, and settings",
                     "Run it — Select the runbook and click the Run button",
                     "View results — Check the History section for past runs",
@@ -60,7 +62,9 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .heading("File Locations"),
                 .table(headers: ["Path", "Contents"], rows: [
                     ["~/.runbook/books/", "Runbook YAML files"],
+                    ["~/.runbook/books/*/templates/", "Shared templates (shown separately)"],
                     ["~/.runbook/history/", "Run history (JSON files)"],
+                    ["~/.runbook/logs/", "Saved run output logs"],
                 ]),
             ]
 
@@ -216,7 +220,14 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .paragraph("Go to Repositories in the sidebar to pull, list, or remove repos."),
                 .heading("Managing Repos"),
                 .code("runbook pull list\nrunbook pull remove name"),
-                .paragraph("All runbooks in pulled repos are automatically discovered."),
+                .paragraph("All runbooks in pulled repos are automatically discovered. YAML files inside directories named templates/ are shown in a separate Templates section in the runbook list."),
+                .heading("Templates"),
+                .paragraph("Templates are starting points for new runbooks. They appear in a collapsible section with an orange badge. To create a runbook from a template:"),
+                .bullet([
+                    "Right-click a template in the list and choose New from Template",
+                    "Or select the template and click New from Template in the toolbar",
+                ]),
+                .paragraph("You can also duplicate any existing runbook by right-clicking it and choosing Duplicate."),
             ]
 
         case .editor:
@@ -250,6 +261,15 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     "Fill in any variable values",
                     "Click Run to start execution",
                     "Watch live output streaming in the runner window",
+                ]),
+                .heading("Stopping a Run"),
+                .paragraph("Click the Stop button or press ⌘. to terminate a running process."),
+                .heading("Output Controls"),
+                .paragraph("After output starts streaming, a toolbar appears above the output area:"),
+                .bullet([
+                    "Find (⌘F) — Search within output with match highlighting and up/down navigation",
+                    "Copy All — Copy all output lines to the clipboard",
+                    "Save — Save output to a .log file (defaults to ~/.runbook/logs/ with a timestamped filename)",
                 ]),
                 .heading("CLI Commands"),
                 .code("runbook run my-runbook\nrunbook run --var host=prod deploy\nrunbook run --dry-run deploy.yaml\nrunbook run --no-tui --yes my-runbook"),
@@ -298,6 +318,8 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .heading("Runner Shortcuts"),
                 .table(headers: ["Shortcut", "Action"], rows: [
                     ["⌘Return", "Start run"],
+                    ["⌘.", "Stop running process"],
+                    ["⌘F", "Search output"],
                     ["Escape", "Close runner"],
                 ]),
             ]
