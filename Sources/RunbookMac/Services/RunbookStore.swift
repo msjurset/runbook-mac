@@ -21,6 +21,13 @@ class RunbookStore {
         pinnedNames = loadPinned()
     }
 
+    init(booksDir: URL, historyDir: URL, pinnedFile: URL) {
+        self.booksDir = booksDir
+        self.historyDir = historyDir
+        self.pinnedFile = pinnedFile
+        pinnedNames = loadPinned()
+    }
+
     // MARK: - Discovery
 
     func loadAll() {
