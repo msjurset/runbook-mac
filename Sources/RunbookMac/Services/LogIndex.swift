@@ -59,11 +59,17 @@ enum LogIndex {
         // Check original path
         if fm.fileExists(atPath: url.path) { return url }
 
-        // Check for compressed version in archive
-        let archiveURL = AppSettings.logsURL
-            .appendingPathComponent("archive")
-            .appendingPathComponent(url.lastPathComponent + ".gz")
-        if fm.fileExists(atPath: archiveURL.path) { return archiveURL }
+        // Check archive for compressed version (may have rotation timestamp appended)
+        let archiveDir = AppSettings.logsURL.appendingPathComponent("archive")
+        let baseName = url.deletingPathExtension().lastPathComponent
+        if let entries = try? fm.contentsOfDirectory(at: archiveDir, includingPropertiesForKeys: nil) {
+            // Find any .gz file that starts with the base log name
+            if let match = entries.first(where: {
+                $0.lastPathComponent.hasPrefix(baseName) && $0.pathExtension == "gz"
+            }) {
+                return match
+            }
+        }
 
         return nil
     }
