@@ -58,18 +58,7 @@ struct PullView: View {
             .padding()
 
             if let err = errorMessage {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .foregroundStyle(.red)
-                    Text(err)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                    Spacer()
-                    Button("Dismiss") { errorMessage = nil }
-                        .font(.caption)
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 4)
+                ErrorBanner(message: err) { errorMessage = nil }
             }
 
             if let msg = successMessage {

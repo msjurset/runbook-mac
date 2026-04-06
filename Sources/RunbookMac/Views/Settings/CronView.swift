@@ -47,10 +47,7 @@ struct CronView: View {
             }
 
             if let err = errorMessage {
-                Text(err)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .padding()
+                ErrorBanner(message: err) { errorMessage = nil }
             }
 
             if schedules.isEmpty && !isLoading {

@@ -38,7 +38,7 @@ struct EditorView: View {
                     .font(.headline)
                 Spacer()
                 if let err = errorMessage {
-                    Text(err)
+                    Label(err, systemImage: "exclamationmark.triangle")
                         .font(.caption)
                         .foregroundStyle(.red)
                 } else if validationSuccess {
@@ -177,7 +177,7 @@ struct NewRunbookSheet: View {
             .padding()
 
             if let err = errorMessage {
-                Text(err)
+                Label(err, systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.red)
                     .padding(.horizontal)

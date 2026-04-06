@@ -30,7 +30,7 @@ struct CreateFromTemplateSheet: View {
                 .onSubmit { create() }
 
             if let err = errorMessage {
-                Text(err)
+                Label(err, systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.red)
             }
