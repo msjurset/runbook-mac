@@ -12,6 +12,7 @@ struct YAMLCompletionTests {
         #expect(results.contains("steps:"))
         #expect(results.contains("variables:"))
         #expect(results.contains("notify:"))
+        #expect(results.contains("log:"))
     }
 
     @Test("Top-level completions with partial match")

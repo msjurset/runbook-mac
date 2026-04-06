@@ -37,16 +37,19 @@ struct YAMLCompletionProvider {
             }
         }
 
-        // Notify section
+        // Notify / log section
         if indent == 2 {
-            return filterPrefix(notifyKeys + variableDefKeys, trimmed)
+            if trimmed.hasPrefix("mode:") {
+                return ["new", "append"]
+            }
+            return filterPrefix(notifyKeys + logKeys + variableDefKeys, trimmed)
         }
 
         return []
     }
 
     private let topLevelKeys = [
-        "name:", "description:", "variables:", "steps:", "notify:",
+        "name:", "description:", "variables:", "steps:", "notify:", "log:",
     ]
 
     private let variableKeys = [
@@ -77,6 +80,10 @@ struct YAMLCompletionProvider {
 
     private let notifyKeys = [
         "on:", "slack:", "desktop:", "email:",
+    ]
+
+    private let logKeys = [
+        "enabled:", "mode:", "dir:", "filename:",
     ]
 
     private func filterPrefix(_ candidates: [String], _ prefix: String) -> [String] {

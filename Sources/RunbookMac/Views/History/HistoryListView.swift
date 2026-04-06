@@ -163,11 +163,18 @@ struct LogViewerSheet: View {
             Divider()
 
             ScrollView {
-                Text(content)
-                    .font(.system(.caption, design: .monospaced))
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+                LazyVStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(content.components(separatedBy: "\n").enumerated()), id: \.offset) { _, line in
+                        let highlight = OutputHighlighter.color(for: line)
+                        Text(line)
+                            .font(.system(.caption, design: .monospaced))
+                            .fontWeight(highlight.bold ? .bold : .regular)
+                            .foregroundStyle(highlight.color)
+                            .textSelection(.enabled)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
             }
             .background(.black.opacity(0.03))
 
