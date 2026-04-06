@@ -29,19 +29,30 @@ struct SidebarView: View {
         }
         .accessibilityIdentifier("sidebar")
         .listStyle(.sidebar)
-        .navigationTitle("Runbook")
-        .toolbar {
-            ToolbarItem {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            HStack(spacing: 12) {
                 Button(action: { showNewRunbook = true }) {
-                    Label("New Runbook", systemImage: "plus")
+                    Image(systemName: "plus")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
+                .buttonStyle(.plain)
+                .help("New Runbook")
                 .accessibilityIdentifier("toolbar.newRunbook")
-            }
-            ToolbarItem {
+
                 Button(action: { store.loadAll() }) {
-                    Label("Refresh", systemImage: "arrow.clockwise")
+                    Image(systemName: "arrow.clockwise")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
+                .buttonStyle(.plain)
+                .help("Refresh")
+
+                Spacer()
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
         }
+        .navigationTitle("Runbook")
     }
 }

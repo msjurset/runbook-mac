@@ -28,9 +28,8 @@ struct RunbookDetailView: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .navigationTitle(runbook.name)
         .toolbar {
-            ToolbarItemGroup {
+            ToolbarItemGroup(placement: .primaryAction) {
                 ContextualHelpButton(topic: .runbookFormat)
                 Button("Edit", systemImage: "pencil") {
                     showEditor = true
