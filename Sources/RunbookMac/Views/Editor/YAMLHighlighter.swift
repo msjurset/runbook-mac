@@ -11,7 +11,9 @@ final class YAMLHighlighter {
     private let anchorColor = NSColor.systemTeal
     private let templateColor = NSColor.systemPink
 
-    private let baseFont = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+    private var baseFont: NSFont {
+        NSFont.monospacedSystemFont(ofSize: CGFloat(AppSettings.editorFontSize), weight: .regular)
+    }
 
     func highlight(_ textStorage: NSTextStorage) {
         let text = textStorage.string

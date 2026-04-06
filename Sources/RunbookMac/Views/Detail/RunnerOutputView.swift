@@ -188,8 +188,7 @@ struct RunnerOutputView: View {
     // MARK: - Save
 
     private func saveToFile() {
-        let logsDir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".runbook/logs")
+        let logsDir = AppSettings.logsURL
         try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
 
         let timestamp = ISO8601DateFormatter.string(

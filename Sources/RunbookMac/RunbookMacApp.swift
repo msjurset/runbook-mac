@@ -37,6 +37,10 @@ struct RunbookMacApp: App {
             NavigateCommands()
         }
 
+        Settings {
+            SettingsView()
+        }
+
         WindowGroup("Runbook Help", id: "help") {
             HelpView()
         }

@@ -14,10 +14,9 @@ class RunbookStore {
     private let pinnedFile: URL
 
     init() {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        booksDir = home.appendingPathComponent(".runbook/books")
-        historyDir = home.appendingPathComponent(".runbook/history")
-        pinnedFile = home.appendingPathComponent(".runbook/pinned.json")
+        booksDir = AppSettings.booksURL
+        historyDir = AppSettings.historyURL
+        pinnedFile = AppSettings.pinnedURL
         pinnedNames = loadPinned()
     }
 
@@ -128,7 +127,7 @@ class RunbookStore {
         let fm = FileManager.default
         guard fm.fileExists(atPath: url.path) else { return }
 
-        let backupsDir = booksDir.deletingLastPathComponent().appendingPathComponent("backups")
+        let backupsDir = AppSettings.backupsURL
         try? fm.createDirectory(at: backupsDir, withIntermediateDirectories: true)
 
         let name = url.deletingPathExtension().lastPathComponent

@@ -29,13 +29,13 @@ struct CodeEditorView: NSViewRepresentable {
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.isGrammarCheckingEnabled = false
         textView.isContinuousSpellCheckingEnabled = false
-        textView.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: CGFloat(AppSettings.editorFontSize), weight: .regular)
         textView.backgroundColor = NSColor.textBackgroundColor
         textView.insertionPointColor = .labelColor
         textView.isRichText = true
         textView.textContainerInset = NSSize(width: 8, height: 8)
         textView.typingAttributes = [
-            .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+            .font: NSFont.monospacedSystemFont(ofSize: CGFloat(AppSettings.editorFontSize), weight: .regular),
             .foregroundColor: NSColor.labelColor,
         ]
 
@@ -66,7 +66,7 @@ struct CodeEditorView: NSViewRepresentable {
         private var isUpdating = false
 
         private let baseAttrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+            .font: NSFont.monospacedSystemFont(ofSize: CGFloat(AppSettings.editorFontSize), weight: .regular),
             .foregroundColor: NSColor.labelColor,
         ]
 
