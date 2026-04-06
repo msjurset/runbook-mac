@@ -54,9 +54,10 @@ This builds the app, creates the `.app` bundle with icon, and installs to `/Appl
 ## Build
 
 ```
-make build       # Compile release binary
-make bundle      # Build + create .app bundle
-make icon        # Generate app icon (if missing)
+make build                    # Compile release binary
+make bundle                   # Build + create .app bundle
+make icon                     # Generate app icon (if missing)
+make release VERSION=1.2.0    # Bump version, commit, and tag
 ```
 
 ## Architecture

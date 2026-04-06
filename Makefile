@@ -32,4 +32,13 @@ clean:
 test:
 	swift test
 
-.PHONY: build bundle icon deploy clean test
+release:
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=1.2.0"; exit 1; fi
+	sed -i '' 's/MARKETING_VERSION: ".*"/MARKETING_VERSION: "$(VERSION)"/' project.yml
+	sed -i '' 's/CURRENT_PROJECT_VERSION: ".*"/CURRENT_PROJECT_VERSION: "$(VERSION)"/' project.yml
+	git add project.yml
+	git commit -m "Bump version to $(VERSION)"
+	git tag "v$(VERSION)"
+	@echo "Tagged v$(VERSION). Push with: git push && git push --tags"
+
+.PHONY: build bundle icon deploy clean test release
