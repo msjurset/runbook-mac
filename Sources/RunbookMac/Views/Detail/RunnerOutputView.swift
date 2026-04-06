@@ -209,11 +209,9 @@ struct RunnerOutputView: View {
             do {
                 try outputText.write(to: url, atomically: true, encoding: .utf8)
                 if let startedAt = runStartedAt {
-                    let formatter = ISO8601DateFormatter()
-                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
                     LogIndex.record(
                         runbookName: runbookName,
-                        startedAt: formatter.string(from: startedAt),
+                        date: startedAt,
                         logPath: url.path
                     )
                 }

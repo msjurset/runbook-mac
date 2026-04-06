@@ -156,15 +156,11 @@ struct RunnerView: View {
         let text = output.joined(separator: "\n")
         do {
             try text.write(to: logURL, atomically: true, encoding: .utf8)
-            if let startedAt = runStartedAt {
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                LogIndex.record(
-                    runbookName: runbook.name,
-                    startedAt: formatter.string(from: startedAt),
-                    logPath: logURL.path
-                )
-            }
+            LogIndex.record(
+                runbookName: runbook.name,
+                date: runStartedAt ?? Date(),
+                logPath: logURL.path
+            )
         } catch {
             output.append("Auto-save log failed: \(error.localizedDescription)")
         }

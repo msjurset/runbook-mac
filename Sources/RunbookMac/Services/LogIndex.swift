@@ -1,7 +1,13 @@
 import Foundation
 
+struct LogIndexEntry: Codable {
+    var logPath: String
+    var runbookName: String
+    var timestamp: Date
+}
+
 struct LogIndexData: Codable {
-    var entries: [String: String] // history record ID → log file path
+    var entries: [LogIndexEntry]
 }
 
 enum LogIndex {
@@ -9,35 +15,58 @@ enum LogIndex {
         AppSettings.logsURL.appendingPathComponent("index.json")
     }
 
-    static func load() -> [String: String] {
+    static func load() -> [LogIndexEntry] {
         guard let data = try? Data(contentsOf: indexURL),
               let index = try? JSONDecoder().decode(LogIndexData.self, from: data) else {
-            return [:]
+            return []
         }
         return index.entries
     }
 
-    static func save(_ entries: [String: String]) {
+    static func save(_ entries: [LogIndexEntry]) {
         let index = LogIndexData(entries: entries)
-        guard let data = try? JSONEncoder().encode(index) else { return }
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(index) else { return }
         try? FileManager.default.createDirectory(at: AppSettings.logsURL, withIntermediateDirectories: true)
         try? data.write(to: indexURL)
     }
 
-    static func record(runbookName: String, startedAt: String, logPath: String) {
+    static func record(runbookName: String, date: Date, logPath: String) {
         var entries = load()
-        let key = "\(runbookName)_\(startedAt)"
-        entries[key] = logPath
+        // Remove any existing entry for the same log path
+        entries.removeAll { $0.logPath == logPath }
+        entries.append(LogIndexEntry(logPath: logPath, runbookName: runbookName, timestamp: date))
         save(entries)
     }
 
     static func logPath(for record: HistoryRecord) -> URL? {
+        guard let recordDate = record.startedDate else { return nil }
         let entries = load()
-        let key = "\(record.runbook_name)_\(record.started_at)"
-        guard let path = entries[key] else { return nil }
-        let url = URL(fileURLWithPath: path)
+
+        // Find the closest entry for this runbook within 60 seconds
+        let candidates = entries.filter { $0.runbookName == record.runbook_name }
+        guard let best = candidates.min(by: {
+            abs($0.timestamp.timeIntervalSince(recordDate)) < abs($1.timestamp.timeIntervalSince(recordDate))
+        }) else { return nil }
+
+        // Must be within 60 seconds
+        guard abs(best.timestamp.timeIntervalSince(recordDate)) < 60 else { return nil }
+
+        let url = URL(fileURLWithPath: best.logPath)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         return url
+    }
+
+    /// Update an entry's log path (used by log rotation).
+    static func updatePath(oldPath: String, newPath: String) {
+        var entries = load()
+        for i in entries.indices {
+            if entries[i].logPath == oldPath {
+                entries[i].logPath = newPath
+            }
+        }
+        save(entries)
     }
 
     static func defaultLogPath(runbookName: String) -> URL {
