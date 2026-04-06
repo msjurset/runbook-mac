@@ -73,6 +73,7 @@ The shared contract between the app and CLI is:
 - JSON history records in `~/.runbook/history/`
 - Run logs in `~/.runbook/logs/`
 - Pinned runbooks in `~/.runbook/pinned.json`
+- YAML backups in `~/.runbook/backups/` (created before every save and delete)
 - The `runbook` binary in `$PATH` or `~/.local/bin/`
 
 ## Project Structure

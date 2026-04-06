@@ -65,6 +65,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     ["~/.runbook/books/*/templates/", "Shared templates (shown separately)"],
                     ["~/.runbook/history/", "Run history (JSON files)"],
                     ["~/.runbook/logs/", "Saved run output logs"],
+                    ["~/.runbook/backups/", "Auto-backups before save or delete"],
                 ]),
             ]
 

@@ -102,6 +102,7 @@ class RunbookStore {
         let fname = filename ?? "\(runbook.name).yaml"
         let url = booksDir.appendingPathComponent(fname)
 
+        backupIfExists(url)
         let yaml = try YAMLEncoder().encode(runbook)
         try yaml.write(to: url, atomically: true, encoding: .utf8)
     }
@@ -111,12 +112,36 @@ class RunbookStore {
         try fm.createDirectory(at: booksDir, withIntermediateDirectories: true)
 
         let url = booksDir.appendingPathComponent(filename)
+        backupIfExists(url)
         try content.write(to: url, atomically: true, encoding: .utf8)
     }
 
     func delete(_ runbook: Runbook) throws {
         guard let path = runbook.filePath else { return }
+        backupIfExists(URL(fileURLWithPath: path))
         try FileManager.default.removeItem(atPath: path)
+    }
+
+    // MARK: - Backup
+
+    private func backupIfExists(_ url: URL) {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: url.path) else { return }
+
+        let backupsDir = booksDir.deletingLastPathComponent().appendingPathComponent("backups")
+        try? fm.createDirectory(at: backupsDir, withIntermediateDirectories: true)
+
+        let name = url.deletingPathExtension().lastPathComponent
+        let ext = url.pathExtension
+        let timestamp = ISO8601DateFormatter.string(
+            from: Date(),
+            timeZone: .current,
+            formatOptions: [.withFullDate, .withTime, .withDashSeparatorInDate]
+        ).replacingOccurrences(of: ":", with: "-")
+        let backupName = "\(name)-\(timestamp).\(ext)"
+        let dest = backupsDir.appendingPathComponent(backupName)
+
+        try? fm.copyItem(at: url, to: dest)
     }
 
     func readRawYAML(for runbook: Runbook) -> String? {
