@@ -9,6 +9,7 @@ struct RunnerView: View {
     @State private var success: Bool?
     @State private var vars: [String: String] = [:]
     @State private var runTask: Task<Void, Never>?
+    @State private var runStartedAt: Date?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,7 +51,7 @@ struct RunnerView: View {
             }
 
             // Output
-            RunnerOutputView(runbookName: runbook.name, output: $output)
+            RunnerOutputView(runbookName: runbook.name, runStartedAt: runStartedAt, output: $output)
 
             Divider()
 
@@ -114,6 +115,7 @@ struct RunnerView: View {
         output = []
         success = nil
         isRunning = true
+        runStartedAt = Date()
 
         runTask = Task {
             do {
@@ -129,6 +131,7 @@ struct RunnerView: View {
                 await MainActor.run {
                     success = result
                     isRunning = false
+                    autoSaveIfEnabled()
                 }
             } catch is CancellationError {
                 await MainActor.run {
@@ -141,8 +144,29 @@ struct RunnerView: View {
                     output.append("Error: \(error.localizedDescription)")
                     success = false
                     isRunning = false
+                    autoSaveIfEnabled()
                 }
             }
+        }
+    }
+
+    private func autoSaveIfEnabled() {
+        guard !dryRun, runbook.log?.enabled == true, !output.isEmpty else { return }
+        let logURL = LogIndex.logPath(for: runbook)
+        let text = output.joined(separator: "\n")
+        do {
+            try text.write(to: logURL, atomically: true, encoding: .utf8)
+            if let startedAt = runStartedAt {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                LogIndex.record(
+                    runbookName: runbook.name,
+                    startedAt: formatter.string(from: startedAt),
+                    logPath: logURL.path
+                )
+            }
+        } catch {
+            output.append("Auto-save log failed: \(error.localizedDescription)")
         }
     }
 

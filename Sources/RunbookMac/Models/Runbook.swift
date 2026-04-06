@@ -7,13 +7,20 @@ struct Runbook: Identifiable, Codable, Hashable {
     var variables: [VariableDef]?
     var steps: [Step]
     var notify: NotifyConfig?
+    var log: LogConfig?
 
     /// Resolved file path on disk (not from YAML)
     var filePath: String?
 
     enum CodingKeys: String, CodingKey {
-        case name, description, variables, steps, notify
+        case name, description, variables, steps, notify, log
     }
+}
+
+struct LogConfig: Codable, Hashable {
+    var enabled: Bool?
+    var dir: String?
+    var filename: String?
 }
 
 struct VariableDef: Codable, Hashable, Identifiable {

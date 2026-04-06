@@ -3,6 +3,7 @@ import AppKit
 
 struct RunnerOutputView: View {
     let runbookName: String
+    var runStartedAt: Date?
     @Binding var output: [String]
     @State private var searchText = ""
     @State private var showSearch = false
@@ -207,6 +208,15 @@ struct RunnerOutputView: View {
         if panel.runModal() == .OK, let url = panel.url {
             do {
                 try outputText.write(to: url, atomically: true, encoding: .utf8)
+                if let startedAt = runStartedAt {
+                    let formatter = ISO8601DateFormatter()
+                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                    LogIndex.record(
+                        runbookName: runbookName,
+                        startedAt: formatter.string(from: startedAt),
+                        logPath: url.path
+                    )
+                }
             } catch {
                 output.append("Save failed: \(error.localizedDescription)")
             }

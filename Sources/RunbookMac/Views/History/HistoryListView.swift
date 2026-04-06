@@ -51,41 +51,7 @@ struct HistoryRowView: View {
     @State private var showLog = false
 
     private var logFile: URL? {
-        guard let date = record.startedDate else { return nil }
-        let logsDir = AppSettings.logsURL
-        let fm = FileManager.default
-        guard let entries = try? fm.contentsOfDirectory(at: logsDir, includingPropertiesForKeys: nil) else { return nil }
-
-        let prefix = record.runbook_name + "-"
-        let candidates = entries.filter { $0.lastPathComponent.hasPrefix(prefix) && $0.pathExtension == "log" }
-
-        // Find the log closest to the run start time (within 5 minutes)
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withFullDate, .withTime, .withDashSeparatorInDate]
-
-        for candidate in candidates {
-            let filename = candidate.deletingPathExtension().lastPathComponent
-            let datePart = String(filename.dropFirst(prefix.count)).replacingOccurrences(of: "-", with: ":")
-            // Try parsing — the filename uses dashes for colons
-            let rawDate = String(filename.dropFirst(prefix.count))
-            // Reconstruct: 2026-04-06T110349 → 2026-04-06T11:03:49
-            if rawDate.count >= 15 {
-                let idx = rawDate.index(rawDate.startIndex, offsetBy: 11)
-                let timePart = rawDate[idx...]
-                if timePart.count >= 4 {
-                    let h = timePart.prefix(2)
-                    let m = timePart.dropFirst(2).prefix(2)
-                    let s = timePart.count >= 6 ? timePart.dropFirst(4).prefix(2) : "00"
-                    let dateStr = rawDate.prefix(11) + h + ":" + m + ":" + s
-                    if let logDate = dateFormatter.date(from: String(dateStr)) {
-                        if abs(logDate.timeIntervalSince(date)) < 300 {
-                            return candidate
-                        }
-                    }
-                }
-            }
-        }
-        return nil
+        LogIndex.logPath(for: record)
     }
 
     var body: some View {
