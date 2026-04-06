@@ -182,7 +182,27 @@ struct LogViewerSheet: View {
         }
         .frame(minWidth: 600, minHeight: 400)
         .onAppear {
-            content = (try? String(contentsOf: url, encoding: .utf8)) ?? "Could not read log file."
+            if url.pathExtension == "gz" {
+                // Decompress gzip
+                if let data = try? Data(contentsOf: url),
+                   let decompressed = try? (data as NSData).decompressed(using: .zlib) as Data,
+                   let text = String(data: decompressed, encoding: .utf8) {
+                    content = text
+                } else {
+                    // Try NSData gzip decompression via shell
+                    let task = Process()
+                    task.executableURL = URL(fileURLWithPath: "/usr/bin/gunzip")
+                    task.arguments = ["-c", url.path]
+                    let pipe = Pipe()
+                    task.standardOutput = pipe
+                    try? task.run()
+                    task.waitUntilExit()
+                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                    content = String(data: data, encoding: .utf8) ?? "Could not decompress log file."
+                }
+            } else {
+                content = (try? String(contentsOf: url, encoding: .utf8)) ?? "Could not read log file."
+            }
         }
     }
 }

@@ -54,8 +54,18 @@ enum LogIndex {
         guard abs(best.timestamp.timeIntervalSince(recordDate)) < 60 else { return nil }
 
         let url = URL(fileURLWithPath: best.logPath)
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-        return url
+        let fm = FileManager.default
+
+        // Check original path
+        if fm.fileExists(atPath: url.path) { return url }
+
+        // Check for compressed version in archive
+        let archiveURL = AppSettings.logsURL
+            .appendingPathComponent("archive")
+            .appendingPathComponent(url.lastPathComponent + ".gz")
+        if fm.fileExists(atPath: archiveURL.path) { return archiveURL }
+
+        return nil
     }
 
     /// Update an entry's log path (used by log rotation).
