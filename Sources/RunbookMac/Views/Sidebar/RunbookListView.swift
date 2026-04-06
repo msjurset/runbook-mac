@@ -82,6 +82,20 @@ struct RunbookListView: View {
         }
     }
 
+    private func isFromRepo(_ book: Runbook) -> Bool {
+        guard let path = book.filePath else { return false }
+        let booksPath = AppSettings.booksURL.path
+        let relative = String(path.dropFirst(booksPath.count + 1))
+        return relative.contains("/")
+    }
+
+    private func repoName(_ book: Runbook) -> String? {
+        guard let path = book.filePath else { return nil }
+        let booksPath = AppSettings.booksURL.path
+        let relative = String(path.dropFirst(booksPath.count + 1))
+        return relative.components(separatedBy: "/").first
+    }
+
     private func runbookRow(_ book: Runbook) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
@@ -98,6 +112,12 @@ struct RunbookListView: View {
                 }
                 Text(book.name)
                     .fontWeight(.medium)
+                if isFromRepo(book) {
+                    Image(systemName: "arrow.down.circle")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .help("From repo: \(repoName(book) ?? "unknown")\n\(book.filePath ?? "")")
+                }
             }
             if let desc = book.description, !desc.isEmpty {
                 Text(desc)
