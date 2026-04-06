@@ -34,8 +34,6 @@ enum LogIndex {
 
     static func record(runbookName: String, date: Date, logPath: String) {
         var entries = load()
-        // Remove any existing entry for the same log path
-        entries.removeAll { $0.logPath == logPath }
         entries.append(LogIndexEntry(logPath: logPath, runbookName: runbookName, timestamp: date))
         save(entries)
     }

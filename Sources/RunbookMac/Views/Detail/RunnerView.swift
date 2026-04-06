@@ -131,7 +131,6 @@ struct RunnerView: View {
                 await MainActor.run {
                     success = result
                     isRunning = false
-                    autoSaveIfEnabled()
                 }
             } catch is CancellationError {
                 await MainActor.run {
@@ -144,43 +143,8 @@ struct RunnerView: View {
                     output.append("Error: \(error.localizedDescription)")
                     success = false
                     isRunning = false
-                    autoSaveIfEnabled()
                 }
             }
-        }
-    }
-
-    private func autoSaveIfEnabled() {
-        guard !dryRun, runbook.log?.enabled == true, !output.isEmpty else { return }
-        let logURL = LogIndex.logPath(for: runbook)
-        let startDate = runStartedAt ?? Date()
-
-        do {
-            if runbook.log?.isAppend == true {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                let separator = "\n--- run: \(formatter.string(from: startDate)) ---\n"
-                let text = separator + output.joined(separator: "\n") + "\n"
-
-                if FileManager.default.fileExists(atPath: logURL.path) {
-                    let handle = try FileHandle(forWritingTo: logURL)
-                    handle.seekToEndOfFile()
-                    handle.write(text.data(using: .utf8)!)
-                    handle.closeFile()
-                } else {
-                    try text.write(to: logURL, atomically: true, encoding: .utf8)
-                }
-            } else {
-                let text = output.joined(separator: "\n")
-                try text.write(to: logURL, atomically: true, encoding: .utf8)
-            }
-            LogIndex.record(
-                runbookName: runbook.name,
-                date: startDate,
-                logPath: logURL.path
-            )
-        } catch {
-            output.append("Auto-save log failed: \(error.localizedDescription)")
         }
     }
 
