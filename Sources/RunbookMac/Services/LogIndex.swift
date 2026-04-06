@@ -16,10 +16,10 @@ enum LogIndex {
     }
 
     static func load() -> [LogIndexEntry] {
-        guard let data = try? Data(contentsOf: indexURL),
-              let index = try? JSONDecoder().decode(LogIndexData.self, from: data) else {
-            return []
-        }
+        guard let data = try? Data(contentsOf: indexURL) else { return [] }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        guard let index = try? decoder.decode(LogIndexData.self, from: data) else { return [] }
         return index.entries
     }
 
