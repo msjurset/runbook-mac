@@ -97,6 +97,11 @@ enum LogIndex {
         }
         try? FileManager.default.createDirectory(at: logDir, withIntermediateDirectories: true)
 
+        // Append mode: single stable file
+        if runbook.log?.isAppend == true {
+            return logDir.appendingPathComponent("\(runbook.name).log")
+        }
+
         if let filenameTemplate = runbook.log?.filename {
             let timestamp = ISO8601DateFormatter.string(
                 from: Date(),

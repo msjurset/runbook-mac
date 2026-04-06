@@ -19,8 +19,11 @@ struct Runbook: Identifiable, Codable, Hashable {
 
 struct LogConfig: Codable, Hashable {
     var enabled: Bool?
+    var mode: String?     // "new" (default) or "append"
     var dir: String?
     var filename: String?
+
+    var isAppend: Bool { mode == "append" }
 }
 
 struct VariableDef: Codable, Hashable, Identifiable {
