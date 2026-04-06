@@ -8,6 +8,7 @@ struct EditableConfigRow: View {
 
     @State private var isEditing = false
     @State private var editValue: String = ""
+    @State private var saveError: String?
     @FocusState private var isFocused: Bool
 
     private var lineCount: Int {
@@ -65,6 +66,11 @@ struct EditableConfigRow: View {
                     }
             }
         }
+        .alert("Save Error", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
+            Button("OK") { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
+        }
     }
 
     private func startEditing() {
@@ -93,8 +99,12 @@ struct EditableConfigRow: View {
 
         guard let path = runbook.filePath else { return }
         let filename = (path as NSString).lastPathComponent
-        try? store.saveRaw(updatedYAML, to: filename)
-        store.loadAll()
+        do {
+            try store.saveRaw(updatedYAML, to: filename)
+            store.loadAll()
+        } catch {
+            saveError = "Could not save: \(error.localizedDescription)"
+        }
     }
 
     /// Replace a YAML value, scoped to lines containing the label key.

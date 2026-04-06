@@ -283,7 +283,11 @@ struct RunnerView: View {
         panel.nameFieldStringValue = "\(runbook.name)-\(timestamp).log"
         panel.allowedContentTypes = [.plainText]
         if panel.runModal() == .OK, let url = panel.url {
-            try? outputText.write(to: url, atomically: true, encoding: .utf8)
+            do {
+                try outputText.write(to: url, atomically: true, encoding: .utf8)
+            } catch {
+                output.append("Save failed: \(error.localizedDescription)")
+            }
         }
     }
 

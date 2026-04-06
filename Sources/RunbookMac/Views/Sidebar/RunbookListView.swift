@@ -9,6 +9,7 @@ struct RunbookListView: View {
     @State private var runbookToDuplicate: Runbook?
     @State private var runbookToRun: Runbook?
     @State private var runbookToDryRun: Runbook?
+    @State private var errorMessage: String?
 
     private var filteredRunbooks: [Runbook] {
         let base = searchText.isEmpty ? store.runbooks : store.runbooks.filter {
@@ -73,6 +74,11 @@ struct RunbookListView: View {
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .accessibilityIdentifier("runbookList")
+        .alert("Error", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("OK") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     private func runbookRow(_ book: Runbook) -> some View {
@@ -170,10 +176,14 @@ struct RunbookListView: View {
     }
 
     private func deleteRunbook(_ book: Runbook) {
-        try? store.delete(book)
-        store.loadAll()
-        if selectedRunbook == book {
-            selectedRunbook = nil
+        do {
+            try store.delete(book)
+            store.loadAll()
+            if selectedRunbook == book {
+                selectedRunbook = nil
+            }
+        } catch {
+            errorMessage = "Could not delete \"\(book.name)\": \(error.localizedDescription)"
         }
     }
 }
