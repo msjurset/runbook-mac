@@ -15,9 +15,10 @@ struct RunbookListView: View {
         let base = searchText.isEmpty ? store.runbooks : store.runbooks.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
+        let pinned = store.pinnedNames
         return base.sorted { a, b in
-            let aPinned = store.isPinned(a)
-            let bPinned = store.isPinned(b)
+            let aPinned = pinned.contains(a.name)
+            let bPinned = pinned.contains(b.name)
             if aPinned != bPinned { return aPinned }
             return a.name < b.name
         }
