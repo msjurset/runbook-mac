@@ -350,8 +350,8 @@ struct RunbookDetailView: View {
                             HStack {
                                 Image(systemName: rec.success ? "checkmark.circle.fill" : "xmark.circle.fill")
                                     .foregroundStyle(rec.success ? .green : .red)
-                                Text(rec.started_at)
-                                    .font(.caption.monospaced())
+                                Text(rec.formattedDate)
+                                    .font(.caption)
                                 Spacer()
                                 Text(rec.duration)
                                     .font(.caption)

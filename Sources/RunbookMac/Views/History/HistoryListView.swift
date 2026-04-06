@@ -80,7 +80,7 @@ struct HistoryRowView: View {
                 VStack(alignment: .leading) {
                     Text(record.runbook_name)
                         .fontWeight(.medium)
-                    Text(record.started_at)
+                    Text(record.formattedDate)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
