@@ -100,10 +100,10 @@ enum OutputHighlighter {
 
     private static let builtinRules: [OutputHighlightRule] = [
         // Health check summary
-        OutputHighlightRule(#"^\s*\[OK\]"#, .green),
-        OutputHighlightRule(#"^\s*\[WARNING\]"#, .orange, bold: true),
-        OutputHighlightRule(#"^\s*\[INFO\]"#, .blue),
-        OutputHighlightRule(#"^\s+ACTION:"#, Color(red: 0.95, green: 0.8, blue: 0.2)),
+        OutputHighlightRule(#"\[OK\]"#, .green),
+        OutputHighlightRule(#"\[WARNING\]"#, .orange, bold: true),
+        OutputHighlightRule(#"\[INFO\]"#, .blue),
+        OutputHighlightRule(#"ACTION:"#, Color(red: 0.95, green: 0.8, blue: 0.2)),
         OutputHighlightRule(#"^[╔╚║]"#, .blue, bold: true),
         OutputHighlightRule(#"HEALTH CHECK SUMMARY"#, .blue, bold: true),
 
