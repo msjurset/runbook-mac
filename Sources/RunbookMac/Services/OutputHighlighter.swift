@@ -14,6 +14,14 @@ struct OutputHighlightRule {
 
 enum OutputHighlighter {
     static let rules: [OutputHighlightRule] = [
+        // Health check summary
+        OutputHighlightRule(#"^\[OK\]"#, .green),
+        OutputHighlightRule(#"^\[WARNING\]"#, .orange, bold: true),
+        OutputHighlightRule(#"^\[INFO\]"#, .blue),
+        OutputHighlightRule(#"^\s+ACTION:"#, .cyan),
+        OutputHighlightRule(#"^[╔╚║]"#, .blue, bold: true),
+        OutputHighlightRule(#"HEALTH CHECK SUMMARY"#, .blue, bold: true),
+
         // Step status markers (runbook CLI output)
         OutputHighlightRule(#"^[✓✔︎] "#, .green),
         OutputHighlightRule(#"^[✗×] "#, .red, bold: true),
