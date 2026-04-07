@@ -15,10 +15,10 @@ struct OutputHighlightRule {
 enum OutputHighlighter {
     static let rules: [OutputHighlightRule] = [
         // Health check summary
-        OutputHighlightRule(#"^\[OK\]"#, .green),
-        OutputHighlightRule(#"^\[WARNING\]"#, .orange, bold: true),
-        OutputHighlightRule(#"^\[INFO\]"#, .blue),
-        OutputHighlightRule(#"^\s+ACTION:"#, .cyan),
+        OutputHighlightRule(#"^\s*\[OK\]"#, .green),
+        OutputHighlightRule(#"^\s*\[WARNING\]"#, .orange, bold: true),
+        OutputHighlightRule(#"^\s*\[INFO\]"#, .blue),
+        OutputHighlightRule(#"^\s+ACTION:"#, .yellow),
         OutputHighlightRule(#"^[╔╚║]"#, .blue, bold: true),
         OutputHighlightRule(#"HEALTH CHECK SUMMARY"#, .blue, bold: true),
 
@@ -46,7 +46,7 @@ enum OutputHighlighter {
         OutputHighlightRule(#"^\s*\[✓\]"#, .green),
         OutputHighlightRule(#"^\s*\[i\]"#, .blue),
         OutputHighlightRule(#"^\s*\[✗\]"#, .red),
-        OutputHighlightRule(#"FTL"#, .purple),
+        OutputHighlightRule(#"^\s*FTL "#, .purple),
 
         // SSH/connection
         OutputHighlightRule(#"(?i)connection refused"#, .red),
@@ -67,5 +67,6 @@ enum OutputHighlighter {
 
 private extension Color {
     static let cyan = Color(red: 0.4, green: 0.8, blue: 0.9)
+    static let yellow = Color(red: 0.95, green: 0.8, blue: 0.2)
     static let secondary = Color.gray
 }
