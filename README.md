@@ -12,8 +12,9 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Runbook Detail** — View variables, steps with type icons, notification config, and recent run history at a glance
 - **Expandable Steps** — Click any step to expand its full configuration (command, host, URL, headers, etc.)
 - **Inline Editing** — Double-click any value in an expanded step to edit it in place; auto-saves to YAML on focus loss
-- **Execute Runbooks** — Run with live streaming output, variable inputs, stop button (⌘.), and success/failure status
-- **Runner Output** — Copy all output, search within output with match navigation, and save logs to `~/.runbook/logs/`
+- **Execute Runbooks** — Run with live streaming output, variable inputs, stop button (⌘.), dry run mode, and success/failure status
+- **Runner Output** — Copy all output, search within output with match navigation, save logs, and syntax-highlighted output for Homebrew/Pi-hole/SSH
+- **Auto-Logging** — Per-runbook log config with `new` (per-run file) and `append` (cumulative) modes; log viewer with section picker for append-mode files
 - **YAML Editor** — Syntax-highlighted editor with color-coded keys, strings, booleans, numbers, comments, template expressions, and `op://` references
 - **Auto-Complete** — Press Tab for context-aware YAML completions (top-level keys, step fields, type values, error policies)
 - **Auto-Indent** — Smart indentation after colon-terminated lines
@@ -24,7 +25,8 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Run History** — Browse all past runs with expandable per-step results, timing, errors, and name filtering
 - **Cron Scheduling** — Add, view, and remove crontab entries from the GUI with natural language descriptions
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
-- **Help System** — Menu bar Help (⌘?) with 13 topics + contextual ? button on each view
+- **SSH Key Caching** — Cache 1Password SSH keys in system keychain via `runbook auth` to avoid Touch ID prompts on repeat runs
+- **Help System** — Menu bar Help (⌘?) with 14 topics + contextual ? button on each view
 - **Validation** — Validate YAML structure without running via the CLI
 - **Desktop Notifications** — Test notifications from the app
 

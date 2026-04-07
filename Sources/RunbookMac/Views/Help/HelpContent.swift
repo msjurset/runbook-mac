@@ -18,6 +18,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
     case errorPolicies = "Error Policies"
     case notifications = "Notifications"
     case secrets = "1Password Secrets"
+    case logging = "Logging"
     case scheduling = "Cron Scheduling"
     case sharing = "Sharing & Importing"
     case editor = "Using the Editor"
@@ -36,6 +37,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
         case .errorPolicies: return "exclamationmark.triangle"
         case .notifications: return "bell"
         case .secrets: return "key"
+        case .logging: return "doc.text.magnifyingglass"
         case .scheduling: return "calendar.badge.clock"
         case .sharing: return "arrow.down.circle"
         case .editor: return "pencil"
@@ -80,6 +82,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     ["variables", "No", "Input parameters with defaults"],
                     ["steps", "Yes", "Ordered list of steps to execute"],
                     ["notify", "No", "Notification configuration"],
+                    ["log", "No", "Automatic output logging (see Logging topic)"],
                 ]),
             ]
 
@@ -108,16 +111,18 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .paragraph("Runs a local command via sh -c:"),
                 .code("- name: Run tests\n  type: shell\n  shell:\n    command: \"go test ./...\"\n    dir: \"/path/to/project\""),
                 .heading("SSH"),
-                .paragraph("Runs a command on a remote host. Reads ~/.ssh/config for host aliases, user, port, and identity settings. Supports 1Password SSH agent."),
-                .code("- name: Restart service\n  type: ssh\n  ssh:\n    host: \"prod-01\"\n    user: \"deploy\"\n    agent_auth: true\n    command: \"sudo systemctl restart app\""),
+                .paragraph("Runs a command on a remote host. Reads ~/.ssh/config for host aliases, user, port, and identity settings."),
+                .code("- name: Restart service\n  type: ssh\n  ssh:\n    host: \"prod-01\"\n    user: \"deploy\"\n    key_file: \"op://Vault/SSH Key/private key\"\n    command: \"sudo systemctl restart app\""),
                 .table(headers: ["Field", "Description"], rows: [
                     ["host", "Hostname or SSH config alias"],
                     ["user", "Username (from SSH config or $USER if omitted)"],
                     ["port", "Port number (default: 22)"],
-                    ["agent_auth", "Use SSH agent for authentication"],
-                    ["key_file", "Path to private key file"],
+                    ["agent_auth", "Use SSH agent for authentication (triggers 1Password prompt)"],
+                    ["key_file", "Path to private key, or op:// reference (cached via runbook auth)"],
                     ["command", "Command to execute remotely"],
                 ]),
+                .heading("SSH Key Caching"),
+                .paragraph("SSH keys referenced with op:// in key_file are resolved via 1Password and cached in the system keychain. Run `runbook auth <name>` once to cache, then all future runs use the cached key without Touch ID prompts. Use `runbook auth --clear <name>` to remove cached keys."),
                 .heading("HTTP"),
                 .paragraph("Makes an HTTP request. Responses with status 400+ are treated as errors."),
                 .code("- name: Health check\n  type: http\n  http:\n    method: GET\n    url: \"https://api.example.com/health\"\n    headers:\n      Authorization: \"Bearer {{.token}}\""),
@@ -162,22 +167,51 @@ enum HelpTopic: String, CaseIterable, Identifiable {
 
         case .secrets:
             return [
-                .paragraph("Variables with op:// references are resolved through the 1Password CLI and cached in the system keychain."),
-                .code("variables:\n  - name: api_token\n    default: \"op://Vault/Service/token\"\n    secret: true"),
+                .paragraph("Variables and SSH keys with op:// references are resolved through the 1Password CLI and cached in the system keychain."),
+                .code("variables:\n  - name: api_token\n    default: \"op://Vault/Service/token\"\n    secret: true\n\nsteps:\n  - name: Deploy\n    type: ssh\n    ssh:\n      key_file: \"op://Vault/SSH Key/private key\"\n      host: \"prod-01\"\n      command: \"deploy.sh\""),
                 .heading("How It Works"),
                 .numbered([
-                    "On first run, runbook calls op read op://Vault/Service/token",
-                    "The resolved value is cached in the macOS Keychain",
-                    "Future runs load from keychain — no 1Password prompt needed",
+                    "Run runbook auth <name> to resolve and cache all op:// references",
+                    "Variables and SSH private keys are cached in the macOS Keychain",
+                    "Future runs load from keychain — no 1Password or Touch ID prompt",
+                    "SSH keys support both OpenSSH and PKCS#8 formats (1Password export)",
                 ]),
                 .heading("Commands"),
-                .code("runbook auth my-runbook          # Pre-cache secrets\nrunbook auth --clear my-runbook  # Clear cached secrets"),
+                .code("runbook auth my-runbook          # Pre-cache all secrets + SSH keys\nrunbook auth --clear my-runbook  # Clear cached secrets + SSH keys"),
                 .heading("Supported Keychains"),
                 .table(headers: ["Platform", "Backend"], rows: [
                     ["macOS", "Keychain (security command)"],
                     ["Linux", "GNOME Secret Service (secret-tool)"],
                     ["Windows", "Credential Manager (cmdkey)"],
                 ]),
+            ]
+
+        case .logging:
+            return [
+                .paragraph("Runbooks can automatically save output to log files after each run."),
+                .heading("Configuration"),
+                .code("log:\n  enabled: true\n  mode: append    # or \"new\" (default)\n  dir: \"~/.runbook/logs/\"\n  filename: \"{name}-{timestamp}\""),
+                .heading("Log Modes"),
+                .table(headers: ["Mode", "Behavior"], rows: [
+                    ["new", "Creates a new file per run: {name}-{timestamp}.log (default)"],
+                    ["append", "Appends to a single file: {name}.log with --- run: timestamp --- separators"],
+                ]),
+                .heading("Fields"),
+                .table(headers: ["Field", "Description"], rows: [
+                    ["enabled", "true to auto-save output (default: false)"],
+                    ["mode", "\"new\" for per-run files, \"append\" for single cumulative file"],
+                    ["dir", "Log directory (default: ~/.runbook/logs/)"],
+                    ["filename", "Template with {name} and {timestamp} placeholders"],
+                ]),
+                .heading("Viewing Logs"),
+                .paragraph("In the History view, runs with saved logs show a document icon and a \"View Saved Log\" link. For append-mode logs, a picker lets you select which run to view."),
+                .heading("Log Rotation"),
+                .paragraph("Logs can be rotated using the rotate-runbook-logs runbook, triggered by sortie when a file exceeds a size threshold. Rotated files are compressed and moved to ~/.runbook/logs/archive/. The log index is updated to maintain history linkage."),
+                .heading("Log Index"),
+                .paragraph("Log-to-history associations are stored in ~/.runbook/logs/index.json. After manual log rotation, run:"),
+                .code("runbook log reindex       # Rebuild index from files\nrunbook log reset-index   # Clear the index\nrunbook log update <old> <new>  # Update a path"),
+                .heading("Manual Save"),
+                .paragraph("The Save button in the runner output toolbar is always available, regardless of log configuration. It lets you save output to any location via a file dialog."),
             ]
 
         case .scheduling:
@@ -267,6 +301,8 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 ]),
                 .heading("Stopping a Run"),
                 .paragraph("Click the Stop button or press ⌘. to terminate a running process."),
+                .heading("Dry Run"),
+                .paragraph("Check the Dry Run checkbox before clicking Run to preview what a runbook will do without executing. The header shows a blue 'preview' badge. After a dry run completes, you can uncheck the box and click Run to execute for real — no need to close and reopen."),
                 .heading("Output Controls"),
                 .paragraph("After output starts streaming, a toolbar appears above the output area:"),
                 .bullet([
@@ -274,6 +310,9 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     "Copy All — Copy all output lines to the clipboard",
                     "Save — Save output to a .log file (defaults to ~/.runbook/logs/ with a timestamped filename)",
                 ]),
+                .paragraph("Output lines are syntax-highlighted for Homebrew, Pi-hole, SSH errors, and runbook step status."),
+                .heading("Auto-Logging"),
+                .paragraph("If the runbook has log.enabled: true, output is automatically saved after each run. See the Logging topic for details."),
                 .heading("CLI Commands"),
                 .code("runbook run my-runbook\nrunbook run --var host=prod deploy\nrunbook run --dry-run deploy.yaml\nrunbook run --no-tui --yes my-runbook"),
                 .heading("TUI Keyboard Controls"),
@@ -292,7 +331,7 @@ enum HelpTopic: String, CaseIterable, Identifiable {
             return [
                 .paragraph("Every runbook execution is recorded as a JSON file in ~/.runbook/history/."),
                 .heading("From the App"),
-                .paragraph("Click History in the sidebar to browse all runs. Click a row to expand and see per-step results, timing, and any errors. Use the filter bar to search by runbook name."),
+                .paragraph("Click History in the sidebar to browse all runs. Click a row to expand and see per-step results, timing, and any errors. Use the filter bar to search by runbook name. Runs with saved logs show a document icon and a \"View Saved Log\" link. For append-mode logs, a picker lets you switch between runs in the same file."),
                 .heading("CLI Commands"),
                 .code("runbook history\nrunbook history -n 10\nrunbook history --runbook deploy"),
                 .heading("Record Contents"),
