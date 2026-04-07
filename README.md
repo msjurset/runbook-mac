@@ -13,7 +13,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Expandable Steps** — Click any step to expand its full configuration (command, host, URL, headers, etc.)
 - **Inline Editing** — Double-click any value in an expanded step to edit it in place; auto-saves to YAML on focus loss
 - **Execute Runbooks** — Run with live streaming output, variable inputs, stop button (⌘.), dry run mode, and success/failure status
-- **Runner Output** — Copy all output, search within output with match navigation, save logs, and syntax-highlighted output for Homebrew/Pi-hole/SSH
+- **Runner Output** — Copy all output, search within output with match navigation, save logs, and syntax-highlighted output via configurable rules in `~/.runbook/highlights.yaml`
 - **Auto-Logging** — Per-runbook log config with `new` (per-run file) and `append` (cumulative) modes; log viewer with section picker for append-mode files
 - **YAML Editor** — Syntax-highlighted editor with color-coded keys, strings, booleans, numbers, comments, template expressions, and `op://` references
 - **Auto-Complete** — Press Tab for context-aware YAML completions (top-level keys, step fields, type values, error policies)
@@ -77,6 +77,7 @@ The shared contract between the app and CLI is:
 - Run logs in `~/.runbook/logs/`
 - Pinned runbooks in `~/.runbook/pinned.json`
 - YAML backups in `~/.runbook/backups/` (created before every save and delete)
+- Output highlighting rules in `~/.runbook/highlights.yaml`
 - The `runbook` binary in `$PATH` or `~/.local/bin/`
 
 ## Project Structure
