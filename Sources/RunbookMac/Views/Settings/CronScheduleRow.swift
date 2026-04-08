@@ -63,8 +63,7 @@ struct CronScheduleRow: View {
                         }
                     }
 
-                    CronDiagram()
-                        .scaleEffect(0.85, anchor: .topLeading)
+                    CronDiagramCompact()
                 }
 
                 // Step flowchart (visible during edit too)

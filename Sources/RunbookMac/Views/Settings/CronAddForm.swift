@@ -140,7 +140,7 @@ struct CronDiagram: View {
         }
     }
 
-    private func cronLegendRow(_ symbol: String, _ desc: String) -> some View {
+    func cronLegendRow(_ symbol: String, _ desc: String) -> some View {
         HStack(spacing: 6) {
             Text(symbol)
                 .font(.system(.caption, design: .monospaced))
@@ -150,5 +150,42 @@ struct CronDiagram: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
+    }
+}
+
+/// Compact horizontal cron diagram for inline editing contexts.
+struct CronDiagramCompact: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("┌───────── minute (0-59)")
+                Text("│ ┌─────── hour (0-23)")
+                Text("│ │ ┌───── day of month (1-31)")
+                Text("│ │ │ ┌─── month (1-12)")
+                Text("│ │ │ │ ┌─ day of week (0-6, Sun=0)")
+                Text("* * * * *")
+                    .foregroundStyle(.orange)
+            }
+            .font(.system(.caption2, design: .monospaced))
+            .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 1) {
+                legendRow("*", "every value")
+                legendRow(",", "list: 1,3,5")
+                legendRow("-", "range: 1-5")
+                legendRow("/", "step: */15")
+            }
+        }
+    }
+
+    private func legendRow(_ symbol: String, _ desc: String) -> some View {
+        HStack(spacing: 4) {
+            Text(symbol)
+                .foregroundStyle(.orange)
+                .frame(width: 10, alignment: .center)
+            Text(desc)
+                .foregroundStyle(.tertiary)
+        }
+        .font(.system(.caption2, design: .monospaced))
     }
 }
