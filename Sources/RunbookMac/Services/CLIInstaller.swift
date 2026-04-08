@@ -11,11 +11,9 @@ class CLIInstaller {
     var error: String?
 
     nonisolated private static let repo = "msjurset/runbook"
-    nonisolated private static let installDir = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent(".local/bin").path
 
-    nonisolated static var installPath: String {
-        "\(installDir)/runbook"
+    static var defaultInstallDir: String {
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin").path
     }
 
     nonisolated static var candidatePaths: [String] {
@@ -34,6 +32,12 @@ class CLIInstaller {
 
     nonisolated static var resolvedPath: String? {
         candidatePaths.first { FileManager.default.isExecutableFile(atPath: $0) }
+    }
+
+    /// Check if a directory is in the user's PATH.
+    nonisolated static func isInPATH(_ dir: String) -> Bool {
+        let path = ProcessInfo.processInfo.environment["PATH"] ?? ""
+        return path.components(separatedBy: ":").contains(dir)
     }
 
     // MARK: - Version Detection
@@ -86,15 +90,17 @@ class CLIInstaller {
 
     // MARK: - Installation
 
-    func install() async {
+    func install(to installDir: String? = nil) async {
         isDownloading = true
         error = nil
+
+        let targetDir = installDir ?? Self.defaultInstallDir
 
         do {
             let version = try await fetchLatestVersion()
             let assetURL = try await fetchAssetURL(version: version)
             let tempFile = try await download(url: assetURL)
-            try extractAndInstall(tarball: tempFile)
+            try extractAndInstall(tarball: tempFile, installDir: targetDir)
             try? FileManager.default.removeItem(at: tempFile)
             isDownloading = false
             checkInstalledVersion()
@@ -145,21 +151,63 @@ class CLIInstaller {
         return dest
     }
 
-    private nonisolated func extractAndInstall(tarball: URL) throws {
+    private nonisolated func extractAndInstall(tarball: URL, installDir: String) throws {
         let fm = FileManager.default
-        try fm.createDirectory(atPath: Self.installDir, withIntermediateDirectories: true)
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
-        process.arguments = ["-xzf", tarball.path, "-C", Self.installDir, "runbook"]
-        try process.run()
-        process.waitUntilExit()
+        // Create install directory
+        try fm.createDirectory(atPath: installDir, withIntermediateDirectories: true)
 
-        guard process.terminationStatus == 0 else {
+        // Extract everything to a temp directory first
+        let tempDir = fm.temporaryDirectory.appendingPathComponent("runbook-extract-\(UUID().uuidString)")
+        try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: tempDir) }
+
+        let tarProcess = Process()
+        tarProcess.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
+        tarProcess.arguments = ["-xzf", tarball.path, "-C", tempDir.path]
+        try tarProcess.run()
+        tarProcess.waitUntilExit()
+        guard tarProcess.terminationStatus == 0 else {
             throw InstallError.extractFailed
         }
 
-        try fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: Self.installPath)
+        // Install binary
+        let binaryPath = installDir + "/runbook"
+        if fm.fileExists(atPath: binaryPath) {
+            try fm.removeItem(atPath: binaryPath)
+        }
+        try fm.copyItem(atPath: tempDir.appendingPathComponent("runbook").path, toPath: binaryPath)
+        try fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binaryPath)
+
+        // Install man page (best-effort)
+        let manSrc = tempDir.appendingPathComponent("runbook.1").path
+        if fm.fileExists(atPath: manSrc) {
+            let manDir = "/usr/local/share/man/man1"
+            try? fm.createDirectory(atPath: manDir, withIntermediateDirectories: true)
+            let manDest = manDir + "/runbook.1"
+            try? fm.removeItem(atPath: manDest)
+            try? fm.copyItem(atPath: manSrc, toPath: manDest)
+        }
+
+        // Install zsh completions (best-effort)
+        let compSrc = tempDir.appendingPathComponent("_runbook").path
+        if fm.fileExists(atPath: compSrc) {
+            // Try oh-my-zsh first, then standard zsh site-functions
+            let compDirs = [
+                FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".oh-my-zsh/custom/completions").path,
+                "/usr/local/share/zsh/site-functions",
+                "/opt/homebrew/share/zsh/site-functions",
+            ]
+            for dir in compDirs {
+                if fm.fileExists(atPath: (dir as NSString).deletingLastPathComponent) {
+                    try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+                    let dest = dir + "/_runbook"
+                    try? fm.removeItem(atPath: dest)
+                    try? fm.copyItem(atPath: compSrc, toPath: dest)
+                    break
+                }
+            }
+        }
     }
 
     private nonisolated func machineArchitecture() -> String {
