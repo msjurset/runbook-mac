@@ -7,6 +7,7 @@ struct FilterField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
     var onCommit: (() -> Void)?
+    var autoFocus = false
 
     func makeNSView(context: Context) -> NoAutoFillTextField {
         let field = NoAutoFillTextField()
@@ -15,6 +16,11 @@ struct FilterField: NSViewRepresentable {
         field.delegate = context.coordinator
         field.isAutomaticTextCompletionEnabled = false
         field.contentType = .none
+        if autoFocus {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                field.window?.makeFirstResponder(field)
+            }
+        }
         return field
     }
 

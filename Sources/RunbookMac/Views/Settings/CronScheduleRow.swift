@@ -54,7 +54,7 @@ struct CronScheduleRow: View {
                                 } else {
                                     editingName = nil
                                 }
-                            })
+                            }, autoFocus: true)
                             .frame(maxWidth: 200)
                             Button("Save") { onUpdate(entry.name) }
                                 .disabled(editSchedule.isEmpty || editSchedule == entry.schedule)
