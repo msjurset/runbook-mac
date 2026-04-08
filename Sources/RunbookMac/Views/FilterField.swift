@@ -48,21 +48,37 @@ class NoAutoFillTextField: NSTextField {
         set {}
     }
 
+    override func becomeFirstResponder() -> Bool {
+        let result = super.becomeFirstResponder()
+        // Suppress autofill immediately when field gains focus
+        if let editor = currentEditor() as? NSTextView {
+            disableAllAutoComplete(editor)
+        }
+        return result
+    }
+
     override func textDidBeginEditing(_ notification: Notification) {
         super.textDidBeginEditing(notification)
-        // Disable completion on the field editor
         if let editor = currentEditor() as? NSTextView {
-            editor.isAutomaticTextCompletionEnabled = false
-            editor.isAutomaticSpellingCorrectionEnabled = false
-            editor.isAutomaticTextReplacementEnabled = false
-            editor.isContinuousSpellCheckingEnabled = false
+            disableAllAutoComplete(editor)
         }
     }
 
     override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
         if let editor = textObject as? NSTextView {
-            editor.isAutomaticTextCompletionEnabled = false
+            disableAllAutoComplete(editor)
         }
         return super.textShouldBeginEditing(textObject)
+    }
+
+    private func disableAllAutoComplete(_ editor: NSTextView) {
+        editor.isAutomaticTextCompletionEnabled = false
+        editor.isAutomaticSpellingCorrectionEnabled = false
+        editor.isAutomaticTextReplacementEnabled = false
+        editor.isContinuousSpellCheckingEnabled = false
+        editor.isAutomaticQuoteSubstitutionEnabled = false
+        editor.isAutomaticDashSubstitutionEnabled = false
+        editor.isAutomaticDataDetectionEnabled = false
+        editor.isAutomaticLinkDetectionEnabled = false
     }
 }
