@@ -6,6 +6,7 @@ import SwiftUI
 struct FilterField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
+    var onCommit: (() -> Void)?
 
     func makeNSView(context: Context) -> NoAutoFillTextField {
         let field = NoAutoFillTextField()
@@ -24,19 +25,25 @@ struct FilterField: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text)
+        Coordinator(text: $text, onCommit: onCommit)
     }
 
     class Coordinator: NSObject, NSTextFieldDelegate {
         var text: Binding<String>
+        var onCommit: (() -> Void)?
 
-        init(text: Binding<String>) {
+        init(text: Binding<String>, onCommit: (() -> Void)?) {
             self.text = text
+            self.onCommit = onCommit
         }
 
         func controlTextDidChange(_ obj: Notification) {
             guard let field = obj.object as? NSTextField else { return }
             text.wrappedValue = field.stringValue
+        }
+
+        func controlTextDidEndEditing(_ obj: Notification) {
+            onCommit?()
         }
     }
 }

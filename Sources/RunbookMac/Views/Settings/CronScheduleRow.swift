@@ -43,20 +43,36 @@ struct CronScheduleRow: View {
             }
 
             if editingName == entry.id {
-                HStack(spacing: 8) {
-                    Image(systemName: "clock")
-                        .foregroundStyle(.secondary)
-                    FilterField(placeholder: "Cron schedule", text: $editSchedule)
-                        .frame(maxWidth: 200)
-                    Button("Save") { onUpdate(entry.name) }
-                        .disabled(editSchedule.isEmpty)
-                    Button("Cancel") { editingName = nil }
-                }
+                HStack(alignment: .top, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "clock")
+                                .foregroundStyle(.secondary)
+                            FilterField(placeholder: "Cron schedule", text: $editSchedule, onCommit: {
+                                if !editSchedule.isEmpty { onUpdate(entry.name) }
+                            })
+                            .frame(maxWidth: 200)
+                            Button("Cancel") { editingName = nil }
+                                .font(.caption)
+                        }
 
-                if !editSchedule.isEmpty {
-                    Text(CronDescription.describe(editSchedule))
-                        .font(.callout)
-                        .foregroundStyle(.orange)
+                        if !editSchedule.isEmpty {
+                            Text(CronDescription.describe(editSchedule))
+                                .font(.callout)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+
+                    // Compact cron legend
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("┌── min  ┌── day")
+                        Text("│ ┌ hr   │ ┌ mon")
+                        Text("│ │ ┌ dom│ │ ┌ dow")
+                        Text("* * * * *")
+                            .foregroundStyle(.orange)
+                    }
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.tertiary)
                 }
 
                 // Step flowchart (visible during edit too)
