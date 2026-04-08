@@ -38,6 +38,7 @@ struct RunbookMacApp: App {
             }
             .sheet(isPresented: $showCLISetup) {
                 CLISetupSheet()
+                    .environment(store)
             }
         }
         .defaultSize(width: 1000, height: 700)

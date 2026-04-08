@@ -1,10 +1,14 @@
 import SwiftUI
 
 struct CLISetupSheet: View {
+    @Environment(RunbookStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var installer = CLIInstaller()
     @State private var installDir = CLIInstaller.defaultInstallDir
     @State private var pathWarning: String?
+    @State private var repoPulled = false
+    @State private var repoPulling = false
+    @State private var repoError: String?
 
     private var isDefaultDir: Bool {
         installDir == CLIInstaller.defaultInstallDir
@@ -16,121 +20,178 @@ struct CLISetupSheet: View {
                 .font(.system(size: 48))
                 .foregroundStyle(.blue)
 
-            Text("Runbook CLI Required")
+            Text("Runbook Setup")
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("The Runbook Mac app requires the **runbook** command-line tool to function.")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: 440)
+            // Step 1: CLI Install
+            GroupBox {
+                HStack(spacing: 12) {
+                    stepIndicator(done: installer.isInstalled, number: 1)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Install CLI")
+                            .fontWeight(.medium)
+                        Text("The runbook command-line tool is required.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
 
-            if installer.isDownloading {
-                VStack(spacing: 8) {
-                    ProgressView()
-                    Text("Downloading and installing...")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            } else if installer.isInstalled {
-                VStack(spacing: 8) {
-                    HStack(spacing: 8) {
+                    if installer.isDownloading {
+                        ProgressView().controlSize(.small)
+                    } else if installer.isInstalled {
+                        if let version = installer.installedVersion {
+                            Text("v\(version)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
-                            .font(.title3)
-                        VStack(alignment: .leading) {
-                            Text("CLI Installed")
-                                .fontWeight(.medium)
-                            if let version = installer.installedVersion {
-                                Text("Version \(version)")
+                    } else {
+                        Button("Install") {
+                            Task { await installer.install(to: installDir) }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                }
+
+                if !installer.isInstalled && !installer.isDownloading {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            TextField("Install directory", text: $installDir)
+                                .textFieldStyle(.roundedBorder)
+                                .font(.system(.caption, design: .monospaced))
+                            Button("Browse...") { browseDirectory() }
+                                .font(.caption)
+                        }
+
+                        if let warning = pathWarning {
+                            HStack(alignment: .top, spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(.orange)
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                Text(warning)
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
                             }
                         }
                     }
-                    if let path = CLIInstaller.resolvedPath {
-                        Text(path)
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.tertiary)
-                    }
+                    .padding(.top, 4)
+                    .onChange(of: installDir) { checkPATH() }
+                    .onAppear { checkPATH() }
                 }
-            } else {
-                // Install path picker
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Install Location")
+
+                if let error = installer.error {
+                    Text(error)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
-                    HStack {
-                        TextField("Install directory", text: $installDir)
-                            .textFieldStyle(.roundedBorder)
-                            .font(.system(.body, design: .monospaced))
-                        Button("Browse...") { browseDirectory() }
-                    }
-                    .frame(maxWidth: 440)
-
-                    // PATH warning
-                    if let warning = pathWarning {
-                        HStack(alignment: .top, spacing: 6) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.orange)
-                                .font(.caption)
-                            Text(warning)
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
-                        .frame(maxWidth: 440, alignment: .leading)
-                    }
-                }
-                .onChange(of: installDir) {
-                    checkPATH()
-                }
-                .onAppear {
-                    checkPATH()
-                }
-
-                Button {
-                    Task { await installer.install(to: installDir) }
-                } label: {
-                    Label("Install Runbook CLI", systemImage: "arrow.down.circle")
-                }
-                .controlSize(.large)
-                .buttonStyle(.borderedProminent)
-            }
-
-            if let error = installer.error {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .frame(maxWidth: 440)
-
-                VStack(spacing: 4) {
-                    Text("You can also install manually:")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text("brew install msjurset/tap/runbook")
+                        .foregroundStyle(.red)
+                    Text("Manual install: `brew install msjurset/tap/runbook`")
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
             }
 
+            // Step 2: Pull shared runbooks
+            GroupBox {
+                HStack(spacing: 12) {
+                    stepIndicator(done: repoPulled, number: 2)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Get Templates & Runbooks")
+                            .fontWeight(.medium)
+                        Text("Pull shared templates and system runbooks from GitHub.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+
+                    if repoPulling {
+                        ProgressView().controlSize(.small)
+                    } else if repoPulled {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else if installer.isInstalled {
+                        Button("Pull") { pullRepo() }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                    } else {
+                        Text("Install CLI first")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+
+                if repoPulled {
+                    Text("Templates and system runbooks are now available in the sidebar.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let error = repoError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             HStack {
-                if !installer.isInstalled && !installer.isDownloading {
+                if !installer.isInstalled {
                     Button("Skip for Now") { dismiss() }
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
                 if installer.isInstalled {
-                    Button("Continue") { dismiss() }
-                        .keyboardShortcut(.defaultAction)
+                    Button("Done") {
+                        store.loadAll()
+                        dismiss()
+                    }
+                    .keyboardShortcut(.defaultAction)
                 }
             }
-            .frame(maxWidth: 440)
         }
         .padding(30)
         .frame(width: 520)
         .onAppear {
             installer.checkInstalledVersion()
+            // Check if repo already pulled
+            let repoDir = URL(fileURLWithPath: AppSettings.runbookDir).appendingPathComponent("runbooks")
+            repoPulled = FileManager.default.fileExists(atPath: repoDir.appendingPathComponent(".git").path)
+        }
+    }
+
+    private func pullRepo() {
+        repoPulling = true
+        repoError = nil
+        Task {
+            do {
+                _ = try await RunbookCLI.shared.pull(url: "github.com/msjurset/runbooks")
+                await MainActor.run {
+                    repoPulled = true
+                    repoPulling = false
+                    store.loadAll()
+                }
+            } catch {
+                await MainActor.run {
+                    repoError = error.localizedDescription
+                    repoPulling = false
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func stepIndicator(done: Bool, number: Int) -> some View {
+        if done {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+                .font(.title3)
+        } else {
+            Text("\(number)")
+                .font(.caption.bold())
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(Circle().fill(.blue))
         }
     }
 
