@@ -49,7 +49,11 @@ struct CronScheduleRow: View {
                             Image(systemName: "clock")
                                 .foregroundStyle(.secondary)
                             FilterField(placeholder: "Cron schedule", text: $editSchedule, onCommit: {
-                                if !editSchedule.isEmpty { onUpdate(entry.name) }
+                                if !editSchedule.isEmpty && editSchedule != entry.schedule {
+                                    onUpdate(entry.name)
+                                } else {
+                                    editingName = nil
+                                }
                             })
                             .frame(maxWidth: 200)
                             Button("Cancel") { editingName = nil }

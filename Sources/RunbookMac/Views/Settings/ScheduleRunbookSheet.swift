@@ -75,7 +75,7 @@ struct ScheduleRunbookSheet: View {
                     saveSchedule()
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(schedule.isEmpty || isSaving)
+                .disabled(schedule.isEmpty || isSaving || schedule == existingSchedule)
             }
         }
         .padding()
