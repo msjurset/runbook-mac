@@ -63,16 +63,8 @@ struct CronScheduleRow: View {
                         }
                     }
 
-                    // Compact cron legend
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("┌── min  ┌── day")
-                        Text("│ ┌ hr   │ ┌ mon")
-                        Text("│ │ ┌ dom│ │ ┌ dow")
-                        Text("* * * * *")
-                            .foregroundStyle(.orange)
-                    }
-                    .font(.system(.caption2, design: .monospaced))
-                    .foregroundStyle(.tertiary)
+                    CronDiagram()
+                        .scaleEffect(0.85, anchor: .topLeading)
                 }
 
                 // Step flowchart (visible during edit too)
