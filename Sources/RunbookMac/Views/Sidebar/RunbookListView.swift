@@ -9,6 +9,7 @@ struct RunbookListView: View {
     @State private var runbookToDuplicate: Runbook?
     @State private var runbookToRun: Runbook?
     @State private var runbookToDryRun: Runbook?
+    @State private var runbookToSchedule: Runbook?
     @State private var errorMessage: String?
 
     private var filteredRunbooks: [Runbook] {
@@ -71,6 +72,9 @@ struct RunbookListView: View {
             }
             .sheet(item: $runbookToDryRun) { book in
                 RunnerView(runbook: book, dryRun: true)
+            }
+            .sheet(item: $runbookToSchedule) { book in
+                ScheduleRunbookSheet(runbookName: book.name)
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)
@@ -142,6 +146,9 @@ struct RunbookListView: View {
             }
             Button("Dry Run", systemImage: "forward.end") {
                 runbookToDryRun = book
+            }
+            Button("Schedule", systemImage: "calendar.badge.clock") {
+                runbookToSchedule = book
             }
             Divider()
             Button(store.isPinned(book) ? "Unpin" : "Pin",

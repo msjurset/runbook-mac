@@ -6,6 +6,7 @@ struct RunbookDetailView: View {
     @State private var showEditor = false
     @State private var showRunner = false
     @State private var showCreateFromTemplate = false
+    @State private var showSchedule = false
     @State private var expandedSteps: Set<Int> = []
 
     private var isTemplate: Bool {
@@ -42,6 +43,11 @@ struct RunbookDetailView: View {
                     .accessibilityIdentifier("toolbar.createFromTemplate")
                     .tint(.orange)
                 } else {
+                    Button("Schedule", systemImage: "calendar.badge.clock") {
+                        showSchedule = true
+                    }
+                    .accessibilityIdentifier("toolbar.schedule")
+                    .help("Schedule run")
                     Button("Run", systemImage: "play.fill") {
                         showRunner = true
                     }
@@ -55,6 +61,9 @@ struct RunbookDetailView: View {
         }
         .sheet(isPresented: $showRunner) {
             RunnerView(runbook: runbook)
+        }
+        .sheet(isPresented: $showSchedule) {
+            ScheduleRunbookSheet(runbookName: runbook.name)
         }
         .sheet(isPresented: $showCreateFromTemplate) {
             CreateFromTemplateSheet(template: runbook)
