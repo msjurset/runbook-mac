@@ -46,10 +46,8 @@ struct CronScheduleRow: View {
                 HStack(spacing: 8) {
                     Image(systemName: "clock")
                         .foregroundStyle(.secondary)
-                    TextField("Cron schedule", text: $editSchedule)
-                        .textFieldStyle(.roundedBorder)
+                    FilterField(placeholder: "Cron schedule", text: $editSchedule)
                         .frame(maxWidth: 200)
-                        .onSubmit { onUpdate(entry.name) }
                     Button("Save") { onUpdate(entry.name) }
                         .disabled(editSchedule.isEmpty)
                     Button("Cancel") { editingName = nil }

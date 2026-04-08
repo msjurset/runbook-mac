@@ -33,8 +33,7 @@ struct CronAddForm: View {
                     Text("Runbook")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    TextField("Name", text: $name)
-                        .textFieldStyle(.roundedBorder)
+                    FilterField(placeholder: "Name", text: $name)
                         .focused($isNameFocused)
 
                     if showSuggestions {
@@ -87,8 +86,7 @@ struct CronAddForm: View {
                     Text("Schedule")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    TextField("e.g., 0 3 * * 0", text: $schedule)
-                        .textFieldStyle(.roundedBorder)
+                    FilterField(placeholder: "e.g., 0 3 * * 0", text: $schedule)
                         .frame(maxWidth: 200)
                         .focused($isScheduleFocused)
                         .onChange(of: isScheduleFocused) { _, focused in

@@ -37,8 +37,7 @@ struct PullView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 HStack {
-                    TextField("Git repo URL or single YAML file URL", text: $repoURL)
-                        .textFieldStyle(.roundedBorder)
+                    FilterField(placeholder: "Git repo URL or single YAML file URL", text: $repoURL)
                     Button {
                         pullRepo()
                     } label: {
