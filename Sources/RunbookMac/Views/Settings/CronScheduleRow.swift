@@ -58,6 +58,11 @@ struct CronScheduleRow: View {
                         .font(.callout)
                         .foregroundStyle(.orange)
                 }
+
+                // Step flowchart (visible during edit too)
+                if let book = store.runbooks.first(where: { $0.name == entry.name }) {
+                    StepFlowCanvas(steps: book.steps, colorScheme: colorScheme)
+                }
             } else {
                 // Schedule info
                 HStack(alignment: .center, spacing: 4) {
