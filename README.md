@@ -27,6 +27,8 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
 - **SSH Key Caching** — Cache 1Password SSH keys in system keychain via `runbook auth` to avoid Touch ID prompts on repeat runs
 - **Help System** — Menu bar Help (⌘?) with 14 topics + contextual ? button on each view
+- **CLI Auto-Install** — Detects missing CLI on first launch and offers one-click install from GitHub Releases
+- **CLI Auto-Update** — Checks for new CLI versions daily and shows non-blocking update notification
 - **Validation** — Validate YAML structure without running via the CLI
 - **Desktop Notifications** — Test notifications from the app
 

@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct RunbookMacApp: App {
     @State private var store = RunbookStore()
+    @State private var showCLISetup = false
 
     init() {
         // Set app icon — try bundle resources, then relative to executable
@@ -23,8 +24,21 @@ struct RunbookMacApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(store)
+            VStack(spacing: 0) {
+                CLIUpdateBanner()
+                ContentView()
+                    .environment(store)
+            }
+            .onAppear {
+                if !CLIInstaller.isCLIInstalled {
+                    showCLISetup = true
+                } else {
+                    checkForCLIUpdate()
+                }
+            }
+            .sheet(isPresented: $showCLISetup) {
+                CLISetupSheet()
+            }
         }
         .defaultSize(width: 1000, height: 700)
         .commands {
@@ -45,5 +59,14 @@ struct RunbookMacApp: App {
             HelpView()
         }
         .defaultSize(width: 800, height: 550)
+    }
+
+    private func checkForCLIUpdate() {
+        let installer = CLIInstaller()
+        installer.checkInstalledVersion()
+        guard installer.shouldCheckForUpdate() else { return }
+        Task {
+            await installer.checkLatestVersion()
+        }
     }
 }
