@@ -56,6 +56,8 @@ struct CronScheduleRow: View {
                                 }
                             })
                             .frame(maxWidth: 200)
+                            Button("Save") { onUpdate(entry.name) }
+                                .disabled(editSchedule.isEmpty || editSchedule == entry.schedule)
                             Button("Cancel") { editingName = nil }
                                 .font(.caption)
                         }
