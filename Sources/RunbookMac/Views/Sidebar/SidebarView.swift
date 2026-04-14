@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @Environment(RunbookStore.self) private var store
+    @Environment(\.openSettings) private var openSettings
     @Binding var selection: SidebarItem?
     @Binding var showNewRunbook: Bool
 
@@ -47,6 +48,15 @@ struct SidebarView: View {
                 }
                 .buttonStyle(.plain)
                 .help("Refresh")
+
+                Button(action: { openSettings() }) {
+                    Image(systemName: "gearshape")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Settings")
+                .accessibilityIdentifier("toolbar.settings")
 
                 Spacer()
             }

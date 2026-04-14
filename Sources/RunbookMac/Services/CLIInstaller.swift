@@ -49,7 +49,7 @@ class CLIInstaller {
         }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
-        process.arguments = ["version"]
+        process.arguments = ["--version"]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = pipe
@@ -58,7 +58,14 @@ class CLIInstaller {
             process.waitUntilExit()
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let version = output.replacingOccurrences(of: "runbook ", with: "")
+            // Output format: "runbook version X.Y.Z" or "runbook version dev"
+            var version = output
+            for prefix in ["runbook version ", "runbook "] {
+                if version.hasPrefix(prefix) {
+                    version = String(version.dropFirst(prefix.count))
+                    break
+                }
+            }
             installedVersion = version.isEmpty ? nil : version
         } catch {
             installedVersion = nil

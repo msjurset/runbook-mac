@@ -123,12 +123,60 @@ struct EditorView: View {
 
 struct NewRunbookSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(RunbookStore.self) private var store
     let onSave: (String, String) throws -> Void
 
-    @State private var selectedTemplate: RunbookTemplate = RunbookTemplate.templates[0]
+    struct TemplateChoice: Identifiable, Hashable {
+        let id: String
+        let name: String
+        let description: String
+        let content: String
+        let isBlank: Bool
+    }
+
+    @State private var selection: String = "blank"
     @State private var name = ""
     @State private var content = ""
     @State private var errorMessage: String?
+
+    private var blankTemplate: TemplateChoice {
+        TemplateChoice(
+            id: "blank",
+            name: "Blank",
+            description: "Empty runbook with a single shell step",
+            content: """
+            name: my-runbook
+            description: ""
+
+            steps:
+              - name: Step 1
+                type: shell
+                shell:
+                  command: "echo hello"
+            """,
+            isBlank: true
+        )
+    }
+
+    private var choices: [TemplateChoice] {
+        var list = [blankTemplate]
+        let sorted = store.templates.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        for tmpl in sorted {
+            let yaml = store.readRawYAML(for: tmpl) ?? ""
+            list.append(TemplateChoice(
+                id: "template:\(tmpl.name)",
+                name: tmpl.name,
+                description: (tmpl.description ?? "").isEmpty ? "Template" : (tmpl.description ?? ""),
+                content: yaml,
+                isBlank: false
+            ))
+        }
+        return list
+    }
+
+    private var selectedChoice: TemplateChoice {
+        choices.first(where: { $0.id == selection }) ?? blankTemplate
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -147,18 +195,18 @@ struct NewRunbookSheet: View {
                     Text("Template")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    List(RunbookTemplate.templates, selection: $selectedTemplate) { tmpl in
+                    List(choices, selection: $selection) { tmpl in
                         VStack(alignment: .leading) {
                             Text(tmpl.name).fontWeight(.medium)
                             Text(tmpl.description)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        .tag(tmpl)
+                        .tag(tmpl.id)
                         .padding(.vertical, 2)
                     }
                     .listStyle(.bordered)
-                    .frame(width: 200)
+                    .frame(width: 240)
                 }
 
                 // Editor
@@ -167,8 +215,7 @@ struct NewRunbookSheet: View {
                         Text("Name")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        TextField("my-runbook", text: $name)
-                            .textFieldStyle(.roundedBorder)
+                        FilterField(placeholder: "my-runbook", text: $name)
                     }
                     CodeEditorView(text: $content)
                         .border(.quaternary)
@@ -195,15 +242,16 @@ struct NewRunbookSheet: View {
             }
             .padding()
         }
-        .frame(minWidth: 700, minHeight: 500)
-        .onChange(of: selectedTemplate) {
-            content = selectedTemplate.content
-            if name.isEmpty {
-                name = selectedTemplate.id == "blank" ? "" : selectedTemplate.id
+        .frame(minWidth: 760, minHeight: 520)
+        .onChange(of: selection) {
+            let choice = selectedChoice
+            content = choice.content
+            if name.isEmpty && !choice.isBlank {
+                name = choice.name
             }
         }
         .onAppear {
-            content = selectedTemplate.content
+            content = selectedChoice.content
         }
     }
 

@@ -4,6 +4,9 @@ struct SettingsView: View {
     @State private var runbookDir = AppSettings.runbookDir
     @State private var editorFontSize = AppSettings.editorFontSize
     @State private var installer = CLIInstaller()
+    @State private var isWarming = false
+    @State private var warmOutput: String?
+    @State private var warmError: String?
 
     var body: some View {
         Form {
@@ -84,6 +87,45 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Credentials") {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Pre-warm goback secrets")
+                            .fontWeight(.medium)
+                        Text("Resolves op:// secrets and caches them in the login keychain so scheduled (cron) runs can read them without an interactive session.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer()
+                    if isWarming {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Button("Pre-warm") { prewarmCredentials() }
+                            .disabled(!GobackCLI.isInstalled)
+                    }
+                }
+                if !GobackCLI.isInstalled {
+                    Label("goback is not installed or not on PATH.", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+                if let out = warmOutput, !out.isEmpty {
+                    ScrollView {
+                        Text(out)
+                            .font(.system(.caption, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxHeight: 120)
+                }
+                if let err = warmError {
+                    Label(err, systemImage: "xmark.octagon")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             Section("Editor") {
                 HStack {
                     Text("Font Size")
@@ -105,6 +147,26 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .onAppear {
             installer.checkInstalledVersion()
+        }
+    }
+
+    private func prewarmCredentials() {
+        isWarming = true
+        warmOutput = nil
+        warmError = nil
+        Task {
+            do {
+                let output = try await GobackCLI.auth()
+                await MainActor.run {
+                    warmOutput = output.isEmpty ? "Done. No new secrets needed caching." : output
+                    isWarming = false
+                }
+            } catch {
+                await MainActor.run {
+                    warmError = error.localizedDescription
+                    isWarming = false
+                }
+            }
         }
     }
 
