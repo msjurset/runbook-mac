@@ -178,6 +178,8 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 ]),
                 .heading("Commands"),
                 .code("runbook auth my-runbook          # Pre-cache all secrets + SSH keys\nrunbook auth --clear my-runbook  # Clear cached secrets + SSH keys"),
+                .heading("Pre-warming from the App"),
+                .paragraph("Scheduled (cron) runs execute in a non-interactive session where the keychain is locked for writes. If a secret hasn't been cached yet, the run will fail. Open Settings (gear icon in the sidebar) and click Pre-warm in the Credentials section to resolve and cache all goback secrets interactively. This also runs goback auth for goback-managed secrets like API tokens."),
                 .heading("Supported Keychains"),
                 .table(headers: ["Platform", "Backend"], rows: [
                     ["macOS", "Keychain (security command)"],
@@ -257,8 +259,9 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .code("runbook pull list\nrunbook pull remove name"),
                 .paragraph("All runbooks in pulled repos are automatically discovered. YAML files inside directories named templates/ are shown in a separate Templates section in the runbook list."),
                 .heading("Templates"),
-                .paragraph("Templates are starting points for new runbooks. They appear in a collapsible section with an orange badge. To create a runbook from a template:"),
+                .paragraph("Templates are starting points for new runbooks. They appear in a collapsible section with an orange badge. All discovered templates also appear in the New Runbook dialog (click + in the sidebar). To create a runbook from a template:"),
                 .bullet([
+                    "Click + in the sidebar and pick a template from the list",
                     "Right-click a template in the list and choose New from Template",
                     "Or select the template and click New from Template in the toolbar",
                 ]),

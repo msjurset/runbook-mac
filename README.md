@@ -18,7 +18,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **YAML Editor** — Syntax-highlighted editor with color-coded keys, strings, booleans, numbers, comments, template expressions, and `op://` references
 - **Auto-Complete** — Press Tab for context-aware YAML completions (top-level keys, step fields, type values, error policies)
 - **Auto-Indent** — Smart indentation after colon-terminated lines
-- **Templates** — Runbooks in `templates/` directories are shown separately with visual distinction; create new runbooks from templates or duplicate existing ones
+- **Templates** — Runbooks in `templates/` directories are shown separately with visual distinction; all discovered templates appear in the New Runbook dialog and as right-click actions
 - **Pin Runbooks** — Pin frequently-used runbooks to the top of the list; persisted across sessions
 - **Keyboard Navigation** — ⌘1-4 for sidebar sections, ⌘K to quick-jump to any runbook by name
 - **Diff Preview** — Review changes before saving in the YAML editor
@@ -26,6 +26,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Cron Scheduling** — Add, view, and remove crontab entries from the GUI with natural language descriptions
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
 - **SSH Key Caching** — Cache 1Password SSH keys in system keychain via `runbook auth` to avoid Touch ID prompts on repeat runs
+- **Credential Pre-warm** — Settings button to run `goback auth` interactively, caching op:// secrets so cron jobs can read them from the locked keychain
 - **Help System** — Menu bar Help (⌘?) with 14 topics + contextual ? button on each view
 - **CLI Auto-Install** — Detects missing CLI on first launch and offers one-click install from GitHub Releases
 - **CLI Auto-Update** — Checks for new CLI versions daily and shows non-blocking update notification
@@ -86,14 +87,14 @@ The shared contract between the app and CLI is:
 
 ```
 Sources/RunbookMac/
-  Models/           Runbook, HistoryRecord, RunbookTemplate (Codable structs)
+  Models/           Runbook, HistoryRecord (Codable structs)
   Services/         RunbookCLI (Process bridge), RunbookStore (file I/O + YAML), CronDescription
   Views/
     Sidebar/        Navigation sidebar, runbook list with search, browser split view
     Detail/         Runbook detail, runner with output controls, create-from-template
     Editor/         YAML editor with syntax highlighting + completion
     History/        Run history browser
-    Settings/       Cron and pull management, step flow visualization
+    Settings/       Settings, cron and pull management, step flow visualization
     Help/           Help system with structured content
 Tests/
   RunbookMacTests/  Unit tests (models, templates, cron, completions)
