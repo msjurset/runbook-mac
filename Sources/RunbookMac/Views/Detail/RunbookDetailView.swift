@@ -2,12 +2,28 @@ import SwiftUI
 
 struct RunbookDetailView: View {
     @Environment(RunbookStore.self) private var store
-    let runbook: Runbook
+    /// Initial runbook passed from the sidebar selection. Used only as a
+    /// fallback and to hold the lookup id; live reads go through `runbook`.
+    private let initialRunbook: Runbook
     @State private var showEditor = false
     @State private var showRunner = false
     @State private var showCreateFromTemplate = false
     @State private var showSchedule = false
     @State private var expandedSteps: Set<Int> = []
+
+    init(runbook: Runbook) {
+        self.initialRunbook = runbook
+    }
+
+    /// Resolve the latest Runbook instance from the store by name so that
+    /// edits saved to disk (which trigger `store.loadAll()`) refresh this
+    /// view automatically. Without this indirection, the `let runbook` copy
+    /// from the sidebar selection went stale after inline edits.
+    private var runbook: Runbook {
+        store.runbooks.first(where: { $0.name == initialRunbook.name })
+            ?? store.templates.first(where: { $0.name == initialRunbook.name })
+            ?? initialRunbook
+    }
 
     private var isTemplate: Bool {
         store.templates.contains(where: { $0.id == runbook.id })
@@ -223,28 +239,28 @@ struct RunbookDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             if let shell = step.shell {
                 configSection("Shell") {
-                    configRow("command", shell.command)
+                    configRow("command", shell.command, stepName: step.name)
                     if let dir = shell.dir {
-                        configRow("dir", dir)
+                        configRow("dir", dir, stepName: step.name)
                     }
                 }
             }
 
             if let ssh = step.ssh {
                 configSection("SSH") {
-                    configRow("host", ssh.host)
+                    configRow("host", ssh.host, stepName: step.name)
                     if let user = ssh.user {
-                        configRow("user", user)
+                        configRow("user", user, stepName: step.name)
                     }
                     if let port = ssh.port {
-                        configRow("port", "\(port)")
+                        configRow("port", "\(port)", stepName: step.name)
                     }
-                    configRow("command", ssh.command)
+                    configRow("command", ssh.command, stepName: step.name)
                     if ssh.agent_auth == true {
-                        configRow("agent_auth", "true")
+                        configRow("agent_auth", "true", stepName: step.name)
                     }
                     if let keyFile = ssh.key_file {
-                        configRow("key_file", keyFile)
+                        configRow("key_file", keyFile, stepName: step.name)
                     }
                 }
             }
@@ -252,23 +268,23 @@ struct RunbookDetailView: View {
             if let http = step.http {
                 configSection("HTTP") {
                     if let method = http.method {
-                        configRow("method", method)
+                        configRow("method", method, stepName: step.name)
                     }
-                    configRow("url", http.url)
+                    configRow("url", http.url, stepName: step.name)
                     if let headers = http.headers, !headers.isEmpty {
                         ForEach(Array(headers.sorted(by: { $0.key < $1.key })), id: \.key) { key, value in
-                            configRow("header: \(key)", value)
+                            configRow("header: \(key)", value, stepName: step.name)
                         }
                     }
                     if let body = http.body {
-                        configRow("body", body)
+                        configRow("body", body, stepName: step.name)
                     }
                 }
             }
 
             if let confirm = step.confirm {
                 configSection("Confirm") {
-                    configRow("message", confirm)
+                    configRow("message", confirm, stepName: step.name)
                 }
             }
 
@@ -277,19 +293,19 @@ struct RunbookDetailView: View {
                 step.capture != nil || step.condition != nil {
                 configSection("Options") {
                     if let timeout = step.timeout {
-                        configRow("timeout", timeout)
+                        configRow("timeout", timeout, stepName: step.name)
                     }
                     if let onErr = step.on_error {
-                        configRow("on_error", onErr)
+                        configRow("on_error", onErr, stepName: step.name)
                     }
                     if let retries = step.retries {
-                        configRow("retries", "\(retries)")
+                        configRow("retries", "\(retries)", stepName: step.name)
                     }
                     if let capture = step.capture {
-                        configRow("capture → ", capture)
+                        configRow("capture → ", capture, stepName: step.name)
                     }
                     if let condition = step.condition {
-                        configRow("condition", condition)
+                        configRow("condition", condition, stepName: step.name)
                     }
                 }
             }
@@ -309,8 +325,8 @@ struct RunbookDetailView: View {
         }
     }
 
-    private func configRow(_ label: String, _ value: String) -> some View {
-        EditableConfigRow(label: label, value: value, runbook: runbook, store: store)
+    private func configRow(_ label: String, _ value: String, stepName: String? = nil) -> some View {
+        EditableConfigRow(label: label, value: value, runbook: runbook, store: store, stepName: stepName)
     }
 
     // MARK: - Helpers

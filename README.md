@@ -11,7 +11,8 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Three-Panel Layout** — Sidebar for navigation, searchable runbook list with metadata, and runbook detail view
 - **Runbook Detail** — View variables, steps with type icons, notification config, and recent run history at a glance
 - **Expandable Steps** — Click any step to expand its full configuration (command, host, URL, headers, etc.)
-- **Inline Editing** — Double-click any value in an expanded step to edit it in place; auto-saves to YAML on focus loss
+- **Inline Editing** — Double-click any value in an expanded step to edit it in place. Single-line values edit inline. Multi-line commands (`shell.command`, `ssh.command`, `http.body`) open a syntax-highlighted popout editor with Bash/JSON highlighting; click outside, press Esc, or Cmd-W to save. The detail view refreshes live.
+- **Code Block Viewer** — Multi-line shell and JSON values render as syntax-highlighted code blocks inline — muted palette in view mode, full-vibrancy colors in the popout editor. Wrapped lines hang-indent under the source's first non-whitespace column.
 - **Execute Runbooks** — Run with live streaming output, variable inputs, stop button (⌘.), dry run mode, and success/failure status
 - **Runner Output** — Copy all output, search within output with match navigation, save logs, and syntax-highlighted output via configurable rules in `~/.runbook/highlights.yaml`
 - **Auto-Logging** — Per-runbook log config with `new` (per-run file) and `append` (cumulative) modes; log viewer with section picker for append-mode files
@@ -23,7 +24,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Keyboard Navigation** — ⌘1-4 for sidebar sections, ⌘K to quick-jump to any runbook by name
 - **Diff Preview** — Review changes before saving in the YAML editor
 - **Run History** — Browse all past runs with expandable per-step results, timing, errors, and name filtering
-- **Cron Scheduling** — Add, view, and remove crontab entries from the GUI with natural language descriptions
+- **Cron Scheduling** — Add, view, and remove crontab entries from the GUI. Each scheduled runbook shows a status dot (gray = never run, green = last succeeded, red = last failed), an inline "last run" badge (e.g. `✓ 5h ago`), and a live-updating "next run" line (e.g. `Next: Sunday at 8:00 AM · in 3d 2h`).
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
 - **SSH Key Caching** — Cache 1Password SSH keys in system keychain via `runbook auth` to avoid Touch ID prompts on repeat runs
 - **Credential Pre-warm** — Settings button to run `goback auth` interactively, caching op:// secrets so cron jobs can read them from the locked keychain

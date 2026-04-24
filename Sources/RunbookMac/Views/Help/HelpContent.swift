@@ -243,6 +243,9 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                     ["0 9 1/15 * 6", "Every 15 days from the 1st, and Saturdays, at 9 AM"],
                 ]),
                 .paragraph("Logs are captured to ~/.runbook/history/<name>.log."),
+                .heading("Status at a Glance"),
+                .paragraph("Each scheduled row shows a colored status dot next to the runbook name (gray = never run, green = last run succeeded, red = last run failed) with a tooltip giving the exact result and time."),
+                .paragraph("Beside the name, an inline badge shows how long ago the last run was (e.g. \"✓ 5h ago\" or \"✗ 2d ago\"). Below the schedule, a live-updating \"Next\" line shows when the next fire will happen in both absolute time and relative countdown (e.g. \"Next: Sunday at 8:00 AM · in 3d 2h\")."),
             ]
 
         case .sharing:
@@ -290,6 +293,9 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .paragraph("Pressing Return after a line ending with : auto-indents by 2 spaces."),
                 .heading("Validation"),
                 .paragraph("Click Validate to check the YAML structure without saving."),
+                .heading("Inline Code Block Editor"),
+                .paragraph("In the runbook detail view, multi-line command/body values render as code blocks with muted syntax highlighting. Double-click anywhere in the block to open a popout editor with full-vibrancy colors and live Bash/JSON highlighting."),
+                .paragraph("The popout saves on any of: clicking outside, Esc, or Cmd-W. The detail view refreshes immediately — no need to reselect the runbook. Edits are written back to YAML block-scalars with their original indentation preserved, scoped to the step you were editing so multiple steps with the same key (e.g. two `command:` blocks) can't collide."),
             ]
 
         case .running:

@@ -93,5 +93,11 @@ class NoAutoFillTextField: NSTextField {
         editor.isAutomaticDashSubstitutionEnabled = false
         editor.isAutomaticDataDetectionEnabled = false
         editor.isAutomaticLinkDetectionEnabled = false
+        // macOS 14+ added an inline-prediction bar that renders as a
+        // large ghost popup beneath the field on focus. The auto-* flags
+        // above don't suppress it; this trait does.
+        if #available(macOS 14.0, *) {
+            editor.inlinePredictionType = .no
+        }
     }
 }

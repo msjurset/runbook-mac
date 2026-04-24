@@ -32,5 +32,7 @@
 	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Runbook executes user-defined runbooks that may make HTTP and SSH calls to hosts and services on your local network.</string>
 </dict>
 </plist>
