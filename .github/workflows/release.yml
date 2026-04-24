@@ -38,10 +38,20 @@ jobs:
           mkdir -p dist
           ditto -c -k --keepParent Runbook.app dist/Runbook-${{ steps.version.outputs.VERSION }}.zip
 
-      - name: Create GitHub release
+      - name: Create or update GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes
+        # Idempotent: if the release was pre-created (e.g. with custom
+        # hand-authored notes via `gh release create <tag> --notes ...`),
+        # skip re-creation; otherwise create with auto-generated notes.
+        # Either way upload/replace the assets.
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists — uploading assets."
+          else
+            gh release create "$GITHUB_REF_NAME" --generate-notes --title "$GITHUB_REF_NAME"
+          fi
+          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
 
       - name: Update Homebrew cask
         env:
