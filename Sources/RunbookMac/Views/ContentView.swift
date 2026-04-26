@@ -59,6 +59,9 @@ struct ContentView: View {
         .onAppear {
             store.loadAll()
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            ConsoleTray()
+        }
         .frame(minWidth: 900, minHeight: 500)
         .focusedValue(\.sidebarSelection, $sidebarSelection)
         .focusedValue(\.showQuickJump, $showQuickJump)

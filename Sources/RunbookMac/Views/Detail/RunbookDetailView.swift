@@ -2,11 +2,12 @@ import SwiftUI
 
 struct RunbookDetailView: View {
     @Environment(RunbookStore.self) private var store
+    @Environment(RunSessionStore.self) private var runSessions
     /// Initial runbook passed from the sidebar selection. Used only as a
     /// fallback and to hold the lookup id; live reads go through `runbook`.
     private let initialRunbook: Runbook
     @State private var showEditor = false
-    @State private var showRunner = false
+    @State private var showRunConfirm = false
     @State private var showCreateFromTemplate = false
     @State private var showSchedule = false
     @State private var expandedSteps: Set<Int> = []
@@ -65,18 +66,21 @@ struct RunbookDetailView: View {
                     .accessibilityIdentifier("toolbar.schedule")
                     .help("Schedule run")
                     Button("Run", systemImage: "play.fill") {
-                        showRunner = true
+                        showRunConfirm = true
                     }
                     .accessibilityIdentifier("toolbar.run")
                     .tint(.green)
+                    .help("Run this runbook")
                 }
             }
         }
         .sheet(isPresented: $showEditor) {
             EditorView(runbook: runbook)
         }
-        .sheet(isPresented: $showRunner) {
-            RunnerView(runbook: runbook)
+        .sheet(isPresented: $showRunConfirm) {
+            RunConfirmSheet(runbook: runbook) { vars, dryRun in
+                _ = runSessions.start(runbook: runbook, vars: vars, dryRun: dryRun)
+            }
         }
         .sheet(isPresented: $showSchedule) {
             ScheduleRunbookSheet(runbookName: runbook.name)
@@ -324,6 +328,11 @@ struct RunbookDetailView: View {
             content()
         }
     }
+
+    /// Route the Run toolbar tap: if the runbook has variables, open a small
+    /// pre-run sheet to collect them; otherwise fire immediately into the
+    /// RunSessionStore. Running is non-modal — the tray docks at the bottom
+    /// so the user can keep browsing other runbooks while this executes.
 
     private func configRow(_ label: String, _ value: String, stepName: String? = nil) -> some View {
         EditableConfigRow(label: label, value: value, runbook: runbook, store: store, stepName: stepName)

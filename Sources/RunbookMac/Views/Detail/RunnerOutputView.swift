@@ -5,6 +5,20 @@ struct RunnerOutputView: View {
     let runbookName: String
     var runStartedAt: Date?
     @Binding var output: [String]
+    /// When non-nil, a Stop button appears in the toolbar near Copy All.
+    /// Fires the closure to request cancellation without dismissing the
+    /// session (the tab × handles stop+dismiss atomically).
+    var stopAction: (() -> Void)? = nil
+    /// When non-nil, a Retry button appears in the toolbar. Intended for
+    /// terminal sessions so the user can rerun with the same args. The
+    /// closure receives the current state of the inline Dry toggle so the
+    /// caller knows whether to run real or dry.
+    var retryAction: ((_ dryRun: Bool) -> Void)? = nil
+    /// Initial value of the inline Dry toggle that sits next to Retry. Pass
+    /// the session's `dryRun` so the default matches the prior run.
+    var retryInitialDryRun: Bool = false
+    @State private var retryDryRun: Bool = false
+    @State private var retryDryRunPrimed = false
     @State private var searchText = ""
     @State private var showSearch = false
     @State private var currentMatch = 0
@@ -23,8 +37,9 @@ struct RunnerOutputView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Toolbar
-            if !output.isEmpty {
+            // Toolbar — always visible while a Stop action is wired so the
+            // user can interrupt even before the first output line lands.
+            if !output.isEmpty || stopAction != nil {
                 toolbar
                 Divider()
             }
@@ -61,6 +76,16 @@ struct RunnerOutputView: View {
             }
             .background(.black.opacity(0.03))
         }
+        .onAppear {
+            if !retryDryRunPrimed {
+                retryDryRun = retryInitialDryRun
+                retryDryRunPrimed = true
+            }
+        }
+        .onChange(of: retryInitialDryRun) {
+            // Reset the toggle if the caller switches to a different session.
+            retryDryRun = retryInitialDryRun
+        }
     }
 
     // MARK: - Toolbar
@@ -96,6 +121,35 @@ struct RunnerOutputView: View {
             }
             .buttonStyle(.borderless)
 
+            if let stopAction {
+                Button(role: .destructive) {
+                    stopAction()
+                } label: {
+                    Label("Stop", systemImage: "stop.fill")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+                .tint(.red)
+                .help("Stop the run (keeps the tab open)")
+                .keyboardShortcut(".", modifiers: .command)
+            }
+
+            if let retryAction {
+                Toggle("Dry", isOn: $retryDryRun)
+                    .toggleStyle(.checkbox)
+                    .font(.caption)
+                    .help("Toggle to rerun as a dry run vs. a real run")
+
+                Button {
+                    retryAction(retryDryRun)
+                } label: {
+                    Label("Retry", systemImage: "arrow.clockwise")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+                .help("Rerun this runbook with the same variables")
+            }
+
             Button {
                 saveToFile()
             } label: {
@@ -115,10 +169,9 @@ struct RunnerOutputView: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            TextField("Search output", text: $searchText)
-                .textFieldStyle(.roundedBorder)
-                .focused($searchFocused)
-                .onSubmit { nextMatch() }
+            FilterField(placeholder: "Search output",
+                        text: $searchText,
+                        onCommit: { nextMatch() })
 
             if !searchText.isEmpty {
                 Text(matchingLines.isEmpty

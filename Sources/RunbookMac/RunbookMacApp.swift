@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct RunbookMacApp: App {
     @State private var store = RunbookStore()
+    @State private var runSessions = RunSessionStore()
     @State private var showCLISetup = false
 
     init() {
@@ -28,6 +29,7 @@ struct RunbookMacApp: App {
                 CLIUpdateBanner()
                 ContentView()
                     .environment(store)
+                    .environment(runSessions)
             }
             .onAppear {
                 if !CLIInstaller.isCLIInstalled {

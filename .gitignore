@@ -10,3 +10,4 @@ xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 Runbook.app/
 *.xcresult
+dist/

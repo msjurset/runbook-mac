@@ -21,8 +21,9 @@ struct VariableInputsView: View {
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
-                        TextField(v.default ?? "", text: binding(for: v.name))
-                            .textFieldStyle(.roundedBorder)
+                        FilterField(placeholder: v.default ?? "",
+                                    text: binding(for: v.name))
+                            .frame(maxWidth: .infinity)
                         if v.required == true {
                             Text("required")
                                 .font(.caption2)
