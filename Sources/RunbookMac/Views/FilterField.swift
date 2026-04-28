@@ -2,20 +2,39 @@ import AppKit
 import SwiftUI
 
 /// A text field that suppresses macOS autofill/autocomplete popups.
-/// Use this instead of SwiftUI TextField for filter/search fields.
+/// Use this instead of SwiftUI TextField for every text input on macOS —
+/// SwiftUI TextField shows a phantom autocomplete dropdown no modifier can kill.
 struct FilterField: NSViewRepresentable {
     let placeholder: String
     @Binding var text: String
     var onCommit: (() -> Void)?
     var autoFocus = false
+    var isDisabled = false
+    /// Bumping this integer requests that the field become first responder.
+    /// Use instead of SwiftUI @FocusState, which doesn't bind to NSViewRepresentable.
+    var focusTrigger: Int = 0
+    /// Visual style — .rounded for form/sheet inputs, .plain for inline search bars.
+    var style: Style = .rounded
+
+    enum Style { case rounded, plain }
 
     func makeNSView(context: Context) -> NoAutoFillTextField {
         let field = NoAutoFillTextField()
         field.placeholderString = placeholder
-        field.bezelStyle = .roundedBezel
+        switch style {
+        case .rounded:
+            field.bezelStyle = .roundedBezel
+            field.isBordered = true
+            field.drawsBackground = true
+        case .plain:
+            field.isBordered = false
+            field.drawsBackground = false
+            field.focusRingType = .none
+        }
         field.delegate = context.coordinator
         field.isAutomaticTextCompletionEnabled = false
         field.contentType = .none
+        context.coordinator.lastFocusTrigger = focusTrigger
         if autoFocus {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 field.window?.makeFirstResponder(field)
@@ -27,6 +46,27 @@ struct FilterField: NSViewRepresentable {
     func updateNSView(_ nsView: NoAutoFillTextField, context: Context) {
         if nsView.stringValue != text {
             nsView.stringValue = text
+            // After a PROGRAMMATIC text change (e.g. autocomplete inserted
+            // a suggestion), place the cursor at the end of the new text
+            // with no selection. Without this, AppKit's default behavior
+            // when stringValue is set on a field with an active editor is
+            // to select the entire inserted text — which forces the user
+            // to press right-arrow before they can keep typing, because
+            // the next keystroke would otherwise replace the selection.
+            // NSRange.location is in UTF-16 units, so use utf16.count to
+            // stay correct for emoji and accented characters.
+            if let editor = nsView.currentEditor() {
+                let end = (text as NSString).length
+                editor.selectedRange = NSRange(location: end, length: 0)
+            }
+        }
+        nsView.isEnabled = !isDisabled
+        if focusTrigger != context.coordinator.lastFocusTrigger {
+            context.coordinator.lastFocusTrigger = focusTrigger
+            DispatchQueue.main.async {
+                nsView.window?.makeFirstResponder(nsView)
+                nsView.currentEditor()?.selectAll(nil)
+            }
         }
     }
 
@@ -37,6 +77,7 @@ struct FilterField: NSViewRepresentable {
     class Coordinator: NSObject, NSTextFieldDelegate {
         var text: Binding<String>
         var onCommit: (() -> Void)?
+        var lastFocusTrigger: Int = 0
 
         init(text: Binding<String>, onCommit: (() -> Void)?) {
             self.text = text
@@ -55,7 +96,10 @@ struct FilterField: NSViewRepresentable {
 }
 
 /// NSTextField subclass that refuses all autofill and autocompletion.
-class NoAutoFillTextField: NSTextField {
+/// The field editor (NSTextView) must be reconfigured in three places —
+/// becomeFirstResponder, textDidBeginEditing, and textShouldBeginEditing —
+/// because AppKit re-enables auto-* flags at each lifecycle point.
+final class NoAutoFillTextField: NSTextField {
     override var allowsCharacterPickerTouchBarItem: Bool {
         get { false }
         set {}
@@ -63,7 +107,6 @@ class NoAutoFillTextField: NSTextField {
 
     override func becomeFirstResponder() -> Bool {
         let result = super.becomeFirstResponder()
-        // Suppress autofill immediately when field gains focus
         if let editor = currentEditor() as? NSTextView {
             disableAllAutoComplete(editor)
         }
@@ -94,8 +137,8 @@ class NoAutoFillTextField: NSTextField {
         editor.isAutomaticDataDetectionEnabled = false
         editor.isAutomaticLinkDetectionEnabled = false
         // macOS 14+ added an inline-prediction bar that renders as a
-        // large ghost popup beneath the field on focus. The auto-* flags
-        // above don't suppress it; this trait does.
+        // large ghost popup beneath the field on focus. The usual
+        // auto-* flags don't disable it; this trait does.
         if #available(macOS 14.0, *) {
             editor.inlinePredictionType = .no
         }

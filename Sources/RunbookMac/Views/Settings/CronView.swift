@@ -132,7 +132,13 @@ struct CronView: View {
                 description: CronDescription.describe(schedule)
             ))
         }
-        return entries
+        // Sort by next fire time so the most-imminent job is on top.
+        // Schedules whose expression can't be parsed sort to the bottom.
+        return entries.sorted { lhs, rhs in
+            let lNext = CronNextRun.next(for: lhs.schedule) ?? .distantFuture
+            let rNext = CronNextRun.next(for: rhs.schedule) ?? .distantFuture
+            return lNext < rNext
+        }
     }
 
     private func addSchedule() {

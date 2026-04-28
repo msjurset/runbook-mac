@@ -26,7 +26,7 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 - **Pin Runbooks** — Pin frequently-used runbooks to the top of the list; persisted across sessions
 - **Keyboard Navigation** — ⌘1-4 for sidebar sections, ⌘K to quick-jump to any runbook by name
 - **Diff Preview** — Review changes before saving in the YAML editor
-- **Run History** — Browse all past runs with expandable per-step results, timing, errors, and name filtering
+- **Run History** — Browse all past runs with expandable per-step results, timing, errors, and name filtering. Each step in an expanded row has its own chevron to reveal that step's actual log output for *this* run (not just the latest), with color-coded highlighting for errors and warnings via `~/.runbook/highlights.yaml` rules
 - **Cron Scheduling** — Add, view, and remove crontab entries from the GUI. Each scheduled runbook shows a status dot (gray = never run, green = last succeeded, red = last failed), an inline "last run" badge (e.g. `✓ 5h ago`), and a live-updating "next run" line (e.g. `Next: Sunday at 8:00 AM · in 3d 2h`).
 - **Repository Management** — Pull git repos or single YAML files, list, update, and remove pulled repos
 - **SSH Key Caching** — Cache 1Password SSH keys in system keychain via `runbook auth` to avoid Touch ID prompts on repeat runs

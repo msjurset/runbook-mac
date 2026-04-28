@@ -193,7 +193,32 @@ final class RunSessionStore {
         sessions[idx].endedAt = Date()
         sessions[idx].state = state
         runTasks[sessionID] = nil
+        persistLog(for: sessions[idx])
         pruneTerminal()
+    }
+
+    /// Save the captured output to a log file so the History and Schedules
+    /// views can show per-step slices of Mac-app-launched runs (cron runs are
+    /// already captured by launchd's stdout redirect).
+    ///
+    /// We always write a per-run file and record it in `LogIndex`. If the
+    /// runbook itself has `log:` configured, the CLI also wrote its own file —
+    /// that's harmless duplication; the index points to ours so History
+    /// resolves consistently against the run's `started_at`.
+    private func persistLog(for session: RunSession) {
+        guard !session.output.isEmpty else { return }
+        let logURL = LogIndex.defaultLogPath(runbookName: session.runbookName)
+        // The CLI's stream strips trailing newlines per line, so rejoin with
+        // explicit newlines. The CLI already emits its own "Running: <name>"
+        // banner so the resulting file already has a parseable run marker.
+        let text = session.output.joined(separator: "\n") + "\n"
+        do {
+            try FileManager.default.createDirectory(at: logURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: logURL, atomically: true, encoding: .utf8)
+            LogIndex.record(runbookName: session.runbookName, date: session.startedAt, logPath: logURL.path)
+        } catch {
+            // Logging is best-effort; failing to write shouldn't break the run.
+        }
     }
 
     /// Keep at most `terminalRetention` terminal sessions around, dropping

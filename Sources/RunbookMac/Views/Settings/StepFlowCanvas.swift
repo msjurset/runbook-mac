@@ -4,6 +4,9 @@ import SwiftUI
 struct StepFlowCanvas: View {
     let steps: [Step]
     let colorScheme: ColorScheme
+    var runbookName: String? = nil
+
+    @Environment(RunbookStore.self) private var store
 
     // Layout constants
     private let pillHeight: CGFloat = 24
@@ -14,19 +17,91 @@ struct StepFlowCanvas: View {
     private let turnRadius: CGFloat = 10
 
     @State private var computedHeight: CGFloat = 30
+    @State private var selectedPillID: String?
+    @State private var selectedLogPillID: String?
 
     var body: some View {
-        GeometryReader { geo in
-            let layout = computeLayout(width: geo.size.width)
-            Canvas { context, size in
-                drawPipeline(context: context, layout: layout, size: size)
+        VStack(alignment: .leading, spacing: 4) {
+            GeometryReader { geo in
+                let layout = computeLayout(width: geo.size.width)
+                ZStack(alignment: .topLeading) {
+                    Canvas { context, size in
+                        drawPipeline(context: context, layout: layout, size: size)
+                    }
+
+                    // Click hit-test rects, anchored at each pill's exact rect.
+                    // .popover BEFORE .position so it anchors to the pill-sized frame,
+                    // not the parent ZStack.
+                    //
+                    // SwiftUI's onTapGesture(count:2) + onTapGesture(count:1)
+                    // pair handles double-vs-single discrimination natively.
+                    // Right-click is handled by a backing NSView since SwiftUI
+                    // does not expose a right-mouse gesture on macOS.
+                    ForEach(Array(layout.pills.enumerated()), id: \.offset) { idx, pill in
+                        let pillID = "\(idx)|\(pill.step.name)"
+                        ZStack {
+                            // SwiftUI tap layer (left + double click). Sits BELOW the
+                            // right-click catcher so left clicks reach it.
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onHover { inside in
+                                    if inside { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+                                }
+                                .onTapGesture(count: 2) {
+                                    selectedPillID = nil
+                                    selectedLogPillID = nil
+                                    guard let name = runbookName else { return }
+                                    NotificationCenter.default.post(
+                                        name: .runbookNavigateToStep,
+                                        object: nil,
+                                        userInfo: [
+                                            "runbookName": name,
+                                            "stepName": pill.step.name
+                                        ]
+                                    )
+                                }
+                                .onTapGesture(count: 1) {
+                                    selectedLogPillID = nil
+                                    selectedPillID = (selectedPillID == pillID) ? nil : pillID
+                                }
+                            // Right-click catcher on TOP. Its hitTest returns nil for
+                            // non-right events so left clicks fall through to the
+                            // SwiftUI layer beneath. Right-clicks land here.
+                            RightClickCatcher {
+                                selectedPillID = nil
+                                selectedLogPillID = (selectedLogPillID == pillID) ? nil : pillID
+                            }
+                        }
+                        .frame(width: pill.rect.width, height: pill.rect.height)
+                        .popover(isPresented: Binding(
+                            get: { selectedPillID == pillID },
+                            set: { if !$0 && selectedPillID == pillID { selectedPillID = nil } }
+                        ), arrowEdge: .bottom) {
+                            StepFlyoutView(step: pill.step, accent: pillBarColor(pill.step))
+                        }
+                        .popover(isPresented: Binding(
+                            get: { selectedLogPillID == pillID },
+                            set: { if !$0 && selectedLogPillID == pillID { selectedLogPillID = nil } }
+                        ), arrowEdge: .bottom) {
+                            StepLogFlyoutView(
+                                step: pill.step,
+                                accent: pillBarColor(pill.step),
+                                lastRecord: lastHistoryRecord(),
+                                lastStepRecord: lastStepRecord(named: pill.step.name)
+                            )
+                        }
+                        .position(x: pill.rect.midX, y: pill.rect.midY)
+                    }
+                }
+                .onAppear { computedHeight = layout.totalHeight }
+                .onChange(of: geo.size.width) { _, _ in
+                    computedHeight = computeLayout(width: geo.size.width).totalHeight
+                }
             }
-            .onAppear { computedHeight = layout.totalHeight }
-            .onChange(of: geo.size.width) { _, _ in
-                computedHeight = computeLayout(width: geo.size.width).totalHeight
-            }
+            .frame(height: computedHeight)
+
+            StepFlowLegend()
         }
-        .frame(height: computedHeight)
     }
 
     // MARK: - Layout computation
@@ -374,5 +449,342 @@ struct StepFlowCanvas: View {
     private func abbreviate(_ s: String, max: Int) -> String {
         if s.count <= max { return s }
         return String(s.prefix(max - 1)) + "…"
+    }
+
+    // MARK: - History lookup
+
+    private func lastHistoryRecord() -> HistoryRecord? {
+        guard let name = runbookName else { return nil }
+        return store.history(for: name).first
+    }
+
+    private func lastStepRecord(named: String) -> StepRecord? {
+        lastHistoryRecord()?.steps.first { $0.name == named }
+    }
+}
+
+extension Notification.Name {
+    /// Fired by the Schedules chart when the user double-clicks a step.
+    /// ContentView consumes this to switch tabs and select the runbook.
+    static let runbookNavigateToStep = Notification.Name("runbookNavigateToStep")
+    /// Fired by ContentView ~150ms after handling `runbookNavigateToStep`,
+    /// once the RunbookDetailView has had time to mount. RunbookDetailView
+    /// consumes this to expand and scroll to the target step.
+    static let runbookExpandStep = Notification.Name("runbookExpandStep")
+}
+
+// MARK: - Right-click only catcher
+//
+// The `hitTest` override only "claims" hits when the in-flight event is a
+// right-mouse-down, so left-clicks fall through to the SwiftUI tap gestures
+// stacked on top. Without this, the NSView would swallow all clicks.
+
+private struct RightClickCatcher: NSViewRepresentable {
+    let action: () -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let v = RightClickView()
+        v.action = action
+        return v
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        (nsView as? RightClickView)?.action = action
+    }
+
+    private final class RightClickView: NSView {
+        var action: (() -> Void)?
+
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            if let event = NSApp.currentEvent, event.type == .rightMouseDown {
+                return self
+            }
+            return nil
+        }
+
+        override func rightMouseDown(with event: NSEvent) {
+            action?()
+        }
+    }
+}
+
+// MARK: - Legend
+
+struct StepFlowLegend: View {
+    private struct Item: Identifiable {
+        let id: String
+        let color: Color
+        let label: String
+    }
+    private let items: [Item] = [
+        Item(id: "shell", color: .blue, label: "shell"),
+        Item(id: "ssh", color: .teal, label: "ssh"),
+        Item(id: "http", color: .green, label: "http"),
+        Item(id: "confirm", color: .orange, label: "confirm"),
+    ]
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(items) { item in
+                HStack(spacing: 4) {
+                    Capsule()
+                        .fill(item.color)
+                        .frame(width: 10, height: 4)
+                    Text(item.label)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Text("· click a step for details")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+}
+
+// MARK: - Click flyout
+
+private struct StepFlyoutView: View {
+    let step: Step
+    let accent: Color
+
+    private var typeLabel: String {
+        if step.confirm != nil { return "confirm" }
+        return step.type ?? "shell"
+    }
+
+    private var commandText: String? {
+        if let s = step.shell?.command, !s.isEmpty { return s }
+        if let s = step.ssh?.command, !s.isEmpty { return s }
+        if let s = step.http?.body, !s.isEmpty { return s }
+        return nil
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Circle().fill(accent).frame(width: 8, height: 8)
+                Text(step.name).font(.headline)
+                Spacer(minLength: 0)
+                Text(typeLabel)
+                    .font(.caption.monospaced())
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(accent.opacity(0.18), in: RoundedRectangle(cornerRadius: 4))
+                    .foregroundStyle(accent)
+            }
+
+            if let host = step.ssh?.host {
+                row(label: "host", value: host)
+            }
+            if let url = step.http?.url {
+                row(label: "url", value: url)
+            }
+            if let method = step.http?.method, !method.isEmpty {
+                row(label: "method", value: method)
+            }
+            if let cond = step.condition, !cond.isEmpty {
+                row(label: "if", value: cond)
+            }
+            if let cap = step.capture, !cap.isEmpty {
+                row(label: "capture", value: cap)
+            }
+            if let oe = step.on_error, !oe.isEmpty {
+                row(label: "on_error", value: oe)
+            }
+            if let t = step.timeout, !t.isEmpty {
+                row(label: "timeout", value: t)
+            }
+            if let r = step.retries {
+                row(label: "retries", value: String(r))
+            }
+            if step.parallel == true {
+                row(label: "parallel", value: "true")
+            }
+            if let confirm = step.confirm, !confirm.isEmpty {
+                row(label: "confirm", value: confirm)
+            }
+
+            if let cmd = commandText {
+                Divider()
+                Text(truncate(cmd, lines: 8))
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(10)
+        .frame(minWidth: 240, idealWidth: 360, maxWidth: 480, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func row(label: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(label)
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
+                .frame(width: 64, alignment: .trailing)
+            Text(value)
+                .font(.callout)
+                .lineLimit(2)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .textSelection(.enabled)
+        }
+    }
+
+    private func truncate(_ s: String, lines: Int) -> String {
+        let parts = s.split(separator: "\n", omittingEmptySubsequences: false)
+        if parts.count <= lines { return s }
+        return parts.prefix(lines).joined(separator: "\n") + "\n…"
+    }
+}
+
+// MARK: - Step log extractor
+//
+// The runbook CLI's log format separates runs with `--- run: <ts> ---` and
+// each step with `▸ Step N: <name>` followed by indented body lines (most
+// prefixed with `│ `) and a result line (`✓ done` / `✗ failed` / `⊘ skipped`).
+// We grab the LAST run in the file (matches HistoryRecord.first) and extract
+// the slice for the requested step name.
+
+// MARK: - Right-click log flyout
+
+private struct StepLogFlyoutView: View {
+    let step: Step
+    let accent: Color
+    let lastRecord: HistoryRecord?
+    let lastStepRecord: StepRecord?
+
+    @State private var stepLogText: String?
+    @State private var stepLogLoaded = false
+
+    private var statusColor: Color {
+        switch (lastStepRecord?.status ?? "").lowercased() {
+        case "success", "succeeded", "passed": return .green
+        case "failed", "error": return .red
+        case "skipped": return .gray
+        default: return .secondary
+        }
+    }
+
+    private var statusIcon: String {
+        switch (lastStepRecord?.status ?? "").lowercased() {
+        case "success", "succeeded", "passed": return "checkmark.circle.fill"
+        case "failed", "error": return "xmark.circle.fill"
+        case "skipped": return "minus.circle.fill"
+        default: return "questionmark.circle.fill"
+        }
+    }
+
+    private var logURL: URL? {
+        guard let rec = lastRecord else { return nil }
+        return StepLogExtractor.findLogURL(for: rec)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Circle().fill(accent).frame(width: 8, height: 8)
+                Text(step.name).font(.headline)
+                Spacer(minLength: 0)
+                Text("last run").font(.caption).foregroundStyle(.tertiary)
+            }
+
+            if let record = lastRecord, let stepRec = lastStepRecord {
+                HStack(spacing: 6) {
+                    Image(systemName: statusIcon).foregroundStyle(statusColor)
+                    Text(stepRec.status.capitalized).font(.callout).foregroundStyle(statusColor)
+                    Text("·").foregroundStyle(.tertiary)
+                    Text(stepRec.duration).font(.callout.monospacedDigit())
+                    Text("·").foregroundStyle(.tertiary)
+                    Text(record.formattedDate).font(.caption).foregroundStyle(.secondary)
+                }
+
+                if let err = stepRec.error, !err.isEmpty {
+                    Divider()
+                    Text("Error").font(.caption.bold()).foregroundStyle(.red)
+                    Text(err)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(.primary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                // Inline step output from the actual log file
+                Divider()
+                if !stepLogLoaded {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Loading step output…")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else if let text = stepLogText, !text.isEmpty {
+                    Text("Output").font(.caption.bold()).foregroundStyle(.secondary)
+                    ScrollView(.vertical, showsIndicators: true) {
+                        Text(text)
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(.primary)
+                            .textSelection(.enabled)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                    }
+                    .frame(height: 220)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.secondary.opacity(0.08))
+                    )
+                } else {
+                    Text("No output captured for this step.")
+                        .font(.caption).foregroundStyle(.tertiary)
+                }
+
+                if let url = logURL {
+                    HStack {
+                        Text(url.lastPathComponent)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1).truncationMode(.middle)
+                        Spacer()
+                        Button("Open Log") { NSWorkspace.shared.open(url) }
+                            .controlSize(.small)
+                    }
+                } else {
+                    Text("No log file recorded for this run.")
+                        .font(.caption).foregroundStyle(.tertiary)
+                }
+            } else if lastRecord == nil {
+                Text("No recent runs for this runbook.")
+                    .font(.callout).foregroundStyle(.secondary)
+            } else {
+                Text("This step did not appear in the last run.")
+                    .font(.callout).foregroundStyle(.secondary)
+                if let url = logURL {
+                    HStack {
+                        Spacer()
+                        Button("Open Last Log") { NSWorkspace.shared.open(url) }
+                            .controlSize(.small)
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .frame(minWidth: 320, idealWidth: 480, maxWidth: 640, alignment: .leading)
+        .task(id: step.name) {
+            stepLogLoaded = false
+            stepLogText = nil
+            guard let url = logURL else {
+                stepLogLoaded = true
+                return
+            }
+            let name = step.name
+            let extracted: String? = await Task.detached(priority: .userInitiated) {
+                StepLogExtractor.extractStepLines(logURL: url, stepName: name)
+            }.value
+            stepLogText = extracted
+            stepLogLoaded = true
+        }
     }
 }

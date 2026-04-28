@@ -30,8 +30,18 @@ struct HistoryListView: View {
                     description: Text("Run a runbook to see its history here.")
                 )
             } else {
-                List(filteredRecords) { record in
-                    HistoryRowView(record: record)
+                // ScrollView + LazyVStack rather than List: macOS List caches
+                // row heights and won't re-measure when an expanded inner log
+                // collapses, leaving a phantom gap where the log used to be.
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(filteredRecords) { record in
+                            HistoryRowView(record: record)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 4)
+                            Divider()
+                        }
+                    }
                 }
             }
         }
@@ -46,43 +56,40 @@ struct HistoryListView: View {
 }
 
 struct HistoryRowView: View {
+    @Environment(RunbookStore.self) private var store
     let record: HistoryRecord
     @State private var expanded = false
     @State private var showLog = false
 
     private var logFile: URL? {
-        LogIndex.logPath(for: record)
+        StepLogExtractor.findLogURL(for: record)
+    }
+
+    /// Position of this record in the runbook's history sorted newest-first.
+    /// Used as a fallback when log markers don't carry a timestamp.
+    private var runIndexFromEnd: Int {
+        store.history(for: record.runbook_name)
+            .firstIndex(where: { $0.id == record.id }) ?? 0
     }
 
     var body: some View {
         DisclosureGroup(isExpanded: $expanded) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 ForEach(record.steps) { step in
-                    HStack {
-                        Image(systemName: statusIcon(step.status))
-                            .foregroundStyle(statusColor(step.status))
-                            .frame(width: 16)
-                        Text(step.name)
-                            .font(.caption)
-                        Spacer()
-                        Text(step.duration)
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.secondary)
-                    }
-                    if let error = step.error, !error.isEmpty {
-                        Text(error)
-                            .font(.caption2)
-                            .foregroundStyle(.red)
-                            .padding(.leading, 20)
-                    }
+                    StepHistoryRow(
+                        step: step,
+                        record: record,
+                        logFile: logFile,
+                        runIndexFromEnd: runIndexFromEnd
+                    )
                 }
 
                 if let log = logFile {
-                    Divider()
+                    Divider().padding(.top, 4)
                     Button {
                         showLog = true
                     } label: {
-                        Label("View Saved Log", systemImage: "doc.text")
+                        Label("View Full Log", systemImage: "doc.text")
                             .font(.caption)
                     }
                     .buttonStyle(.borderless)
@@ -134,6 +141,144 @@ struct HistoryRowView: View {
         case "failed": .red
         case "skipped": .gray
         default: .secondary
+        }
+    }
+}
+
+/// One step row inside the expanded HistoryRowView. Status + duration are
+/// always visible; click the chevron to lazy-load the per-step log slice
+/// for THIS run (not the most recent — see scopeToRun in StepLogExtractor).
+struct StepHistoryRow: View {
+    let step: StepRecord
+    let record: HistoryRecord
+    let logFile: URL?
+    let runIndexFromEnd: Int
+
+    @State private var expanded = false
+    @State private var stepLogText: String?
+    @State private var loadState: LoadState = .idle
+
+    private enum LoadState { case idle, loading, loaded }
+
+    private var statusIcon: String {
+        switch step.status {
+        case "success": return "checkmark.circle.fill"
+        case "failed": return "xmark.circle.fill"
+        case "skipped": return "minus.circle"
+        default: return "circle"
+        }
+    }
+
+    private var statusTint: Color {
+        switch step.status {
+        case "success": return .green
+        case "failed": return .red
+        case "skipped": return .gray
+        default: return .secondary
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Button {
+                if logFile != nil { expanded.toggle() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(expanded ? 90 : 0))
+                        .opacity(logFile != nil ? 1 : 0)
+                        .frame(width: 10)
+                    Image(systemName: statusIcon)
+                        .foregroundStyle(statusTint)
+                        .frame(width: 16)
+                    Text(step.name)
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text(step.duration)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if let error = step.error, !error.isEmpty {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+                    .padding(.leading, 32)
+                    .textSelection(.enabled)
+            }
+
+            if expanded {
+                stepLogBody
+                    .padding(.leading, 32)
+                    .padding(.trailing, 4)
+                    .padding(.top, 2)
+            }
+        }
+        .task(id: expandedKey) {
+            guard expanded, loadState == .idle, let url = logFile else { return }
+            loadState = .loading
+            let stepName = step.name
+            let recordCopy = record
+            let idx = runIndexFromEnd
+            let extracted: String? = await Task.detached(priority: .userInitiated) {
+                StepLogExtractor.extractStepLines(
+                    logURL: url,
+                    stepName: stepName,
+                    record: recordCopy,
+                    runIndexFromEnd: idx
+                )
+            }.value
+            stepLogText = extracted
+            loadState = .loaded
+        }
+    }
+
+    /// Combines `expanded` with the step name so .task re-fires when the
+    /// user collapses then re-expands a different step in the same row.
+    private var expandedKey: String { "\(expanded ? "1" : "0")|\(step.name)" }
+
+    @ViewBuilder
+    private var stepLogBody: some View {
+        switch loadState {
+        case .idle, .loading:
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Loading log…")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+        case .loaded:
+            if let text = stepLogText, !text.isEmpty {
+                ScrollView(.vertical, showsIndicators: true) {
+                    LazyVStack(alignment: .leading, spacing: 1) {
+                        ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
+                            let str = String(line)
+                            let highlight = OutputHighlighter.color(for: str)
+                            Text(str)
+                                .font(.system(size: 11, design: .monospaced))
+                                .fontWeight(highlight.bold ? .bold : .regular)
+                                .foregroundStyle(highlight.color)
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(8)
+                }
+                .frame(maxHeight: 240)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.secondary.opacity(0.08))
+                )
+            } else {
+                Text("No log output captured for this step in this run.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
     }
 }

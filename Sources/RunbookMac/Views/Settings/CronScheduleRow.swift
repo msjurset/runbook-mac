@@ -88,7 +88,7 @@ struct CronScheduleRow: View {
 
                 // Step flowchart (visible during edit too)
                 if let book = store.runbooks.first(where: { $0.name == entry.name }) {
-                    StepFlowCanvas(steps: book.steps, colorScheme: colorScheme)
+                    StepFlowCanvas(steps: book.steps, colorScheme: colorScheme, runbookName: book.name)
                 }
             } else {
                 // Schedule info
@@ -110,7 +110,7 @@ struct CronScheduleRow: View {
 
                 // Step flowchart
                 if let book = store.runbooks.first(where: { $0.name == entry.name }) {
-                    StepFlowCanvas(steps: book.steps, colorScheme: colorScheme)
+                    StepFlowCanvas(steps: book.steps, colorScheme: colorScheme, runbookName: book.name)
                 }
             }
         }

@@ -59,6 +59,24 @@ struct ContentView: View {
         .onAppear {
             store.loadAll()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .runbookNavigateToStep)) { note in
+            guard let info = note.userInfo,
+                  let name = info["runbookName"] as? String,
+                  let book = store.runbooks.first(where: { $0.name == name }) else { return }
+            sidebarSelection = .runbooks
+            selectedRunbook = book
+            // Re-post once RunbookDetailView has had time to mount so its
+            // listener actually receives it.
+            if let stepName = info["stepName"] as? String {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                    NotificationCenter.default.post(
+                        name: .runbookExpandStep,
+                        object: nil,
+                        userInfo: ["runbookName": name, "stepName": stepName]
+                    )
+                }
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             ConsoleTray()
         }

@@ -31,20 +31,33 @@ struct RunbookDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                header
-                if let vars = runbook.variables, !vars.isEmpty {
-                    variablesSection(vars)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    header
+                    if let vars = runbook.variables, !vars.isEmpty {
+                        variablesSection(vars)
+                    }
+                    stepsSection
+                    if let notify = runbook.notify {
+                        notifySection(notify)
+                    }
+                    historyPreview
                 }
-                stepsSection
-                if let notify = runbook.notify {
-                    notifySection(notify)
-                }
-                historyPreview
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .onReceive(NotificationCenter.default.publisher(for: .runbookExpandStep)) { note in
+                guard let info = note.userInfo,
+                      let name = info["runbookName"] as? String,
+                      name == runbook.name,
+                      let stepName = info["stepName"] as? String,
+                      let idx = runbook.steps.firstIndex(where: { $0.name == stepName }) else { return }
+                expandedSteps.insert(idx)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    withAnimation { proxy.scrollTo("step-\(idx)", anchor: .top) }
+                }
+            }
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -145,6 +158,7 @@ struct RunbookDetailView: View {
                         stepRow(index: index, step: step)
                             .contentShape(Rectangle())
                             .onTapGesture { toggleStep(index) }
+                            .id("step-\(index)")
 
                         // Expanded config — shown on click
                         if expandedSteps.contains(index) {
