@@ -6,6 +6,20 @@ Native macOS app for browsing, executing, and managing operational runbooks. A G
 
 ![YAML editor with syntax highlighting](screenshot2.png)
 
+## 📚 Documentation
+
+This README is a feature/reference overview. The **[User Guide in `docs/guide/`](docs/guide/)** is where to look for learning Runbook Mac, working through real-world workflows, and debugging issues:
+
+- **[Getting Started](docs/guide/01-getting-started.md)** — install, first launch, three-panel walkthrough, run your first runbook from the GUI
+- **[Concepts](docs/guide/02-concepts.md)** — the frontend-not-engine model, three-panel layout, console tray, sidebar sections, where state lives on disk
+- **[Cookbook](docs/guide/03-cookbook.md)** — recipes for every UI surface: run with sheet, retry with dry checkbox, edit YAML with diff preview, schedule via cron UI, pull a shared collection, customize highlights
+- **[Reference](docs/guide/04-reference.md)** — keyboard shortcuts, sidebar sections, file locations, `highlights.yaml` schema, version compatibility
+- **[Troubleshooting](docs/guide/05-troubleshooting.md)** — symptom-driven fixes with decision trees: CLI not found, History view stale, wrong log content, schedule won't fire
+- **[Running as a Service](docs/guide/06-running-as-a-service.md)** — Login Items, scheduling via the cron UI, the CLI auto-update flow, log management
+- **[Thinking in Runbook Mac](docs/guide/07-thinking-in-runbook-mac.md)** — when to use the app vs. the CLI directly, design philosophy, workflow patterns, anti-patterns
+
+For the underlying CLI's docs (YAML schema, step types, variable resolution, scheduling), see the [runbook CLI guide](https://github.com/msjurset/runbook/tree/main/docs/guide).
+
 ## Features
 
 - **Three-Panel Layout** — Sidebar for navigation, searchable runbook list with metadata, and runbook detail view
@@ -60,6 +74,8 @@ make deploy
 
 This builds the app, creates the `.app` bundle with icon, and installs to `/Applications/Runbook.app`.
 
+> **First time using Runbook Mac?** Once installed, the **[10-minute Getting Started tour](docs/guide/01-getting-started.md)** walks you through first launch, CLI auto-install, the three-panel layout, and running your first runbook from the GUI.
+
 ## Build
 
 ```
@@ -104,6 +120,10 @@ Tests/
   RunbookMacTests/  Unit tests (models, templates, cron, completions)
   UITests/          XCUITest UI tests (navigation, layout, selection)
 ```
+
+## Need help?
+
+Hit a wall? The **[Troubleshooting guide](docs/guide/05-troubleshooting.md)** has decision trees for the three biggest categories (app launches but can't run, run completed but History doesn't show it, wrong log content shows for a run) plus 15+ symptom→fix entries. If your problem isn't there, file an issue at https://github.com/msjurset/runbook-mac/issues with the artifacts listed in the [bug-report checklist](docs/guide/05-troubleshooting.md#filing-a-useful-bug-report).
 
 ## License
 
