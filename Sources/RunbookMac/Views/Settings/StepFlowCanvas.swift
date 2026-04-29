@@ -658,6 +658,8 @@ private struct StepLogFlyoutView: View {
 
     @State private var stepLogText: String?
     @State private var stepLogLoaded = false
+    @State private var showLogSheet = false
+    @State private var justCopied = false
 
     private var statusColor: Color {
         switch (lastStepRecord?.status ?? "").lowercased() {
@@ -722,20 +724,48 @@ private struct StepLogFlyoutView: View {
                 } else if let text = stepLogText, !text.isEmpty {
                     Text("Output").font(.caption.bold()).foregroundStyle(.secondary)
                     ScrollView(.vertical, showsIndicators: true) {
-                        Text(text)
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundStyle(.primary)
-                            .textSelection(.enabled)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
+                        LazyVStack(alignment: .leading, spacing: 1) {
+                            ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
+                                let str = String(line)
+                                let highlight = OutputHighlighter.color(for: str)
+                                Text(str)
+                                    .font(.system(size: 11, design: .monospaced))
+                                    .fontWeight(highlight.bold ? .bold : .regular)
+                                    .foregroundStyle(highlight.color)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                        .padding(8)
                     }
                     .frame(height: 220)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color.secondary.opacity(0.08))
                     )
+                    .overlay(alignment: .topTrailing) {
+                        Button {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(text, forType: .string)
+                            withAnimation(.easeInOut(duration: 0.15)) { justCopied = true }
+                            Task {
+                                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                                withAnimation(.easeInOut(duration: 0.15)) { justCopied = false }
+                            }
+                        } label: {
+                            Image(systemName: justCopied ? "checkmark" : "doc.on.doc")
+                                .font(.caption2)
+                                .foregroundStyle(justCopied ? Color.green : .secondary)
+                                .padding(4)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(.background.opacity(0.6))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .padding(6)
+                        .help(justCopied ? "Copied" : "Copy step log to clipboard")
+                    }
                 } else {
                     Text("No output captured for this step.")
                         .font(.caption).foregroundStyle(.tertiary)
@@ -748,7 +778,7 @@ private struct StepLogFlyoutView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1).truncationMode(.middle)
                         Spacer()
-                        Button("Open Log") { NSWorkspace.shared.open(url) }
+                        Button("Open Log") { showLogSheet = true }
                             .controlSize(.small)
                     }
                 } else {
@@ -761,10 +791,10 @@ private struct StepLogFlyoutView: View {
             } else {
                 Text("This step did not appear in the last run.")
                     .font(.callout).foregroundStyle(.secondary)
-                if let url = logURL {
+                if logURL != nil {
                     HStack {
                         Spacer()
-                        Button("Open Last Log") { NSWorkspace.shared.open(url) }
+                        Button("Open Last Log") { showLogSheet = true }
                             .controlSize(.small)
                     }
                 }
@@ -772,6 +802,11 @@ private struct StepLogFlyoutView: View {
         }
         .padding(10)
         .frame(minWidth: 320, idealWidth: 480, maxWidth: 640, alignment: .leading)
+        .sheet(isPresented: $showLogSheet) {
+            if let url = logURL {
+                LogViewerSheet(url: url, matchDate: lastRecord?.startedDate)
+            }
+        }
         .task(id: step.name) {
             stepLogLoaded = false
             stepLogText = nil
