@@ -19,6 +19,10 @@ struct CodeBlockView: View {
     /// Fraction of original alpha applied to every highlighted token
     /// (`labelColor` is kept at full alpha so normal text stays readable).
     var muteAlpha: CGFloat = 0.55
+    /// `true` (default) wraps long lines under a hanging indent. `false` keeps
+    /// each line on a single horizontal axis — pair with a horizontal ScrollView
+    /// so the user can scroll wide commands instead of having them reflow.
+    var wrapsLines: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -27,7 +31,7 @@ struct CodeBlockView: View {
             }
         }
         .padding(8)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: wrapsLines ? .infinity : nil, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 5)
                 .fill(Color(NSColor.textBackgroundColor).opacity(0.4))
@@ -47,9 +51,10 @@ struct CodeBlockView: View {
         Text(highlighted(rest))
             .font(.system(size: fontSize, weight: .regular, design: .monospaced))
             .textSelection(.enabled)
-            .fixedSize(horizontal: false, vertical: true)
+            .lineLimit(wrapsLines ? nil : 1)
+            .fixedSize(horizontal: !wrapsLines, vertical: true)
             .padding(.leading, indent)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: wrapsLines ? .infinity : nil, alignment: .leading)
     }
 
     private func highlighted(_ lineText: String) -> AttributedString {

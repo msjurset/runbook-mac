@@ -77,7 +77,23 @@ struct StepFlowCanvas: View {
                             get: { selectedPillID == pillID },
                             set: { if !$0 && selectedPillID == pillID { selectedPillID = nil } }
                         ), arrowEdge: .bottom) {
-                            StepFlyoutView(step: pill.step, accent: pillBarColor(pill.step))
+                            StepFlyoutView(
+                                step: pill.step,
+                                accent: pillBarColor(pill.step),
+                                onOpenInDetail: {
+                                    selectedPillID = nil
+                                    selectedLogPillID = nil
+                                    guard let name = runbookName else { return }
+                                    NotificationCenter.default.post(
+                                        name: .runbookNavigateToStep,
+                                        object: nil,
+                                        userInfo: [
+                                            "runbookName": name,
+                                            "stepName": pill.step.name
+                                        ]
+                                    )
+                                }
+                            )
                         }
                         .popover(isPresented: Binding(
                             get: { selectedLogPillID == pillID },
@@ -547,6 +563,11 @@ struct StepFlowLegend: View {
 private struct StepFlyoutView: View {
     let step: Step
     let accent: Color
+    /// Fired by the navigate icon and the code block's double-click. The parent
+    /// dismisses the popover and posts `runbookNavigateToStep` so the sidebar
+    /// switches to Runbooks and the runbook detail view scrolls to + expands
+    /// the matching step.
+    let onOpenInDetail: () -> Void
 
     private var typeLabel: String {
         if step.confirm != nil { return "confirm" }
@@ -558,6 +579,17 @@ private struct StepFlyoutView: View {
         if let s = step.ssh?.command, !s.isEmpty { return s }
         if let s = step.http?.body, !s.isEmpty { return s }
         return nil
+    }
+
+    /// Bash for shell/ssh commands, JSON if the http body parses as JSON,
+    /// plain otherwise.
+    private var commandLanguage: CodeLanguage {
+        if step.shell != nil || step.ssh != nil { return .bash }
+        if let body = step.http?.body {
+            let trimmed = body.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.hasPrefix("{") || trimmed.hasPrefix("[") { return .json }
+        }
+        return .plain
     }
 
     var body: some View {
@@ -606,15 +638,31 @@ private struct StepFlyoutView: View {
 
             if let cmd = commandText {
                 Divider()
-                Text(truncate(cmd, lines: 8))
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Navigate icon ABOVE the scroll area so it stays anchored —
+                // the user explicitly asked for it to not scroll out of view.
+                HStack(spacing: 6) {
+                    Spacer(minLength: 0)
+                    Button {
+                        onOpenInDetail()
+                    } label: {
+                        Image(systemName: "arrow.up.forward.square")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Open step in runbook detail")
+                }
+                ScrollView([.horizontal, .vertical], showsIndicators: true) {
+                    CodeBlockView(source: cmd, language: commandLanguage, wrapsLines: false)
+                }
+                .frame(maxHeight: 320)
+                .contentShape(Rectangle())
+                .onTapGesture(count: 2) { onOpenInDetail() }
+                .help("Double-click to open in runbook detail")
             }
         }
         .padding(10)
-        .frame(minWidth: 240, idealWidth: 360, maxWidth: 480, alignment: .leading)
+        .frame(minWidth: 280, idealWidth: 420, maxWidth: 560, alignment: .leading)
     }
 
     @ViewBuilder
@@ -631,12 +679,6 @@ private struct StepFlyoutView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
         }
-    }
-
-    private func truncate(_ s: String, lines: Int) -> String {
-        let parts = s.split(separator: "\n", omittingEmptySubsequences: false)
-        if parts.count <= lines { return s }
-        return parts.prefix(lines).joined(separator: "\n") + "\n…"
     }
 }
 
