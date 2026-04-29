@@ -7,7 +7,7 @@ The "service" question for the Mac app comes in two flavors:
 
 These are independent. You can do either, both, or neither. This page covers both, plus how the auto-update flow works and how the app and cron-launched runs share log files.
 
-For the underlying CLI's scheduling docs (which apply equally whether you schedule from the GUI or the terminal), see the [runbook CLI Running as a Service guide](https://github.com/msjurset/runbook/blob/main/docs/guide/06-running-as-a-service.md).
+For the underlying CLI's scheduling docs (which apply equally whether you schedule from the GUI or the terminal), see the [runbook CLI Running as a Service guide](https://github.com/msjurset/runbook/blob/master/docs/guide/06-running-as-a-service.md).
 
 - [Auto-launch at login](#auto-launch-at-login)
 - [Scheduling runbooks (cron)](#scheduling-runbooks-cron)
@@ -221,7 +221,7 @@ After newsyslog runs, run `runbook log reindex` either manually or as a separate
 
 ### 2. Use the runbook itself to rotate logs
 
-Schedule a runbook that compresses and archives weekly. See [CLI Running as a Service → Log rotation](https://github.com/msjurset/runbook/blob/main/docs/guide/06-running-as-a-service.md#rotation) for the full pattern.
+Schedule a runbook that compresses and archives weekly. See [CLI Running as a Service → Log rotation](https://github.com/msjurset/runbook/blob/master/docs/guide/06-running-as-a-service.md#rotation) for the full pattern.
 
 ### 3. Use append-mode YAML config and ignore the duplication
 
@@ -233,4 +233,4 @@ Schedule a runbook that compresses and archives weekly. See [CLI Running as a Se
 
 - [Reference](04-reference.md) — keyboard shortcuts, file locations, settings.
 - [Troubleshooting](05-troubleshooting.md) — schedule issues, log content mismatches, CLI updates.
-- [CLI Running as a Service](https://github.com/msjurset/runbook/blob/main/docs/guide/06-running-as-a-service.md) — deeper dive into the cron model and Windows Task Scheduler equivalent.
+- [CLI Running as a Service](https://github.com/msjurset/runbook/blob/master/docs/guide/06-running-as-a-service.md) — deeper dive into the cron model and Windows Task Scheduler equivalent.

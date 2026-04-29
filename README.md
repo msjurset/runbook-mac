@@ -18,7 +18,7 @@ This README is a feature/reference overview. The **[User Guide in `docs/guide/`]
 - **[Running as a Service](docs/guide/06-running-as-a-service.md)** — Login Items, scheduling via the cron UI, the CLI auto-update flow, log management
 - **[Thinking in Runbook Mac](docs/guide/07-thinking-in-runbook-mac.md)** — when to use the app vs. the CLI directly, design philosophy, workflow patterns, anti-patterns
 
-For the underlying CLI's docs (YAML schema, step types, variable resolution, scheduling), see the [runbook CLI guide](https://github.com/msjurset/runbook/tree/main/docs/guide).
+For the underlying CLI's docs (YAML schema, step types, variable resolution, scheduling), see the [runbook CLI guide](https://github.com/msjurset/runbook/tree/master/docs/guide).
 
 ## Features
 

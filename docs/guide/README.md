@@ -1,12 +1,12 @@
 # Runbook Mac User Guide
 
-A comprehensive, recipe-driven guide for power users of the Runbook macOS app. For a feature overview or install instructions, start with the [project README](../../README.md). For the underlying CLI's docs (YAML schema, step types, variable resolution, scheduling), see the [runbook CLI guide](https://github.com/msjurset/runbook/tree/main/docs/guide).
+A comprehensive, recipe-driven guide for power users of the Runbook macOS app. For a feature overview or install instructions, start with the [project README](../../README.md). For the underlying CLI's docs (YAML schema, step types, variable resolution, scheduling), see the [runbook CLI guide](https://github.com/msjurset/runbook/tree/master/docs/guide).
 
 ## Who this guide is for
 
 You're comfortable on macOS and have used `runbook` from the terminal at least a little — enough to know what a runbook YAML looks like and what a step does. The guide assumes that foundation and focuses on how the app surfaces those concepts, what each panel does, and how to move quickly between authoring, running, observing, and scheduling.
 
-If you've never run `runbook` from the terminal, read the [runbook CLI Getting Started](https://github.com/msjurset/runbook/blob/main/docs/guide/01-getting-started.md) first (10 minutes). The Mac app builds on those concepts, it doesn't replace them.
+If you've never run `runbook` from the terminal, read the [runbook CLI Getting Started](https://github.com/msjurset/runbook/blob/master/docs/guide/01-getting-started.md) first (10 minutes). The Mac app builds on those concepts, it doesn't replace them.
 
 ## Contents
 
@@ -24,7 +24,7 @@ The Mac app is a **frontend** for the [runbook CLI](https://github.com/msjurset/
 
 That means:
 
-- **YAML schema, step types, variable resolution, error policies, parallel groups, log/notify config** — all documented in the [CLI guide](https://github.com/msjurset/runbook/blob/main/docs/guide/02-concepts.md). This Mac-app guide does not duplicate that material; it points at it.
+- **YAML schema, step types, variable resolution, error policies, parallel groups, log/notify config** — all documented in the [CLI guide](https://github.com/msjurset/runbook/blob/master/docs/guide/02-concepts.md). This Mac-app guide does not duplicate that material; it points at it.
 - **Cron syntax, history record format, log markers, op:// resolution, keychain caching** — same. Documented in the CLI guide.
 - **What the app adds:** discovery and visualization of all of the above (browse the runbook list, expand steps, see the cron schedule's flow chart), an inline YAML editor with completion and diff preview, a non-modal console tray for concurrent runs, a History view that shows per-step log slices, and one-click access to operations that are otherwise multi-step (`runbook pull`, `runbook cron add`, `runbook auth`).
 
@@ -32,4 +32,4 @@ You can switch between the app and the CLI freely. A runbook authored in the edi
 
 ## Platform support
 
-Runbook Mac runs on **macOS 15.0 (Sequoia) or later**. Apple Silicon and Intel are both supported via the universal binary. The `runbook` CLI (auto-installed on first launch if missing) supports macOS, Linux, and Windows — but the Mac app itself is macOS-only. For Linux and Windows users, run `runbook` from the terminal and read the [CLI guide](https://github.com/msjurset/runbook/tree/main/docs/guide).
+Runbook Mac runs on **macOS 15.0 (Sequoia) or later**. Apple Silicon and Intel are both supported via the universal binary. The `runbook` CLI (auto-installed on first launch if missing) supports macOS, Linux, and Windows — but the Mac app itself is macOS-only. For Linux and Windows users, run `runbook` from the terminal and read the [CLI guide](https://github.com/msjurset/runbook/tree/master/docs/guide).

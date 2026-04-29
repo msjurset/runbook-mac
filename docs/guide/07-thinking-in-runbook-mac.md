@@ -231,4 +231,4 @@ Sharing is via git collections (`runbook pull`). Auditing is via `~/.runbook/his
 - [Concepts](02-concepts.md) — the mental model these patterns are built on.
 - [Cookbook](03-cookbook.md) — concrete recipes that exercise the patterns.
 - [Troubleshooting](05-troubleshooting.md) — when something doesn't work the way this page describes.
-- [CLI Thinking guide](https://github.com/msjurset/runbook/blob/main/docs/guide/07-thinking-in-runbook.md) — design patterns at the YAML level (rule structure, error policies, parallel groups, anti-patterns), which apply equally whether you author in the GUI or the terminal.
+- [CLI Thinking guide](https://github.com/msjurset/runbook/blob/master/docs/guide/07-thinking-in-runbook.md) — design patterns at the YAML level (rule structure, error policies, parallel groups, anti-patterns), which apply equally whether you author in the GUI or the terminal.

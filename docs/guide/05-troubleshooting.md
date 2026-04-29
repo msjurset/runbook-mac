@@ -4,7 +4,7 @@ When Runbook Mac isn't doing what you expect, this is the first place to look.
 
 The fastest path to a fix usually goes through three artifacts: the **history record** (what `runbook` decided to do), the **log file** (what the steps actually printed), and the **CLI directly from a terminal** (does the same command work outside the GUI?). Most reports here boil down to combining those three.
 
-For underlying CLI issues (1Password failures, SSH auth, condition templates not rendering, etc.), see the [runbook CLI Troubleshooting guide](https://github.com/msjurset/runbook/blob/main/docs/guide/05-troubleshooting.md).
+For underlying CLI issues (1Password failures, SSH auth, condition templates not rendering, etc.), see the [runbook CLI Troubleshooting guide](https://github.com/msjurset/runbook/blob/master/docs/guide/05-troubleshooting.md).
 
 - [Decision trees](#decision-trees) — guided diagnostics for the biggest categories
   - [The app launches but I can't run anything](#the-app-launches-but-i-cant-run-anything)
@@ -290,7 +290,7 @@ This was the bug the per-run log persistence (added 2026-04-28) was designed to 
 
 ### Linux / Windows
 
-The Mac app is macOS-only. For Linux and Windows, run `runbook` from the terminal and use the [CLI guide](https://github.com/msjurset/runbook/tree/main/docs/guide).
+The Mac app is macOS-only. For Linux and Windows, run `runbook` from the terminal and use the [CLI guide](https://github.com/msjurset/runbook/tree/master/docs/guide).
 
 ---
 

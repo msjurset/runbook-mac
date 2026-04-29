@@ -2,7 +2,7 @@
 
 The mental model behind Runbook Mac. Read this once and the [Cookbook](03-cookbook.md) will feel like applied common sense.
 
-This page is concept-first, not reference-first. Each section explains what's happening and **why**, then walks through a concrete example. The exhaustive lookup tables live in [Reference](04-reference.md). For the underlying YAML schema, step types, variable resolution, and on-disk semantics, see the [runbook CLI guide](https://github.com/msjurset/runbook/blob/main/docs/guide/02-concepts.md) — this page does not duplicate that material.
+This page is concept-first, not reference-first. Each section explains what's happening and **why**, then walks through a concrete example. The exhaustive lookup tables live in [Reference](04-reference.md). For the underlying YAML schema, step types, variable resolution, and on-disk semantics, see the [runbook CLI guide](https://github.com/msjurset/runbook/blob/master/docs/guide/02-concepts.md) — this page does not duplicate that material.
 
 - [The frontend model](#the-frontend-model) — why the app is just a frontend
 - [The three-panel layout](#the-three-panel-layout) — sidebar, list, detail
@@ -214,7 +214,7 @@ The split is deliberate: anything that's a *side effect on the world* (running, 
 
 ## Templates and shared collections
 
-The Mac app surfaces both the CLI's [pulled-collection mechanism](https://github.com/msjurset/runbook/blob/main/docs/guide/02-concepts.md#pulled-collections-and-shared-templates) and its templates feature with dedicated UI:
+The Mac app surfaces both the CLI's [pulled-collection mechanism](https://github.com/msjurset/runbook/blob/master/docs/guide/02-concepts.md#pulled-collections-and-shared-templates) and its templates feature with dedicated UI:
 
 - **Templates** appear in their own collapsible section at the bottom of the Runbook List, visually distinct (orange "template" badge). Right-click a template → "New from Template" opens a sheet that pre-fills the editor with the template's YAML and asks for a new name. The toolbar's `+` button opens the same sheet with a template picker on the left.
 - **Pulled repositories** show up as a directory under `~/.runbook/books/`. Their contents (regular runbooks and any `templates/` subdirectories inside them) are discovered and surface in the Runbook List and Templates section just like any local file.

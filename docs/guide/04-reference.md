@@ -1,6 +1,6 @@
 # Reference
 
-Quick-lookup tables. For the underlying CLI's reference (subcommands, flags, YAML schema, template variables), see the [runbook CLI Reference](https://github.com/msjurset/runbook/blob/main/docs/guide/04-reference.md).
+Quick-lookup tables. For the underlying CLI's reference (subcommands, flags, YAML schema, template variables), see the [runbook CLI Reference](https://github.com/msjurset/runbook/blob/master/docs/guide/04-reference.md).
 
 ## Keyboard shortcuts
 
@@ -429,4 +429,4 @@ When the app detects a CLI mismatch (older than expected), some features may be 
 - [Concepts](02-concepts.md) — mental model.
 - [Cookbook](03-cookbook.md) — recipes per UI surface.
 - [Troubleshooting](05-troubleshooting.md) — symptom-driven fixes.
-- [runbook CLI Reference](https://github.com/msjurset/runbook/blob/main/docs/guide/04-reference.md) — YAML schema, subcommands, flags.
+- [runbook CLI Reference](https://github.com/msjurset/runbook/blob/master/docs/guide/04-reference.md) — YAML schema, subcommands, flags.

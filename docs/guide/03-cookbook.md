@@ -16,39 +16,39 @@ These recipes assume you've read [Getting Started](01-getting-started.md) and ar
 
 The recipes on **this** page are about **using the Mac app** — clicking the right button, expanding the right row, finding the right panel. They don't tell you what to put inside your runbooks.
 
-For that — **what to write in a YAML, what step types to use, how to combine them into real workflows like a deploy or a scheduled backup** — the [**runbook CLI Cookbook**](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md) is the foundational source. The YAML you'd write is identical whether you author it in the Mac app's editor or in `vim`, so every CLI cookbook recipe applies equally.
+For that — **what to write in a YAML, what step types to use, how to combine them into real workflows like a deploy or a scheduled backup** — the [**runbook CLI Cookbook**](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md) is the foundational source. The YAML you'd write is identical whether you author it in the Mac app's editor or in `vim`, so every CLI cookbook recipe applies equally.
 
 A curated map into the CLI cookbook by topic:
 
 | What you want to do | CLI cookbook recipe |
 |---------------------|---------------------|
 | **Step types** | |
-| Run a shell command and capture its output for later steps | [Capture output and feed it forward](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#capture-output-and-feed-it-forward) |
-| Probe an HTTP endpoint | [HTTP GET healthcheck](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#http-get-healthcheck) |
-| Trigger a webhook with a JSON body | [POST JSON payload](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#post-json-payload) |
-| SSH to a remote host using your agent | [SSH with agent auth](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#ssh-with-agent-auth) |
-| SSH using a 1Password-stored key (cron-friendly) | [SSH with 1Password-stored key](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#ssh-with-1password-stored-key) |
+| Run a shell command and capture its output for later steps | [Capture output and feed it forward](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#capture-output-and-feed-it-forward) |
+| Probe an HTTP endpoint | [HTTP GET healthcheck](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#http-get-healthcheck) |
+| Trigger a webhook with a JSON body | [POST JSON payload](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#post-json-payload) |
+| SSH to a remote host using your agent | [SSH with agent auth](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#ssh-with-agent-auth) |
+| SSH using a 1Password-stored key (cron-friendly) | [SSH with 1Password-stored key](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#ssh-with-1password-stored-key) |
 | **Variables and secrets** | |
-| Prompt the user for a required value | [Prompt for a required variable](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#prompt-for-a-required-variable) |
-| Reference a 1Password secret cleanly | [1Password secret as a variable](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#1password-secret-as-a-variable) |
+| Prompt the user for a required value | [Prompt for a required variable](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#prompt-for-a-required-variable) |
+| Reference a 1Password secret cleanly | [1Password secret as a variable](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#1password-secret-as-a-variable) |
 | **Flow control** | |
-| Pause and ask before a destructive step | [Confirm before destructive step](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#confirm-before-destructive-step) |
-| Probe several services concurrently | [Parallel health probes](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#parallel-health-probes) |
-| Retry a flaky step with a backoff | [Retry with exponential backoff](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#retry-with-exponential-backoff) |
-| Skip a step unless an environment matches | [Conditional step](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#conditional-step) |
+| Pause and ask before a destructive step | [Confirm before destructive step](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#confirm-before-destructive-step) |
+| Probe several services concurrently | [Parallel health probes](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#parallel-health-probes) |
+| Retry a flaky step with a backoff | [Retry with exponential backoff](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#retry-with-exponential-backoff) |
+| Skip a step unless an environment matches | [Conditional step](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#conditional-step) |
 | **Scheduled runs** | |
-| Hourly automated health check | [Hourly health check via cron](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#hourly-health-check-via-cron) |
-| Nightly backup with notification | [Nightly backup](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#nightly-backup) |
+| Hourly automated health check | [Hourly health check via cron](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#hourly-health-check-via-cron) |
+| Nightly backup with notification | [Nightly backup](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#nightly-backup) |
 | **Notifications** | |
-| Slack only when something fails | [Slack on failure only](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#slack-on-failure-only) |
-| Email digest with per-step status | [Email digest with per-step status](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#email-digest-with-per-step-status) |
+| Slack only when something fails | [Slack on failure only](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#slack-on-failure-only) |
+| Email digest with per-step status | [Email digest with per-step status](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#email-digest-with-per-step-status) |
 | **Sharing** | |
-| Pull a shared runbook collection | [Pull a shared runbook collection](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#pull-a-shared-runbook-collection) |
-| Publish your own collection for a team | [Publish your own runbook collection](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#publish-your-own-runbook-collection) |
-| Author a template that ships with the collection | [Author a template for a shared collection](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#author-a-template-for-a-shared-collection) |
+| Pull a shared runbook collection | [Pull a shared runbook collection](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#pull-a-shared-runbook-collection) |
+| Publish your own collection for a team | [Publish your own runbook collection](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#publish-your-own-runbook-collection) |
+| Author a template that ships with the collection | [Author a template for a shared collection](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#author-a-template-for-a-shared-collection) |
 | **End-to-end runbooks** | |
-| Production deploy with pre/post-flight and rollback gate | [Deploy with rollback gate](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#deploy-with-rollback-gate) |
-| Multi-region health probe with email summary | [Multi-region health probe](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#multi-region-health-probe) |
+| Production deploy with pre/post-flight and rollback gate | [Deploy with rollback gate](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#deploy-with-rollback-gate) |
+| Multi-region health probe with email summary | [Multi-region health probe](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#multi-region-health-probe) |
 
 When you've found a recipe you want to try, the Mac app workflows below tell you how to bring it to life: [Create a runbook](#create-a-runbook), [Edit YAML with diff preview](#edit-yaml-with-diff-preview), [Run a runbook](#run-a-runbook), and so on.
 
@@ -247,7 +247,7 @@ When you've found a recipe you want to try, the Mac app workflows below tell you
 
 - The template's `name:` field is replaced by `runbook create`. Don't bake meaning into a template's name — pick something descriptive (`ssh-remote-template`, not `template-1`).
 
-**Notes:** authoring your own templates is straightforward — just save a YAML file under `~/.runbook/books/<name>/templates/<thing>.yaml`. Anything in a `templates/` subdirectory is automatically classified as a template. See the [CLI Cookbook → Author a template](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#author-a-template-for-a-shared-collection) for the full publish workflow.
+**Notes:** authoring your own templates is straightforward — just save a YAML file under `~/.runbook/books/<name>/templates/<thing>.yaml`. Anything in a `templates/` subdirectory is automatically classified as a template. See the [CLI Cookbook → Author a template](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#author-a-template-for-a-shared-collection) for the full publish workflow.
 
 ---
 
@@ -521,7 +521,7 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 
 ## Sharing
 
-> The shared collections workflow is documented in depth in the [CLI Cookbook → Sharing and templates](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#sharing-and-templates). The Mac app's Repositories view is a GUI for the `runbook pull` flow described there.
+> The shared collections workflow is documented in depth in the [CLI Cookbook → Sharing and templates](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#sharing-and-templates). The Mac app's Repositories view is a GUI for the `runbook pull` flow described there.
 
 ### Pull a shared collection
 
@@ -554,7 +554,7 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 
 **Variations:**
 
-- **Hands-off keep-fresh:** create a runbook that pulls the collections you care about, schedule it via cron. See the [CLI Cookbook → Keep pulled collections fresh](https://github.com/msjurset/runbook/blob/main/docs/guide/03-cookbook.md#keep-pulled-collections-fresh) for the full pattern.
+- **Hands-off keep-fresh:** create a runbook that pulls the collections you care about, schedule it via cron. See the [CLI Cookbook → Keep pulled collections fresh](https://github.com/msjurset/runbook/blob/master/docs/guide/03-cookbook.md#keep-pulled-collections-fresh) for the full pattern.
 
 **Gotchas:**
 
