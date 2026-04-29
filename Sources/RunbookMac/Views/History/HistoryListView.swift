@@ -276,10 +276,9 @@ struct StepHistoryRow: View {
                         ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
                             let str = String(line)
                             let highlight = OutputHighlighter.color(for: str)
-                            Text(str)
+                            Text(OutputHighlighter.attributedLine(for: str, baseColor: highlight.color))
                                 .font(.system(size: 11, design: .monospaced))
                                 .fontWeight(highlight.bold ? .bold : .regular)
-                                .foregroundStyle(highlight.color)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -379,10 +378,9 @@ struct LogViewerSheet: View {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(currentContent.components(separatedBy: "\n").enumerated()), id: \.offset) { _, line in
                         let highlight = OutputHighlighter.color(for: line)
-                        Text(line)
+                        Text(OutputHighlighter.attributedLine(for: line, baseColor: highlight.color))
                             .font(.system(.caption, design: .monospaced))
                             .fontWeight(highlight.bold ? .bold : .regular)
-                            .foregroundStyle(highlight.color)
                             .textSelection(.enabled)
                     }
                 }

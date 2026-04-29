@@ -218,10 +218,9 @@ struct RunnerOutputView: View {
         let isCurrentMatch = isMatch && matchingLines.indices.contains(currentMatch) && matchingLines[currentMatch] == idx
         let highlight = OutputHighlighter.color(for: line)
 
-        Text(line)
+        Text(OutputHighlighter.attributedLine(for: line, baseColor: highlight.color))
             .font(.system(.caption, design: .monospaced))
             .fontWeight(highlight.bold ? .bold : .regular)
-            .foregroundStyle(highlight.color)
             .textSelection(.enabled)
             .padding(.horizontal, isMatch ? 4 : 0)
             .padding(.vertical, isMatch ? 1 : 0)

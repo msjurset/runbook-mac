@@ -37,6 +37,65 @@ enum OutputHighlighter {
         return (.primary, false)
     }
 
+    /// Color used for inline URLs across all log surfaces.
+    static let linkColor = Color(red: 0.45, green: 0.75, blue: 1.0)
+
+    /// Returns an AttributedString for `line` with the base color applied to
+    /// non-URL text and `.link` attributes on detected URLs (light blue,
+    /// underlined, clickable). Detection uses NSDataDetector so plain http/https
+    /// occurrences are picked up without explicit markdown.
+    static func attributedLine(for line: String, baseColor: Color) -> AttributedString {
+        let nsString = line as NSString
+        let fullLength = nsString.length
+        guard fullLength > 0 else {
+            return AttributedString("")
+        }
+
+        // Detect every URL once for the line.
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let matches = detector?.matches(
+            in: line,
+            options: [],
+            range: NSRange(location: 0, length: fullLength)
+        ) ?? []
+
+        if matches.isEmpty {
+            var attr = AttributedString(line)
+            attr.foregroundColor = baseColor
+            return attr
+        }
+
+        var result = AttributedString()
+        var cursor = 0
+        for match in matches {
+            // Plain run before this match.
+            if match.range.location > cursor {
+                let plainRange = NSRange(location: cursor, length: match.range.location - cursor)
+                var plain = AttributedString(nsString.substring(with: plainRange))
+                plain.foregroundColor = baseColor
+                result.append(plain)
+            }
+            // The link itself.
+            var linkAttr = AttributedString(nsString.substring(with: match.range))
+            linkAttr.foregroundColor = linkColor
+            linkAttr.underlineStyle = .single
+            if let url = match.url {
+                linkAttr.link = url
+            }
+            result.append(linkAttr)
+
+            cursor = match.range.location + match.range.length
+        }
+        // Tail after the last match.
+        if cursor < fullLength {
+            let tailRange = NSRange(location: cursor, length: fullLength - cursor)
+            var tail = AttributedString(nsString.substring(with: tailRange))
+            tail.foregroundColor = baseColor
+            result.append(tail)
+        }
+        return result
+    }
+
     // MARK: - Loading
 
     private static func loadRules() -> [OutputHighlightRule] {
@@ -117,9 +176,16 @@ enum OutputHighlighter {
         // Errors and warnings (generic)
         OutputHighlightRule(#"(?i)^.*fatal[:!]"#, .red, bold: true),
         OutputHighlightRule(#"(?i)^.*panic[:!]"#, .red, bold: true),
+        OutputHighlightRule(#"(?i)^\s*Traceback"#, .red, bold: true),
+        OutputHighlightRule(#"(?i)^.*Exception\b"#, .red),
         OutputHighlightRule(#"(?i)^.*error[:!]"#, .red),
         OutputHighlightRule(#"(?i)^.*warning[:!]"#, .orange),
         OutputHighlightRule(#"(?i)^.*FAILED"#, .red, bold: true),
+
+        // Generic error stems
+        OutputHighlightRule(#"(?i)\bdenied\b"#, .red),
+        OutputHighlightRule(#"(?i)\bunable to\b"#, .red),
+        OutputHighlightRule(#"(?i)\bcannot\b"#, .red),
 
         // Homebrew
         OutputHighlightRule(#"^.*==> "#, Color(red: 0.4, green: 0.8, blue: 0.9), bold: true),
