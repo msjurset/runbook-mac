@@ -34,6 +34,7 @@ This is by design. It means:
 - **Versioning is decoupled.** The Mac app and the CLI ship and version independently. Updating one doesn't force the other. The app checks for new CLI versions on launch (once per 24h) and prompts you to update the CLI when one is available.
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart LR
     GUI[Runbook Mac<br/>SwiftUI] -->|Process exec| CLI[runbook<br/>Go binary]
     CLI -->|reads| Books[(~/.runbook/books/<br/>YAML files)]
@@ -87,6 +88,7 @@ Two states:
 The tray shows **one** session at a time, but `RunSessionStore` (the in-memory store backing the tray) tracks **all** active and recently-completed sessions:
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart LR
     Start1[Click Run on deploy-app] --> Session1[Session A: deploy-app<br/>running]
     Start2[Click Run on backup] --> Session2[Session B: backup<br/>running]

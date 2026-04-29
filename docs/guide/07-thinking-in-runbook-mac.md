@@ -62,6 +62,7 @@ Five patterns that recur in good day-to-day use.
 The single highest-leverage habit when authoring a runbook. Iterate in the YAML editor, validate, dry-run, real run, inspect — all without leaving the app.
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart LR
     Edit[Edit YAML in editor] --> Validate[Click Validate]
     Validate -->|errors| Edit

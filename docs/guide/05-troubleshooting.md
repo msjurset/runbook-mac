@@ -21,6 +21,7 @@ For underlying CLI issues (1Password failures, SSH auth, condition templates not
 ### The app launches but I can't run anything
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart TD
     Start([Click Run, nothing happens]) --> CLI{Settings →<br/>Runbook CLI shows<br/>installed version?}
     CLI -->|"Not installed"| Install[Install via the Install button,<br/>or brew install msjurset/tap/runbook]
@@ -40,6 +41,7 @@ The key triage: **does `runbook run <name>` work from a terminal?** If yes, the 
 ### A run completed but History doesn't show it
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart TD
     Start([Run finished but<br/>History view is empty/stale]) --> Refresh{Click another<br/>sidebar section<br/>and back to History?}
     Refresh -->|now visible| Done[Just stale; History<br/>doesn't auto-refresh]
@@ -55,6 +57,7 @@ The History view loads `~/.runbook/history/*.json` files on every navigation. It
 ### The wrong log content shows for a run
 
 ```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 flowchart TD
     Start([History shows green<br/>but the log content<br/>looks like a failure]) --> Append{Is the runbook<br/>using log: mode: append?}
     Append -->|yes| Stale[Append-mode logs may<br/>contain a stale run.<br/>The mtime gate prevents<br/>most leakage but isn't<br/>perfect]
