@@ -115,6 +115,8 @@ enum OutputHighlighter {
         OutputHighlightRule(#"done \(\d+"#, .green),
 
         // Errors and warnings (generic)
+        OutputHighlightRule(#"(?i)^.*fatal[:!]"#, .red, bold: true),
+        OutputHighlightRule(#"(?i)^.*panic[:!]"#, .red, bold: true),
         OutputHighlightRule(#"(?i)^.*error[:!]"#, .red),
         OutputHighlightRule(#"(?i)^.*warning[:!]"#, .orange),
         OutputHighlightRule(#"(?i)^.*FAILED"#, .red, bold: true),
