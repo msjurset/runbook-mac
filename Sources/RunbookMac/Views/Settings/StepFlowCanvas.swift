@@ -645,11 +645,13 @@ private struct StepFlyoutView: View {
                     Button {
                         onOpenInDetail()
                     } label: {
-                        Image(systemName: "arrow.up.forward.square")
+                        Image(systemName: "arrow.up.forward")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .padding(4)
                     }
                     .buttonStyle(.plain)
+                    .focusEffectDisabled()
                     .help("Open step in runbook detail")
                 }
                 ScrollView([.horizontal, .vertical], showsIndicators: true) {
