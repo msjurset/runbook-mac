@@ -728,11 +728,14 @@ private struct StepLogFlyoutView: View {
                             ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
                                 let str = String(line)
                                 let highlight = OutputHighlighter.color(for: str)
-                                Text(OutputHighlighter.attributedLine(for: str, baseColor: highlight.color))
+                                let attr = OutputHighlighter.attributedLine(for: str, baseColor: highlight.color)
+                                let hasLink = attr.runs.contains { $0.link != nil }
+                                Text(attr)
                                     .font(.system(size: 11, design: .monospaced))
                                     .fontWeight(highlight.bold ? .bold : .regular)
                                     .textSelection(.enabled)
                                     .frame(maxWidth: .infinity, alignment: .leading)
+                                    .pointerStyle(hasLink ? .link : nil)
                             }
                         }
                         .padding(8)

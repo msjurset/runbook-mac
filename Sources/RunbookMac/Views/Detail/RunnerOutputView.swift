@@ -218,7 +218,10 @@ struct RunnerOutputView: View {
         let isCurrentMatch = isMatch && matchingLines.indices.contains(currentMatch) && matchingLines[currentMatch] == idx
         let highlight = OutputHighlighter.color(for: line)
 
-        Text(OutputHighlighter.attributedLine(for: line, baseColor: highlight.color))
+        let attr = OutputHighlighter.attributedLine(for: line, baseColor: highlight.color)
+        let hasLink = attr.runs.contains { $0.link != nil }
+
+        Text(attr)
             .font(.system(.caption, design: .monospaced))
             .fontWeight(highlight.bold ? .bold : .regular)
             .textSelection(.enabled)
@@ -229,6 +232,7 @@ struct RunnerOutputView: View {
                 isMatch ? Color.yellow.opacity(0.1) : .clear
             )
             .clipShape(RoundedRectangle(cornerRadius: 2))
+            .pointerStyle(hasLink ? .link : nil)
     }
 
     private func nextMatch() {

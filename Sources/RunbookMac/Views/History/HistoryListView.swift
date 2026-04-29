@@ -276,11 +276,14 @@ struct StepHistoryRow: View {
                         ForEach(Array(text.split(separator: "\n", omittingEmptySubsequences: false).enumerated()), id: \.offset) { _, line in
                             let str = String(line)
                             let highlight = OutputHighlighter.color(for: str)
-                            Text(OutputHighlighter.attributedLine(for: str, baseColor: highlight.color))
+                            let attr = OutputHighlighter.attributedLine(for: str, baseColor: highlight.color)
+                            let hasLink = attr.runs.contains { $0.link != nil }
+                            Text(attr)
                                 .font(.system(size: 11, design: .monospaced))
                                 .fontWeight(highlight.bold ? .bold : .regular)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .pointerStyle(hasLink ? .link : nil)
                         }
                     }
                     .padding(8)
@@ -378,10 +381,13 @@ struct LogViewerSheet: View {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(currentContent.components(separatedBy: "\n").enumerated()), id: \.offset) { _, line in
                         let highlight = OutputHighlighter.color(for: line)
-                        Text(OutputHighlighter.attributedLine(for: line, baseColor: highlight.color))
+                        let attr = OutputHighlighter.attributedLine(for: line, baseColor: highlight.color)
+                        let hasLink = attr.runs.contains { $0.link != nil }
+                        Text(attr)
                             .font(.system(.caption, design: .monospaced))
                             .fontWeight(highlight.bold ? .bold : .regular)
                             .textSelection(.enabled)
+                            .pointerStyle(hasLink ? .link : nil)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
