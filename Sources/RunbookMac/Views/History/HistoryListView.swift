@@ -73,55 +73,71 @@ struct HistoryRowView: View {
     }
 
     var body: some View {
-        DisclosureGroup(isExpanded: $expanded) {
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(record.steps) { step in
-                    StepHistoryRow(
-                        step: step,
-                        record: record,
-                        logFile: logFile,
-                        runIndexFromEnd: runIndexFromEnd
-                    )
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    expanded.toggle()
                 }
-
-                if let log = logFile {
-                    Divider().padding(.top, 4)
-                    Button {
-                        showLog = true
-                    } label: {
-                        Label("View Full Log", systemImage: "doc.text")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.borderless)
-                    .sheet(isPresented: $showLog) {
-                        LogViewerSheet(url: log, matchDate: record.startedDate)
-                    }
-                }
-            }
-            .padding(.vertical, 4)
-        } label: {
-            HStack {
-                Image(systemName: record.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(record.success ? .green : .red)
-                VStack(alignment: .leading) {
-                    Text(record.runbook_name)
-                        .fontWeight(.medium)
-                    Text(record.formattedDate)
+            } label: {
+                HStack {
+                    Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                }
-                Spacer()
-                if logFile != nil {
-                    Image(systemName: "doc.text")
+                        .rotationEffect(.degrees(expanded ? 90 : 0))
+                        .frame(width: 12)
+                    Image(systemName: record.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(record.success ? .green : .red)
+                    VStack(alignment: .leading) {
+                        Text(record.runbook_name)
+                            .fontWeight(.medium)
+                        Text(record.formattedDate)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if logFile != nil {
+                        Image(systemName: "doc.text")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    Text("\(record.step_count) steps")
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
+                    Text(record.duration)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
                 }
-                Text("\(record.step_count) steps")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(record.duration)
-                    .font(.caption.monospaced())
-                    .foregroundStyle(.secondary)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if expanded {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(record.steps) { step in
+                        StepHistoryRow(
+                            step: step,
+                            record: record,
+                            logFile: logFile,
+                            runIndexFromEnd: runIndexFromEnd
+                        )
+                    }
+
+                    if let log = logFile {
+                        Divider().padding(.top, 4)
+                        Button {
+                            showLog = true
+                        } label: {
+                            Label("View Full Log", systemImage: "doc.text")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.borderless)
+                        .sheet(isPresented: $showLog) {
+                            LogViewerSheet(url: log, matchDate: record.startedDate)
+                        }
+                    }
+                }
+                .padding(.leading, 24)
+                .padding(.vertical, 4)
             }
         }
     }
