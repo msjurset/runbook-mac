@@ -157,6 +157,7 @@ struct StepHistoryRow: View {
     @State private var expanded = false
     @State private var stepLogText: String?
     @State private var loadState: LoadState = .idle
+    @State private var justCopied = false
 
     private enum LoadState { case idle, loading, loaded }
 
@@ -274,6 +275,33 @@ struct StepHistoryRow: View {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.secondary.opacity(0.08))
                 )
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(text, forType: .string)
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            justCopied = true
+                        }
+                        Task {
+                            try? await Task.sleep(nanoseconds: 1_500_000_000)
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                justCopied = false
+                            }
+                        }
+                    } label: {
+                        Image(systemName: justCopied ? "checkmark" : "doc.on.doc")
+                            .font(.caption2)
+                            .foregroundStyle(justCopied ? Color.green : .secondary)
+                            .padding(4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(.background.opacity(0.6))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(6)
+                    .help(justCopied ? "Copied" : "Copy step log to clipboard")
+                }
             } else {
                 Text("No log output captured for this step in this run.")
                     .font(.caption2)
