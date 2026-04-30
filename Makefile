@@ -34,11 +34,19 @@ test:
 
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=1.2.0"; exit 1; fi
+	@if ! git diff --quiet || ! git diff --cached --quiet; then \
+	    echo "Working tree is dirty. Commit or stash first."; exit 1; fi
+	@if git rev-parse "v$(VERSION)" >/dev/null 2>&1; then \
+	    echo "Tag v$(VERSION) already exists. Pick a different VERSION or delete the tag."; exit 1; fi
+	swift test
+	swift build -c release
 	sed -i '' 's/MARKETING_VERSION: ".*"/MARKETING_VERSION: "$(VERSION)"/' project.yml
 	sed -i '' 's/CURRENT_PROJECT_VERSION: ".*"/CURRENT_PROJECT_VERSION: "$(VERSION)"/' project.yml
-	git add project.yml
+	/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $(VERSION)" Info.plist
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" Info.plist
+	git add project.yml Info.plist
 	git commit -m "Bump version to $(VERSION)"
-	git tag "v$(VERSION)"
-	@echo "Tagged v$(VERSION). Push with: git push && git push --tags"
+	git tag -a "v$(VERSION)" -m "v$(VERSION)"
+	@echo "Tagged v$(VERSION). Push with: git push --follow-tags"
 
 .PHONY: build bundle icon deploy clean test release
