@@ -59,7 +59,7 @@ When you've found a recipe you want to try, the Mac app workflows below tell you
 - **Running** — [run a runbook](#run-a-runbook), [run with custom variables](#run-with-custom-variables), [dry run from the run sheet](#dry-run-from-the-run-sheet), [retry with the dry checkbox](#retry-with-the-dry-checkbox), [stop a running session](#stop-a-running-session), [run multiple concurrently](#run-multiple-concurrently)
 - **Authoring** — [create a runbook](#create-a-runbook), [scaffold from a template](#scaffold-from-a-template), [edit a step inline](#edit-a-step-inline), [edit YAML with diff preview](#edit-yaml-with-diff-preview), [validate before saving](#validate-before-saving)
 - **Observation** — [browse history](#browse-history), [see a step's actual log slice](#see-a-steps-actual-log-slice), [view a full log file](#view-a-full-log-file), [search within console output](#search-within-console-output), [save run output](#save-run-output)
-- **Scheduling** — [schedule via the cron UI](#schedule-a-runbook-via-the-cron-ui), [edit a schedule](#edit-a-schedule), [inspect via the step flow chart](#inspect-via-the-step-flow-chart), [navigate from chart to runbook step](#navigate-from-chart-to-runbook-step)
+- **Scheduling** — [schedule via the cron UI](#schedule-a-runbook-via-the-cron-ui), [right-click context menu](#right-click-context-menu-on-a-schedule), [edit a schedule](#edit-a-schedule), [inspect via the step flow chart](#inspect-via-the-step-flow-chart), [open step config from the chart](#open-step-config-from-the-chart), [navigate from chart to runbook step](#navigate-from-chart-to-runbook-step)
 - **Sharing** — [pull a shared collection](#pull-a-shared-collection), [refresh a pulled collection](#refresh-a-pulled-collection), [remove a pulled collection](#remove-a-pulled-collection)
 - **Customization** — [pin a runbook](#pin-a-runbook), [customize output highlighting](#customize-output-highlighting), [change the editor font size](#change-the-editor-font-size), [change the runbook directory](#change-the-runbook-directory), [pre-warm 1Password secrets](#pre-warm-1password-secrets)
 - **Navigation** — [Quick Jump to a runbook](#quick-jump-to-a-runbook), [keyboard shortcuts](#keyboard-shortcuts)
@@ -338,7 +338,7 @@ For these, Dry Run is the next layer of validation — it resolves variables and
 1. Click **History** in the sidebar.
 2. The list shows every run, newest first, with status icon + runbook name + relative date + step count + duration.
 3. Filter with the search field at the top — matches against the runbook name.
-4. Click a row's chevron to expand and see the per-step status list.
+4. Click **anywhere on a row** to expand it and see the per-step status list — runbook name, date, status icon, duration, the chevron, anything. The whole row is the click target.
 
 **Variations:**
 
@@ -356,7 +356,8 @@ For these, Dry Run is the next layer of validation — it resolves variables and
 
 1. In the History view, expand a run.
 2. Each step in the expanded section has its **own** chevron next to its name. Click it.
-3. The app loads that step's log slice from the run's log file and displays it in a 240pt scrollable box, syntax-highlighted via `~/.runbook/highlights.yaml`.
+3. The app loads that step's log slice from the run's log file and displays it in a 240pt scrollable box, syntax-highlighted via `~/.runbook/highlights.yaml`. URLs in the slice render as clickable light-blue underlined links (cursor changes to the pointing hand on hover; click opens the system default browser).
+4. A small `doc.on.doc` copy icon in the top-right of the log block copies the entire slice to the clipboard. The icon swaps to a green checkmark for ~1.5s as feedback.
 
 **What happens:** `StepLogExtractor.findLogURL(for: record)` resolves the log file path:
 
@@ -460,6 +461,34 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 
 ---
 
+### Right-click context menu on a schedule
+
+**When to reach for this:** quick one-off actions on a scheduled runbook without leaving the Schedules view — kick off a run on demand, peek at the latest log, jump to the runbook detail, copy the cron expression, etc.
+
+**How:**
+
+1. Schedules view → right-click anywhere on the row (header, schedule line, next-run line, or the empty space around the step flow chart) — anywhere *except* on a step pill.
+2. The context menu opens with seven actions:
+
+| Item | Action |
+|------|--------|
+| Run now | Spawns the runbook with YAML default variable values (same source cron uses); console tray opens with output streaming |
+| Dry run now | Same but with `--dry-run`, so the CLI prints the plan without executing |
+| Open runbook | Navigates to the runbook detail view |
+| View latest log | Opens the in-app log viewer for the most recent log; disabled if no log file exists |
+| Copy cron expression | Copies the schedule string to the clipboard |
+| Edit schedule | Same as the pencil button — opens inline cron expression edit |
+| Remove schedule | Same as the trash button (destructive style) |
+
+**Gotchas:**
+
+- **Right-click on a step pill is *not* the schedule context menu** — it opens the step's last-run log slice flyout (a separate, pre-existing affordance). The schedule menu fires only for clicks outside any pill.
+- **Run now uses YAML defaults**, not interactive prompts. Required-but-undefaulted variables fail the run (no TTY in the GUI's launch path either). For runs that need user-supplied vars, use the runbook list's right-click → Run, which opens the Run Confirm Sheet with variable inputs.
+
+**Notes:** dry runs deliberately don't appear in History (the CLI skips history writes for `--dry-run`). The console tray still shows the dry-run preview live.
+
+---
+
 ### Edit a schedule
 
 **When to reach for this:** changing the cron expression for an existing schedule.
@@ -501,6 +530,23 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 - The flyout positioning is anchored to the center of the clicked pill. If you click near the edge of a pill, the flyout still appears centered on the pill, not at the cursor.
 
 **Notes:** the chart is a custom SwiftUI `Canvas` (drawn with `context.draw` calls), not HTML or SVG. The chart exists primarily so you can quickly scan a schedule's structure without round-tripping to the detail view; it's not interactive in the deeper "drag to reorder" sense.
+
+---
+
+### Open step config from the chart
+
+**When to reach for this:** you want to see exactly what a scheduled step does — its full shell command, SSH host, HTTP body — without leaving the Schedules view.
+
+**How:**
+
+1. Schedules view → expand a schedule's chevron to reveal its step flow chart.
+2. **Click** any step pill (left-click).
+3. The flyout shows the step's full configuration: variables-style rows for `host`, `url`, `method`, `condition`, `capture`, `on_error`, `timeout`, `retries`, `parallel`, `confirm` — whichever apply — plus the full command/body rendered as a syntax-highlighted code block (muted Bash for shell/ssh, muted JSON for http bodies that look like JSON, plain otherwise).
+4. The code block scrolls **both axes** — long lines scroll horizontally without wrapping; tall code scrolls vertically up to ~320pt.
+5. A small `arrow.up.forward` icon sits above the code (anchored, doesn't scroll out of view). Click it → flyout dismisses, sidebar switches to Runbooks, runbook detail view scrolls to and expands this step. Same as double-click on the pill itself.
+6. **Double-click** anywhere in the code block area → same navigate action.
+
+**Notes:** colors are deliberately muted (alpha-reduced) so the eye stays on the structure, not the syntax. The full-vibrancy palette is reserved for the popout editor in the runbook detail view.
 
 ---
 
@@ -615,15 +661,20 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
        bold: true
    ```
 
-3. Save. The next line rendered in the tray (or the History view, or the Log Viewer) uses the new rules. No app restart.
+3. Save. The next line rendered in the tray (or the History view, or the Log Viewer) uses the new rules. **The rules are cached for the lifetime of the running app process** — restart the app (Cmd-Q + reopen) to pick up edits.
 
 **Color names:** red, green, blue, orange, yellow, purple, cyan, gray, white, pink, teal. Or hex `#RRGGBB`.
 
 **First-match wins** per line — order rules from most-specific to most-generic.
 
+**Built-in default rules** cover: `[OK]` / `[WARNING]` / `[INFO]` markers, runbook CLI step markers (`▸ Step N`, `Running:`, `✓`/`✗`), Homebrew (`==>`, `🍺`, `Fetching`/`Pouring`/`Removing`), Pi-hole (`[✓]`/`[i]`/`[✗]`), generic errors (`fatal:`, `panic:`, `Traceback`, `Exception`, `error:`, `warning:`, `FAILED`), error stems (`denied`, `unable to`, `cannot`), and SSH (`connection refused`, `permission denied`, `timed out`). If `~/.runbook/highlights.yaml` doesn't exist, these defaults apply.
+
+**Clickable URLs** are detected separately, *on top of* whatever color rule the line matched. Any `http(s)://...` in a line renders as a light-blue underlined link, cursor changes to the pointing hand on hover, and click opens the system default browser. The runbook-mac window stays focused; in-flight runs keep streaming. URL detection uses `NSDataDetector`, so plain URLs are caught without markdown.
+
 **Gotchas:**
 
-- If the YAML is malformed, the highlighter silently falls back to the built-in defaults. Test with a known-bad input file (e.g. `runbook-mac/highlights-test.yaml` style) before relying on it for production runbooks.
+- If the YAML is malformed, the highlighter silently falls back to the built-in defaults. Validate by editing carefully or running `yamllint` against the file.
+- The link cursor activates over the *whole line* containing a URL, not just the URL range — a SwiftUI limitation. Clicks outside the URL itself are no-ops; the click target is still URL-precise.
 
 **Notes:** the file is shared with `~/.runbook/highlights.yaml` consumed by the CLI's TUI mode (when running `runbook run` interactively in a terminal). Edit once, both render the same.
 
