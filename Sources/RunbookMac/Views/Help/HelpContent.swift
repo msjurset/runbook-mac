@@ -246,6 +246,11 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .heading("Status at a Glance"),
                 .paragraph("Each scheduled row shows a colored status dot next to the runbook name (gray = never run, green = last run succeeded, red = last run failed) with a tooltip giving the exact result and time."),
                 .paragraph("Beside the name, an inline badge shows how long ago the last run was (e.g. \"✓ 5h ago\" or \"✗ 2d ago\"). Below the schedule, a live-updating \"Next\" line shows when the next fire will happen in both absolute time and relative countdown (e.g. \"Next: Sunday at 8:00 AM · in 3d 2h\")."),
+                .heading("Right-Click Context Menu"),
+                .paragraph("Right-click anywhere on a schedule row (except on a step pill, which has its own right-click affordance) to open a context menu with: Run now, Dry run now, Open runbook, View latest log, Copy cron expression, Edit schedule, and Remove schedule."),
+                .paragraph("Run now uses the runbook's YAML default variable values — same source cron uses when firing the schedule. The console tray opens with output streaming. Dry runs deliberately don't appear in History (the CLI skips history writes for --dry-run)."),
+                .heading("Step Flow Chart"),
+                .paragraph("Expand a schedule's chevron to reveal a custom-drawn flow chart of its steps. Click any pill to see the full step config (muted Bash/JSON syntax highlighting, both-axis scroll, an arrow.up.forward navigate icon and double-click to open in the runbook detail view). Right-click a pill to see the last-run log slice for that step (color-coded, with copy button and Open Log routing through the in-app log viewer). Double-click a pill to navigate directly to the runbook detail view at that step."),
             ]
 
         case .sharing:
@@ -347,9 +352,15 @@ enum HelpTopic: String, CaseIterable, Identifiable {
 
         case .history:
             return [
-                .paragraph("Every runbook execution is recorded as a JSON file in ~/.runbook/history/."),
+                .paragraph("Every runbook execution (other than dry runs) is recorded as a JSON file in ~/.runbook/history/."),
                 .heading("From the App"),
-                .paragraph("Click History in the sidebar to browse all runs. Click a row to expand and see per-step results, timing, and any errors. Use the filter bar to search by runbook name. Runs with saved logs show a document icon and a \"View Saved Log\" link. For append-mode logs, a picker lets you switch between runs in the same file."),
+                .paragraph("Click History in the sidebar to browse all runs. Click anywhere on a row — runbook name, date, status icon, duration — to expand it and see the per-step status list. Use the filter bar to search by runbook name."),
+                .heading("Per-Step Log Slices"),
+                .paragraph("Each step inside an expanded row has its own chevron. Click it to load that step's actual log output for THIS run (not just the latest), syntax-highlighted via ~/.runbook/highlights.yaml. URLs render as clickable light-blue underlined links and open in the system default browser. A copy icon in the top-right of each log block copies the slice to the clipboard."),
+                .heading("Full Log"),
+                .paragraph("\"View Full Log\" at the bottom of an expanded row opens the in-app log viewer. For append-mode logs (multiple runs in one file), a picker switches between run sections — the app pre-selects the run matching this history record."),
+                .heading("Dry Runs"),
+                .paragraph("Dry runs deliberately don't appear in History — the CLI skips history writes for --dry-run, and the Mac app skips its per-run log persistence. Dry-run output is visible in the console tray during execution and stays there until the tab is dismissed."),
                 .heading("CLI Commands"),
                 .code("runbook history\nrunbook history -n 10\nrunbook history --runbook deploy"),
                 .heading("Record Contents"),

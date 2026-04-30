@@ -296,10 +296,24 @@ The step flow chart renders below the row. Each step pill:
 
 | Interaction | Action |
 |------------|--------|
-| Hover | Tooltip with step name |
-| Click | Flyout with step config |
-| Right-click | Flyout with last-run log slice |
+| Hover | Tooltip with step name + pointing-hand cursor |
+| Click | Flyout with full step config (muted Bash/JSON highlighting, both-axis scroll) plus an `arrow.up.forward` navigate icon and double-click → open in runbook detail |
+| Right-click | Flyout with last-run log slice (color-coded via `~/.runbook/highlights.yaml`, copy button, "Open Log" routes through the in-app log viewer) |
 | Double-click | Navigate to runbook detail view, expand that step |
+
+### Right-click context menu (anywhere on row except a pill)
+
+| Item | Action |
+|------|--------|
+| Run now | Spawn the runbook with YAML default variable values; tray opens with output streaming |
+| Dry run now | Same with `--dry-run` (no history record, no log file persisted) |
+| Open runbook | Navigate to the runbook detail view |
+| View latest log | Open the in-app log viewer for the most recent log; disabled if no log exists |
+| Copy cron expression | Copy the schedule string to the clipboard |
+| Edit schedule | Same as the pencil button |
+| Remove schedule | Same as the trash button (destructive) |
+
+Pills consume right-clicks at the pill level (their `RightClickCatcher` NSView returns self for `.rightMouseDown`), so the schedule context menu fires only for clicks outside any pill.
 
 ---
 

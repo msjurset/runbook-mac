@@ -109,6 +109,18 @@ This was the bug the per-run log persistence (added 2026-04-28) was designed to 
 
 ---
 
+### My dry runs don't appear in History
+
+**Cause:** by design. The CLI explicitly skips `saveHistory()` and the YAML `log:` append-file write when `--dry-run` is passed (it returns early after printing the resolved variable map and step plan). The Mac app's per-run log persistence (`RunSessionStore.persistLog`) also skips dry runs as of 2026-04-30, so dry runs leave **no trace on disk** — no JSON history record, no append log, no per-run log file.
+
+**Why:** dry runs are exploratory. Counting them in success/failure dashboards (Schedules screen status dots, "last run" badges, History list) would muddy the signal of "did this thing actually run?"
+
+**What you still see:** the dry-run output streams in the console tray during execution. Once the session ends, the tab stays in the tray's recent-terminals list until pruned (5-session retention). Click the tab to revisit the output. After the tab is dismissed, the output is gone — there's no on-disk record.
+
+**If you want a record of a dry-run preview:** click **Save** in the tray's output toolbar before dismissing the session. Writes a `.log` file to a path you choose; LogIndex registers it.
+
+---
+
 ### History view is empty even though I just ran something
 
 **Causes (in order of likelihood):**
