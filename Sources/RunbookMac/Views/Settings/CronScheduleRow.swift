@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CronScheduleRow: View {
     @Environment(RunbookStore.self) private var store
+    @Environment(RunSessionStore.self) private var runSessions
     @Environment(\.colorScheme) private var colorScheme
     let entry: CronView.ScheduleEntry
     @Binding var editingName: String?
@@ -14,12 +15,19 @@ struct CronScheduleRow: View {
     @State private var now = Date()
     private let tick = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
+    @State private var showLogSheet = false
+
     private var lastRun: HistoryRecord? {
         store.history(for: entry.name).first
     }
 
     private var nextRun: Date? {
         CronNextRun.next(for: entry.schedule, after: now)
+    }
+
+    private var latestLogURL: URL? {
+        guard let last = lastRun else { return nil }
+        return StepLogExtractor.findLogURL(for: last)
     }
 
     var body: some View {
@@ -116,6 +124,87 @@ struct CronScheduleRow: View {
         }
         .padding(.vertical, 4)
         .onReceive(tick) { now = $0 }
+        // Right-click context menu fires on any row content area that isn't
+        // a pill. Pills have their own RightClickCatcher (NSView hitTest
+        // returning self for .rightMouseDown) which consumes the event before
+        // it can reach SwiftUI's .contextMenu, preserving the existing
+        // last-run-log flyout on right-click of a pill.
+        .contextMenu {
+            Button {
+                runRunbook(dryRun: false)
+            } label: {
+                Label("Run now", systemImage: "play.fill")
+            }
+            Button {
+                runRunbook(dryRun: true)
+            } label: {
+                Label("Dry run now", systemImage: "play")
+            }
+            Divider()
+            Button {
+                openInRunbookDetail()
+            } label: {
+                Label("Open runbook", systemImage: "arrow.up.forward")
+            }
+            Button {
+                showLogSheet = true
+            } label: {
+                Label("View latest log", systemImage: "doc.text.magnifyingglass")
+            }
+            .disabled(latestLogURL == nil)
+            Button {
+                copyCronExpression()
+            } label: {
+                Label("Copy cron expression", systemImage: "doc.on.doc")
+            }
+            Divider()
+            Button {
+                startEditing()
+            } label: {
+                Label("Edit schedule", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                onRemove(entry.name, entry.schedule)
+            } label: {
+                Label("Remove schedule", systemImage: "trash")
+            }
+        }
+        .sheet(isPresented: $showLogSheet) {
+            if let url = latestLogURL {
+                LogViewerSheet(url: url, matchDate: lastRun?.startedDate)
+            }
+        }
+    }
+
+    // MARK: - Context menu actions
+
+    private func runRunbook(dryRun: Bool) {
+        guard let book = store.runbooks.first(where: { $0.name == entry.name }) else { return }
+        // Use YAML defaults — same value source as cron-launched runs, since
+        // there's no TTY to prompt for required-but-undefaulted vars in
+        // either path. The CLI handles op:// resolution itself.
+        let vars = (book.variables ?? []).reduce(into: [String: String]()) { acc, v in
+            if let def = v.`default` { acc[v.name] = def }
+        }
+        runSessions.start(runbook: book, vars: vars, dryRun: dryRun)
+    }
+
+    private func openInRunbookDetail() {
+        NotificationCenter.default.post(
+            name: .runbookNavigateToStep,
+            object: nil,
+            userInfo: ["runbookName": entry.name]
+        )
+    }
+
+    private func copyCronExpression() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(entry.schedule, forType: .string)
+    }
+
+    private func startEditing() {
+        editingName = entry.id
+        editSchedule = entry.schedule
     }
 
     // MARK: - Subviews
