@@ -205,7 +205,13 @@ final class RunSessionStore {
     /// runbook itself has `log:` configured, the CLI also wrote its own file —
     /// that's harmless duplication; the index points to ours so History
     /// resolves consistently against the run's `started_at`.
+    ///
+    /// Dry runs are skipped: the CLI doesn't write a history record for
+    /// `--dry-run`, so persisting a log file here would create an orphan
+    /// (no history row points at it, no view surfaces it). End-to-end this
+    /// keeps "dry runs leave no trace" consistent with the CLI.
     private func persistLog(for session: RunSession) {
+        guard !session.dryRun else { return }
         guard !session.output.isEmpty else { return }
         let logURL = LogIndex.defaultLogPath(runbookName: session.runbookName)
         // The CLI's stream strips trailing newlines per line, so rejoin with
