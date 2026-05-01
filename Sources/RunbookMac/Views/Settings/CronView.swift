@@ -18,6 +18,10 @@ struct CronView: View {
     @State private var cronDescription = ""
     @State private var editingName: String?
     @State private var editSchedule = ""
+    /// ID of the row whose content area the mouse is currently inside, or nil.
+    /// Drives single-row legend visibility — entering a row clears any other
+    /// row's legend by virtue of the binding holding only one id at a time.
+    @State private var hoveredRowID: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -63,6 +67,7 @@ struct CronView: View {
                             entry: entry,
                             editingName: $editingName,
                             editSchedule: $editSchedule,
+                            hoveredRowID: $hoveredRowID,
                             onUpdate: updateSchedule,
                             onRemove: removeSchedule
                         )

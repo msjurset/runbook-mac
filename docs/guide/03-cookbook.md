@@ -515,14 +515,14 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 
 **How:**
 
-1. Schedules view → expand the chevron on a schedule row.
+1. Schedules view → click the runbook name (or its chevron) to expand the row if it's collapsed. Newly opened rows default to expanded; click the name again to collapse back to just the header line.
 2. The step flow chart renders below the row: a custom-drawn canvas showing each step as a colored box (blue=shell, orange=ssh, green=http, gray=confirm), connected by arrows.
 3. **Hover** a step → tooltip with the step name.
 4. **Click** a step → flyout with the step's full config (command, host, URL, headers, options).
 5. **Right-click** a step → flyout with the **last run's log slice** for that specific step.
 6. **Double-click** a step → navigates to the runbook detail view with that step pre-expanded.
 
-**The color legend** is always visible below the chart — you don't need to remember which color is which step type.
+**The color legend** sits inline on the "Next: ..." line and appears only while the mouse is hovering inside the row's content area. Hovering one row hides every other row's legend automatically (only one is visible at a time), so the screen stays quiet when you're scanning and reveals the key only on the row you're focused on.
 
 **Gotchas:**
 

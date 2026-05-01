@@ -21,10 +21,11 @@ struct StepFlowCanvas: View {
     @State private var selectedLogPillID: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            GeometryReader { geo in
-                let layout = computeLayout(width: geo.size.width)
-                ZStack(alignment: .topLeading) {
+        // Legend is rendered separately by the parent (CronScheduleRow) on its
+        // "Next: ..." line, gated by hover, so this view is just the canvas.
+        GeometryReader { geo in
+            let layout = computeLayout(width: geo.size.width)
+            ZStack(alignment: .topLeading) {
                     Canvas { context, size in
                         drawPipeline(context: context, layout: layout, size: size)
                     }
@@ -109,15 +110,12 @@ struct StepFlowCanvas: View {
                         .position(x: pill.rect.midX, y: pill.rect.midY)
                     }
                 }
-                .onAppear { computedHeight = layout.totalHeight }
-                .onChange(of: geo.size.width) { _, _ in
-                    computedHeight = computeLayout(width: geo.size.width).totalHeight
-                }
+            .onAppear { computedHeight = layout.totalHeight }
+            .onChange(of: geo.size.width) { _, _ in
+                computedHeight = computeLayout(width: geo.size.width).totalHeight
             }
-            .frame(height: computedHeight)
-
-            StepFlowLegend()
         }
+        .frame(height: computedHeight)
     }
 
     // MARK: - Layout computation
@@ -540,6 +538,8 @@ struct StepFlowLegend: View {
     ]
 
     var body: some View {
+        // The "click a step for details" hint moved into a per-item tooltip so
+        // the legend stays compact on the "Next: ..." line.
         HStack(spacing: 10) {
             ForEach(items) { item in
                 HStack(spacing: 4) {
@@ -550,10 +550,8 @@ struct StepFlowLegend: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .help("Click a step for details")
             }
-            Text("· click a step for details")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
         }
     }
 }
