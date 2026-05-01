@@ -32,6 +32,12 @@ struct RunbookMacApp: App {
                     .environment(runSessions)
             }
             .onAppear {
+                // Pick up external YAML edits / git pulls / new files
+                // automatically — replaces what the bottom-strip Refresh
+                // button used to do, plus catches files added outside the
+                // app (which the manual refresh required the user to know
+                // to press).
+                store.startWatching()
                 if !CLIInstaller.isCLIInstalled {
                     showCLISetup = true
                 } else {

@@ -12,6 +12,11 @@ class RunbookStore {
     private let booksDir: URL
     private let historyDir: URL
     private let pinnedFile: URL
+    /// FSEvents-based watcher started lazily by `startWatching()`. Reloads
+    /// the runbook list whenever something inside booksDir changes — covers
+    /// external edits (vim/VS Code), git pulls of runbook repos, and brand-
+    /// new YAMLs dropped into the directory by other tools.
+    private var watcher: FileSystemWatcher?
 
     init() {
         booksDir = AppSettings.booksURL
@@ -34,6 +39,27 @@ class RunbookStore {
         runbooks = discovered
         templates = discoveredTemplates
         historyRecords = loadHistory()
+    }
+
+    /// Begin watching booksDir for filesystem changes. Idempotent — calling
+    /// twice is harmless. The watcher's callback runs on the main queue and
+    /// triggers loadAll(), so external file edits surface in the UI without
+    /// a manual refresh.
+    func startWatching() {
+        guard watcher == nil else { return }
+        // Ensure the directory exists before starting; FSEventStreamCreate
+        // would silently no-op against a missing path.
+        try? FileManager.default.createDirectory(
+            at: booksDir, withIntermediateDirectories: true)
+        watcher = FileSystemWatcher(path: booksDir.path) { [weak self] in
+            self?.loadAll()
+        }
+        watcher?.start()
+    }
+
+    func stopWatching() {
+        watcher?.stop()
+        watcher = nil
     }
 
     private func discoverAll(in dir: URL) -> (runbooks: [Runbook], templates: [Runbook]) {

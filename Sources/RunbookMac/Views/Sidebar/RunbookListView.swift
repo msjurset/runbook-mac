@@ -17,6 +17,11 @@ struct RunbookListView: View {
     @State private var pendingRunDryRun = false
     @State private var runbookToSchedule: Runbook?
     @State private var errorMessage: String?
+    /// New-runbook sheet trigger. Owned here so the "+" button at the
+    /// list's top-right opens it; previously this state lived in
+    /// ContentView and was driven by a button in the sidebar's bottom
+    /// strip, which was an awkward place for "create item in this list".
+    @State private var showNewRunbook = false
 
     private var filteredRunbooks: [Runbook] {
         let base = searchText.isEmpty ? store.runbooks : store.runbooks.filter {
@@ -42,10 +47,18 @@ struct RunbookListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
+            HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
                 FilterField(placeholder: "Filter runbooks", text: $searchText)
+                Button(action: { showNewRunbook = true }) {
+                    Image(systemName: "plus")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("New Runbook")
+                .accessibilityIdentifier("toolbar.newRunbook")
             }
             .padding(8)
 
@@ -80,6 +93,12 @@ struct RunbookListView: View {
             }
             .sheet(item: $runbookToSchedule) { book in
                 ScheduleRunbookSheet(runbookName: book.name)
+            }
+            .sheet(isPresented: $showNewRunbook) {
+                NewRunbookSheet { name, content in
+                    try store.saveRaw(content, to: "\(name).yaml")
+                    store.loadAll()
+                }
             }
         }
         .frame(maxHeight: .infinity, alignment: .top)

@@ -54,11 +54,25 @@ struct YAMLCompletionTests {
         #expect(results.contains("capture:"))
     }
 
-    @Test("Empty line at indent 6 returns step keys")
+    @Test("Empty line at indent 6 returns sub-step keys")
     func nestedEmptyLine() {
-        // At indent 6 with empty content, returns step-level keys (not nested shell/ssh/http)
+        // At indent 6 (under shell:/ssh:/http:) we now expect the
+        // sub-step keys: command/dir for shell, host/user/port/key_file/
+        // command/agent_auth for ssh, method/url/headers/body for http.
+        // Step-level keys (type:, capture:, timeout:, ...) belong to
+        // indent 4 only.
         let results = provider.completions(for: "      ", cursorPosition: 6)
-        #expect(results.contains("type:"))
-        #expect(results.contains("capture:"))
+        #expect(results.contains("command:"))
+        #expect(results.contains("host:"))
+        #expect(results.contains("url:"))
+        #expect(!results.contains("type:"))
+        #expect(!results.contains("capture:"))
+    }
+
+    @Test("Value completion filters by partial after colon")
+    func valueFiltering() {
+        // 'type: ss' should narrow to ssh only — not all three values.
+        let results = provider.completions(for: "    type: ss", cursorPosition: 12)
+        #expect(results == ["ssh"])
     }
 }

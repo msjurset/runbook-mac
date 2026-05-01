@@ -11,15 +11,11 @@ struct ContentView: View {
     @Environment(RunbookStore.self) private var store
     @State private var sidebarSelection: SidebarItem? = .runbooks
     @State private var selectedRunbook: Runbook?
-    @State private var showNewRunbook = false
     @State private var showQuickJump = false
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(
-                selection: $sidebarSelection,
-                showNewRunbook: $showNewRunbook
-            )
+            SidebarView(selection: $sidebarSelection)
         } detail: {
             switch sidebarSelection {
             case .runbooks:
@@ -42,12 +38,6 @@ struct ContentView: View {
                 .accessibilityIdentifier("detail.empty")
             }
         }
-        .sheet(isPresented: $showNewRunbook) {
-            NewRunbookSheet { name, content in
-                try store.saveRaw(content, to: "\(name).yaml")
-                store.loadAll()
-            }
-        }
         .sheet(isPresented: $showQuickJump) {
             QuickJumpSheet(selectedRunbook: $selectedRunbook, sidebarSelection: $sidebarSelection)
         }
@@ -57,6 +47,12 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            store.loadAll()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .runbookRefreshRequested)) { _ in
+            // Manual refresh from the View > Refresh menu (⌘R). The watcher
+            // catches most cases automatically — this is the explicit
+            // escape hatch.
             store.loadAll()
         }
         .onReceive(NotificationCenter.default.publisher(for: .runbookNavigateToStep)) { note in
