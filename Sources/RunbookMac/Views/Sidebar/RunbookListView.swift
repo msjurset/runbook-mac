@@ -2,13 +2,19 @@ import SwiftUI
 
 struct RunbookListView: View {
     @Environment(RunbookStore.self) private var store
+    @Environment(RunSessionStore.self) private var runSessions
     @Binding var selectedRunbook: Runbook?
     @State private var searchText = ""
     @State private var showTemplates = true
     @State private var templateToCreate: Runbook?
     @State private var runbookToDuplicate: Runbook?
-    @State private var runbookToRun: Runbook?
-    @State private var runbookToDryRun: Runbook?
+    /// Pre-run dialog target. The accompanying `pendingRunDryRun` seeds the
+    /// sheet's Dry Run checkbox so a right-click on Dry Run opens the sheet
+    /// with that toggle on. On confirm the sheet dispatches into the
+    /// RunSessionStore so output streams to the docked ConsoleTray rather
+    /// than the old all-in-one RunnerView modal.
+    @State private var runbookToConfirmRun: Runbook?
+    @State private var pendingRunDryRun = false
     @State private var runbookToSchedule: Runbook?
     @State private var errorMessage: String?
 
@@ -67,11 +73,10 @@ struct RunbookListView: View {
             .sheet(item: $runbookToDuplicate) { book in
                 CreateFromTemplateSheet(template: book, isDuplicate: true)
             }
-            .sheet(item: $runbookToRun) { book in
-                RunnerView(runbook: book)
-            }
-            .sheet(item: $runbookToDryRun) { book in
-                RunnerView(runbook: book, dryRun: true)
+            .sheet(item: $runbookToConfirmRun) { book in
+                RunConfirmSheet(runbook: book, initialDryRun: pendingRunDryRun) { vars, dryRun in
+                    _ = runSessions.start(runbook: book, vars: vars, dryRun: dryRun)
+                }
             }
             .sheet(item: $runbookToSchedule) { book in
                 ScheduleRunbookSheet(runbookName: book.name)
@@ -142,10 +147,12 @@ struct RunbookListView: View {
         .tag(book)
         .contextMenu {
             Button("Run", systemImage: "play.fill") {
-                runbookToRun = book
+                pendingRunDryRun = false
+                runbookToConfirmRun = book
             }
             Button("Dry Run", systemImage: "forward.end") {
-                runbookToDryRun = book
+                pendingRunDryRun = true
+                runbookToConfirmRun = book
             }
             Button("Schedule", systemImage: "calendar.badge.clock") {
                 runbookToSchedule = book
