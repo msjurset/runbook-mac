@@ -142,10 +142,34 @@ struct CodeEditorView: NSViewRepresentable {
                 let cursorLocation = textView.selectedRange().location
                 let lineRange = nsText.lineRange(for: NSRange(location: cursorLocation, length: 0))
                 let line = nsText.substring(with: lineRange).trimmingCharacters(in: .newlines)
+                let lineToCursor = nsText.substring(
+                    with: NSRange(location: lineRange.location,
+                                  length: cursorLocation - lineRange.location))
 
                 if line.trimmingCharacters(in: .whitespaces).isEmpty {
-                    // Empty line: just insert spaces
-                    textView.insertText("  ", replacementRange: textView.selectedRange())
+                    // Indent-only line: prefer offering keys appropriate to
+                    // this indent if the schema has any. If the provider
+                    // returns nothing (e.g., we're outside the schema's
+                    // known indent levels), fall back to inserting spaces so
+                    // Tab still does *something*.
+                    let cursorOffsetInLine = cursorLocation - lineRange.location
+                    let suggestions = completionProvider.completions(
+                        for: line, cursorPosition: cursorOffsetInLine)
+                    if suggestions.isEmpty {
+                        textView.insertText("  ", replacementRange: textView.selectedRange())
+                    } else {
+                        textView.complete(nil)
+                    }
+                } else if lineToCursor.hasSuffix(":") {
+                    // Cursor sits right after a key colon with no space yet —
+                    // chain into value completion. Insert the missing space
+                    // first so the partial-word range AppKit computes is the
+                    // empty position AFTER the space, not the colon itself.
+                    // Without this, the value commit would have to either
+                    // produce "type:shell" (no space, ugly) or special-case
+                    // insertion in two places.
+                    textView.insertText(" ", replacementRange: textView.selectedRange())
+                    textView.complete(nil)
                 } else {
                     // Line has content: trigger completion
                     textView.complete(nil)
@@ -281,9 +305,15 @@ struct CodeEditorView: NSViewRepresentable {
     }
 }
 
-/// NSTextView subclass that treats YAML tokens (with colons, dashes, underscores) as words for completion.
+/// NSTextView subclass that scopes completion's partial-word range to a YAML
+/// token. Crucially `:` is NOT a word char — that makes the YAML key/value
+/// boundary a token boundary, so a value-position completion (cursor after a
+/// `key:`) replaces only the value text, not the key. Including `:` in the
+/// word set causes "type:" + Tab to replace the whole "type:" with the
+/// chosen value, producing a broken document.
 final class YAMLTextView: NSTextView {
-    private static let wordChars = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_-:."))
+    private static let wordChars = CharacterSet.alphanumerics
+        .union(CharacterSet(charactersIn: "_-."))
 
     override var rangeForUserCompletion: NSRange {
         let nsText = string as NSString
