@@ -14,7 +14,9 @@ struct EditableConfigRow: View {
     @State private var isPopoutOpen = false
     @State private var editValue: String = ""
     @State private var saveError: String?
-    @FocusState private var isFocused: Bool
+    /// Bump to request focus on the FilterField after we flip into edit
+    /// mode. A FocusState binding doesn't reach into NSViewRepresentable.
+    @State private var focusBump = 0
 
     private var lineCount: Int {
         max(1, editValue.components(separatedBy: "\n").count)
@@ -47,24 +49,26 @@ struct EditableConfigRow: View {
                 .frame(minWidth: 70, alignment: .trailing)
 
             if isEditing {
-                TextEditor(text: $editValue)
-                    .font(.system(.caption, design: .monospaced))
-                    .scrollContentBackground(.hidden)
-                    .padding(4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(.background)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(.blue.opacity(0.5), lineWidth: 1)
-                    )
-                    .frame(height: editorHeight)
-                    .focused($isFocused)
-                    .onChange(of: isFocused) {
-                        if !isFocused { save() }
-                    }
-                    .onExitCommand { cancel() }
+                // Multi-line by design: command/shell values that start as
+                // one-liners often grow into multi-line shell snippets, so
+                // plain Return inserts a newline; Cmd+Return saves; Escape
+                // cancels; clicking outside saves via textDidEndEditing.
+                InlineMultilineEditor(
+                    text: $editValue,
+                    onSave: { save() },
+                    onCancel: { cancel() },
+                    focusTrigger: focusBump
+                )
+                .padding(4)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(.background)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(.blue.opacity(0.5), lineWidth: 1)
+                )
+                .frame(height: editorHeight)
             } else if let lang = codeLanguage {
                 CodeBlockView(source: value, language: lang)
                     .contentShape(Rectangle())
@@ -105,9 +109,9 @@ struct EditableConfigRow: View {
     private func startEditing() {
         editValue = value
         isEditing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            isFocused = true
-        }
+        // Bump the trigger so FilterField becomes first responder after the
+        // SwiftUI render flushes the .editing branch into the view tree.
+        focusBump += 1
     }
 
     private func startPopoutEditing() {
@@ -125,10 +129,17 @@ struct EditableConfigRow: View {
         isEditing = false
         isPopoutOpen = false
 
-        // Multi-line block scalars preserve whitespace intentionally; only trim
-        // for single-line inline values.
-        let isBlockScalar = value.contains("\n") || editValue.contains("\n")
-        let newValue = isBlockScalar ? editValue : editValue.trimmingCharacters(in: .whitespaces)
+        let oldIsBlock = value.contains("\n")
+        // Whether the NEW value is genuinely multi-line: collapse trailing
+        // whitespace/newlines first so a stray "user pressed Return at end"
+        // doesn't keep the value pinned in block-scalar form when its body
+        // is really just one line.
+        let newBodyTrimmed = editValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let newIsBlock = newBodyTrimmed.contains("\n")
+
+        // Block scalars preserve internal whitespace; inline values trim
+        // outer whitespace (YAML's flat form doesn't preserve it anyway).
+        let newValue: String = newIsBlock ? editValue : newBodyTrimmed
         if newValue == value { return }
 
         guard let rawYAML = store.readRawYAML(for: runbook) else {
@@ -137,7 +148,9 @@ struct EditableConfigRow: View {
         }
 
         let updatedYAML: String
-        if isBlockScalar {
+        switch (oldIsBlock, newIsBlock) {
+        case (true, true):
+            // Block → block: edit the block scalar contents in place.
             if let updated = replaceBlockScalarValue(in: rawYAML,
                                                      label: label,
                                                      oldValue: value,
@@ -148,7 +161,39 @@ struct EditableConfigRow: View {
                 saveError = "Couldn't locate this block in the YAML (step: \(stepName ?? "?"), key: \(label)). Edit was not saved."
                 return
             }
-        } else {
+
+        case (false, true):
+            // Inline → block: promote `key: value` to `key: |` with
+            // indented body. Next render will switch this row to the
+            // CodeBlockView/popout.
+            if let updated = promoteInlineToBlock(in: rawYAML,
+                                                  label: label,
+                                                  oldValue: value,
+                                                  newValue: newValue,
+                                                  stepName: stepName) {
+                updatedYAML = updated
+            } else {
+                saveError = "Couldn't locate the inline value in the YAML (step: \(stepName ?? "?"), key: \(label)). Edit was not saved."
+                return
+            }
+
+        case (true, false):
+            // Block → inline: demote `key: |\n  body` back to flat
+            // `key: body`. Without this branch the block scalar header
+            // stays even after the user collapses the body to one line,
+            // so the row keeps rendering as a CodeBlockView.
+            if let updated = demoteBlockToInline(in: rawYAML,
+                                                 label: label,
+                                                 newValue: newValue,
+                                                 stepName: stepName) {
+                updatedYAML = updated
+            } else {
+                saveError = "Couldn't locate the block in the YAML (step: \(stepName ?? "?"), key: \(label)). Edit was not saved."
+                return
+            }
+
+        case (false, false):
+            // Flat → flat.
             updatedYAML = replaceYAMLValue(in: rawYAML, label: label, oldValue: value, newValue: newValue)
         }
         guard updatedYAML != rawYAML else {
@@ -305,6 +350,175 @@ struct EditableConfigRow: View {
             result.append(contentsOf: lines[found.blockEnd..<lines.count])
         }
         return result.joined(separator: "\n")
+    }
+
+    /// Convert an inline `key: value` line into a block-scalar `key: |` with
+    /// indented content. Used when the user pastes / types newlines into a
+    /// previously single-line field. Scopes by step name when provided so
+    /// multiple steps sharing the same key (e.g. every shell step has
+    /// `command:`) don't collide on the first match.
+    private func promoteInlineToBlock(in yaml: String, label: String, oldValue: String, newValue: String, stepName: String?) -> String? {
+        let key = label.lowercased()
+            .replacingOccurrences(of: " → ", with: "")
+            .replacingOccurrences(of: "header: ", with: "")
+            .trimmingCharacters(in: .whitespaces)
+            .replacingOccurrences(of: ":", with: "")
+        guard !key.isEmpty else { return nil }
+
+        let lines = yaml.components(separatedBy: "\n")
+        let scope = stepLineRange(in: lines, stepName: stepName)
+
+        var targetIdx: Int? = nil
+        var indentStr = ""
+        for idx in scope {
+            let line = lines[idx]
+            let leading = line.prefix(while: { $0 == " " || $0 == "\t" })
+            let afterLeading = String(line.dropFirst(leading.count))
+            guard afterLeading.hasPrefix("\(key):") else { continue }
+            let afterKey = afterLeading
+                .dropFirst(key.count + 1)
+                .trimmingCharacters(in: .whitespaces)
+            // The displayed `value` mirrors what was rendered, which strips
+            // YAML quotes. Match against the bare value as well as both
+            // quote styles so `command: "echo hi"` still matches when the
+            // user's edit started from displayed `echo hi`.
+            let matches = afterKey == oldValue
+                || afterKey == "\"\(oldValue)\""
+                || afterKey == "'\(oldValue)'"
+            if matches {
+                targetIdx = idx
+                indentStr = String(leading)
+                break
+            }
+        }
+        guard let idx = targetIdx else { return nil }
+
+        let blockIndent = indentStr + "  "
+        var replacement: [String] = ["\(indentStr)\(key): |"]
+        for line in newValue.components(separatedBy: "\n") {
+            replacement.append(line.isEmpty ? "" : blockIndent + line)
+        }
+        var result = lines
+        result.replaceSubrange(idx...idx, with: replacement)
+        return result.joined(separator: "\n")
+    }
+
+    /// Inverse of promoteInlineToBlock: collapse a block scalar (`key: |`
+    /// plus its indented body lines) back into a single inline `key: value`
+    /// line. Quotes the value when YAML's plain-scalar rules would mis-parse
+    /// it (leading reserved chars, embedded `: ` or ` #`, reserved keywords,
+    /// numeric-like text).
+    private func demoteBlockToInline(in yaml: String, label: String, newValue: String, stepName: String?) -> String? {
+        let key = label.lowercased()
+            .replacingOccurrences(of: " → ", with: "")
+            .replacingOccurrences(of: "header: ", with: "")
+            .trimmingCharacters(in: .whitespaces)
+            .replacingOccurrences(of: ":", with: "")
+        guard !key.isEmpty else { return nil }
+
+        let lines = yaml.components(separatedBy: "\n")
+        let scope = stepLineRange(in: lines, stepName: stepName)
+
+        // Find the block-scalar header `<indent>key: |` (plus folded /
+        // chomping variants).
+        var headerIdx: Int? = nil
+        var indentStr = ""
+        for idx in scope {
+            let line = lines[idx]
+            let leading = line.prefix(while: { $0 == " " || $0 == "\t" })
+            let afterLeading = String(line.dropFirst(leading.count))
+            guard afterLeading.hasPrefix("\(key):") else { continue }
+            let afterKey = afterLeading
+                .dropFirst(key.count + 1)
+                .trimmingCharacters(in: .whitespaces)
+            if ["|", "|-", "|+", ">", ">-", ">+"].contains(afterKey) {
+                headerIdx = idx
+                indentStr = String(leading)
+                break
+            }
+        }
+        guard let hIdx = headerIdx else { return nil }
+
+        // Block content runs from hIdx+1 until indent drops below the body's
+        // first-content indent (matches replaceBlockScalarValue's scan).
+        var blockEnd = hIdx + 1
+        var bodyIndent: Int? = nil
+        while blockEnd < lines.count {
+            let line = lines[blockEnd]
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty {
+                blockEnd += 1
+                continue
+            }
+            let leadingLen = line.prefix(while: { $0 == " " || $0 == "\t" }).count
+            if let b = bodyIndent {
+                if leadingLen < b { break }
+            } else {
+                bodyIndent = leadingLen
+            }
+            blockEnd += 1
+        }
+
+        let inlineLine = "\(indentStr)\(key): \(formatInlineYAMLValue(newValue))"
+        var result = lines
+        result.replaceSubrange(hIdx..<blockEnd, with: [inlineLine])
+        return result.joined(separator: "\n")
+    }
+
+    /// Quote `value` for use as a YAML inline scalar if its plain form
+    /// would be ambiguous or mis-parsed. Pragmatic, not a full YAML 1.2
+    /// scalar-resolution implementation — it covers the cases that bite
+    /// shell command bodies, which is what flows through here.
+    private func formatInlineYAMLValue(_ value: String) -> String {
+        let needsQuote: Bool = {
+            if value.isEmpty { return true }
+            if value.first?.isWhitespace == true { return true }
+            if value.last?.isWhitespace == true { return true }
+            if let first = value.first, "!&*?|>%@`-,[]{}#".contains(first) { return true }
+            if value.contains(": ") || value.contains(" #") { return true }
+            let lower = value.lowercased()
+            if ["null", "~", "true", "false", "yes", "no", "on", "off"].contains(lower) { return true }
+            if Double(value) != nil { return true }
+            return false
+        }()
+        if !needsQuote { return value }
+        let escaped = value
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        return "\"\(escaped)\""
+    }
+
+    /// Lines belonging to the named step's `- name: <stepName>` block,
+    /// bounded by the next sibling-or-shallower `- name:`. Falls back to
+    /// the whole file when stepName is nil or no match is found, so
+    /// callers can still operate at file scope.
+    private func stepLineRange(in lines: [String], stepName: String?) -> Range<Int> {
+        guard let stepName else { return 0..<lines.count }
+        let nameMatch: (String) -> Bool = { line in
+            let t = line.trimmingCharacters(in: .whitespaces)
+            guard t.hasPrefix("- name:") else { return false }
+            var rest = t.dropFirst("- name:".count).trimmingCharacters(in: .whitespaces)
+            if (rest.hasPrefix("\"") && rest.hasSuffix("\"")) ||
+               (rest.hasPrefix("'") && rest.hasSuffix("'")) {
+                rest = String(rest.dropFirst().dropLast())
+            }
+            return rest == stepName
+        }
+        guard let headerIdx = lines.firstIndex(where: nameMatch) else {
+            return 0..<lines.count
+        }
+        let headerIndent = lines[headerIdx].prefix { $0 == " " || $0 == "\t" }.count
+        var end = headerIdx + 1
+        while end < lines.count {
+            let l = lines[end]
+            let t = l.trimmingCharacters(in: .whitespaces)
+            if t.hasPrefix("- name:") {
+                let indent = l.prefix { $0 == " " || $0 == "\t" }.count
+                if indent <= headerIndent { break }
+            }
+            end += 1
+        }
+        return headerIdx..<end
     }
 
     /// Replace a YAML value, scoped to lines containing the label key.
