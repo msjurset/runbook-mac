@@ -17,7 +17,16 @@ struct SettingsView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
-                                Text("Installed: v\(version)")
+                                // The CLI prints "dev" when built without
+                                // -ldflags '-X main.version=...' (i.e. a
+                                // local `make build`/`make deploy` with no
+                                // VERSION). Don't pretend that's a real
+                                // semver — say so explicitly.
+                                if version == "dev" {
+                                    Text("Installed: dev build (no release tag)")
+                                } else {
+                                    Text("Installed: v\(version)")
+                                }
                             }
                         } else {
                             HStack(spacing: 6) {
