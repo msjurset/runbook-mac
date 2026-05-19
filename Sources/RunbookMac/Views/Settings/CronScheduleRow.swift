@@ -7,6 +7,10 @@ struct CronScheduleRow: View {
     let entry: CronView.ScheduleEntry
     @Binding var editingName: String?
     @Binding var editSchedule: String
+    /// Editable --var payload while this row is in edit mode. Bound at
+    /// CronView so the parent's Save handler reads both the cron string
+    /// and the var list as one unit.
+    @Binding var editVars: [CronVarPair]
     /// Shared at the parent (CronView) so only one row's legend is visible at a
     /// time — entering this row's content area sets it to entry.id; leaving
     /// clears it. The legend renders only when this row owns the value.
@@ -27,6 +31,13 @@ struct CronScheduleRow: View {
 
     private var lastRun: HistoryRecord? {
         store.history(for: entry.name).first
+    }
+
+    /// True when the editor's in-progress vars differ from the entry's
+    /// current vars. Drives the Save button's enabled state so users can
+    /// commit a var-only change without touching the cron expression.
+    private var hasVarChanges: Bool {
+        editVars.asCronVarStrings() != entry.vars
     }
 
     private var nextRun: Date? {
@@ -66,6 +77,7 @@ struct CronScheduleRow: View {
                     } else {
                         editingName = entry.id
                         editSchedule = entry.schedule
+                        editVars = entry.vars.asCronVarPairs()
                         // Editing forces the body open so the form is visible.
                         isExpanded = true
                     }
@@ -164,7 +176,12 @@ struct CronScheduleRow: View {
                             Image(systemName: "clock")
                                 .foregroundStyle(.secondary)
                             FilterField(placeholder: "Cron schedule", text: $editSchedule, onCommit: {
-                                if !editSchedule.isEmpty && editSchedule != entry.schedule {
+                                // Cron-only commit (no var changes, no
+                                // structural diff) preserves the old
+                                // Enter-to-save behavior on the cron
+                                // field. The Save button below handles
+                                // the var-changed and var-added cases.
+                                if !editSchedule.isEmpty && (editSchedule != entry.schedule || hasVarChanges) {
                                     onUpdate(entry.name)
                                 } else {
                                     editingName = nil
@@ -172,7 +189,7 @@ struct CronScheduleRow: View {
                             }, autoFocus: true)
                             .frame(maxWidth: 200)
                             Button("Save") { onUpdate(entry.name) }
-                                .disabled(editSchedule.isEmpty || editSchedule == entry.schedule)
+                                .disabled(editSchedule.isEmpty || (editSchedule == entry.schedule && !hasVarChanges))
                             Button("Cancel") { editingName = nil }
                                 .font(.caption)
                         }
@@ -182,6 +199,8 @@ struct CronScheduleRow: View {
                                 .font(.callout)
                                 .foregroundStyle(.orange)
                         }
+
+                        CronVarsEditor(pairs: $editVars)
                     }
 
                     CronDiagramCompact()
@@ -205,6 +224,24 @@ struct CronScheduleRow: View {
                         .font(.callout)
                         .foregroundStyle(.orange)
                         .padding(.leading, 8)
+                }
+
+                // --var key=value pairs baked into the schedule, when present.
+                // Surfacing them inline (under the cron line, indented to align
+                // with the description) keeps the eye anchored to "what runs
+                // when" before "what's passed in"; suppress entirely for plain
+                // schedules so the common case stays uncluttered.
+                if !entry.vars.isEmpty {
+                    HStack(alignment: .center, spacing: 4) {
+                        Color.clear.frame(width: 18, height: 16)
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(entry.vars.joined(separator: "  "))
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
                 }
 
                 nextRunLine

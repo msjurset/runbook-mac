@@ -5,6 +5,10 @@ struct CronAddForm: View {
     @Binding var name: String
     @Binding var schedule: String
     @Binding var cronDescription: String
+    /// Optional `--var key=value` payload to bake into the new schedule.
+    /// Empty rows are dropped on submit, so it's safe to leave the editor
+    /// untouched for plain schedules.
+    @Binding var vars: [CronVarPair]
     let onAdd: () -> Void
 
     @FocusState private var isNameFocused: Bool
@@ -109,6 +113,11 @@ struct CronAddForm: View {
                 CronDiagram()
                     .padding(.top, 2)
             }
+
+            // Optional variables payload. Reuses the same editor used by
+            // the per-row edit form so the Add and Edit flows look and
+            // behave identically.
+            CronVarsEditor(pairs: $vars)
         }
         .padding()
     }

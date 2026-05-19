@@ -448,7 +448,8 @@ The mtime gate is what prevents a stale append-mode log from leaking content int
 
 **Variations:**
 
-- **Multiple schedules per runbook:** call Add Schedule again. Both lines coexist; you can remove either independently.
+- **Multiple schedules per runbook:** call Add Schedule again. Both lines coexist; you can remove either independently. The Schedules view groups them into a single card — one header, one step pipeline, one sub-row per schedule — instead of duplicating the whole entry.
+- **Bake CLI variables into a schedule:** at the CLI, `runbook cron add my-report "0 6 * * *" --var type=daily --var path=/r/daily.csv` and a second `--var type=monthly --var path=/r/monthly.csv` on a `"0 7 1 * *"` schedule installs the same runbook twice with different inputs. The Schedules view shows each sub-row's `--var` payload on its own line under the cron expression. Use this with a `condition:` step in the YAML to branch on the variable for true variant behavior.
 - **Same schedule from the runbook list:** right-click a runbook → Schedule. Opens a sheet with the same form.
 - **Same schedule from the detail view:** Schedule button in the toolbar.
 

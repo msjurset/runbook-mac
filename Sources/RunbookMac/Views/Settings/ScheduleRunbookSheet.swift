@@ -5,10 +5,30 @@ struct ScheduleRunbookSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var schedule = ""
     @State private var existingSchedule: String?
+    /// `--var key=value` payload, prepopulated from the existing schedule
+    /// (if editing) and editable inline. Empty for the create-new path.
+    @State private var vars: [CronVarPair] = []
+    /// Vars captured at load time so the Save/Update button can detect
+    /// "vars changed even though cron string didn't" and stay enabled.
+    @State private var existingVars: [String] = []
     @State private var cronDescription = ""
     @State private var isLoading = true
     @State private var isSaving = false
     @State private var errorMessage: String?
+
+    private var hasVarChanges: Bool {
+        vars.asCronVarStrings() != existingVars
+    }
+
+    private var saveDisabled: Bool {
+        if schedule.isEmpty || isSaving { return true }
+        // Editing: enabled if either schedule or vars changed.
+        if existingSchedule != nil {
+            return schedule == existingSchedule && !hasVarChanges
+        }
+        // Creating: enabled as soon as schedule is non-empty.
+        return false
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -46,6 +66,9 @@ struct ScheduleRunbookSheet: View {
 
                     CronDiagram()
                         .padding(.top, 4)
+
+                    CronVarsEditor(pairs: $vars)
+                        .padding(.top, 4)
                 }
                 .onChange(of: schedule) {
                     cronDescription = CronDescription.describe(schedule)
@@ -75,7 +98,7 @@ struct ScheduleRunbookSheet: View {
                     saveSchedule()
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(schedule.isEmpty || isSaving || schedule == existingSchedule)
+                .disabled(saveDisabled)
             }
         }
         .padding()
@@ -103,6 +126,18 @@ struct ScheduleRunbookSheet: View {
                             existingSchedule = tokens[0...4].joined(separator: " ")
                             schedule = existingSchedule!
                             cronDescription = CronDescription.describe(schedule)
+                            // Columns after schedule are BACKEND + VARS.
+                            // Capture vars (skipping the "-" sentinel)
+                            // so the editor opens with the right state.
+                            let varTokens = tokens.count > 6 ? Array(tokens[6...]) : []
+                            let parsedVars: [String]
+                            if varTokens.count == 1 && varTokens[0] == "-" {
+                                parsedVars = []
+                            } else {
+                                parsedVars = varTokens
+                            }
+                            existingVars = parsedVars
+                            vars = parsedVars.asCronVarPairs()
                         }
                         break
                     }
@@ -125,7 +160,7 @@ struct ScheduleRunbookSheet: View {
                 if let old = existingSchedule {
                     _ = try await RunbookCLI.shared.cronRemove(name: runbookName, schedule: old)
                 }
-                _ = try await RunbookCLI.shared.cronAdd(name: runbookName, schedule: schedule)
+                _ = try await RunbookCLI.shared.cronAdd(name: runbookName, schedule: schedule, vars: vars.asCronVarStrings())
                 await MainActor.run {
                     isSaving = false
                     dismiss()

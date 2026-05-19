@@ -56,9 +56,17 @@ actor RunbookCLI {
         try await captureOutput(args: ["cron", "list"])
     }
 
-    /// Add a cron entry.
-    func cronAdd(name: String, schedule: String) async throws -> String {
-        try await captureOutput(args: ["cron", "add", name, schedule])
+    /// Add a cron entry. `vars` is a list of "key=value" strings that get
+    /// baked into the scheduled invocation as repeated `--var key=value`
+    /// arguments — same flag the manual `runbook run` accepts. Pass an
+    /// empty array for a plain schedule.
+    func cronAdd(name: String, schedule: String, vars: [String] = []) async throws -> String {
+        var args = ["cron", "add", name, schedule]
+        for v in vars {
+            args.append("--var")
+            args.append(v)
+        }
+        return try await captureOutput(args: args)
     }
 
     /// Remove a cron entry.
