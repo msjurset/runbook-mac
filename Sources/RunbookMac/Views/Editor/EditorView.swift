@@ -9,6 +9,7 @@ struct EditorView: View {
     @State private var errorMessage: String?
     @State private var validationSuccess = false
     @State private var showDiff = false
+    @State private var vimHost = VimEditorHost()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,6 +29,7 @@ struct EditorView: View {
             let yaml = store.readRawYAML(for: runbook) ?? ""
             content = yaml
             originalContent = yaml
+            vimHost.onSubmit = { reviewChanges() }
         }
     }
 
@@ -51,17 +53,24 @@ struct EditorView: View {
 
             Divider()
 
-            CodeEditorView(text: $content)
+            CodeEditorView(
+                text: $content,
+                vimEngine: vimHost.vim.engine,
+                slashPrefix: $vimHost.slashPrefix,
+                onSlashKeyEvent: { vimHost.handleSlashKey($0, text: $content) }
+            )
+            .vimSlashOverlay(vimHost)
 
             Divider()
 
             HStack {
                 Button("Cancel") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
+                    .keyboardShortcut(vimHost.isActive ? nil : .cancelAction)
                 Spacer()
+                VimToolbarItem(controller: vimHost.vim)
                 Button("Validate") { validate() }
                 Button("Save") { reviewChanges() }
-                    .keyboardShortcut(.defaultAction)
+                    .keyboardShortcut(vimHost.isActive ? nil : .defaultAction)
             }
             .padding()
         }
@@ -138,6 +147,7 @@ struct NewRunbookSheet: View {
     @State private var name = ""
     @State private var content = ""
     @State private var errorMessage: String?
+    @State private var vimHost = VimEditorHost()
 
     private var blankTemplate: TemplateChoice {
         TemplateChoice(
@@ -217,8 +227,14 @@ struct NewRunbookSheet: View {
                             .foregroundStyle(.secondary)
                         FilterField(placeholder: "my-runbook", text: $name)
                     }
-                    CodeEditorView(text: $content)
-                        .border(.quaternary)
+                    CodeEditorView(
+                        text: $content,
+                        vimEngine: vimHost.vim.engine,
+                        slashPrefix: $vimHost.slashPrefix,
+                        onSlashKeyEvent: { vimHost.handleSlashKey($0, text: $content) }
+                    )
+                    .border(.quaternary)
+                    .vimSlashOverlay(vimHost)
                 }
             }
             .padding()
@@ -234,10 +250,11 @@ struct NewRunbookSheet: View {
 
             HStack {
                 Button("Cancel") { dismiss() }
-                    .keyboardShortcut(.cancelAction)
+                    .keyboardShortcut(vimHost.isActive ? nil : .cancelAction)
                 Spacer()
+                VimToolbarItem(controller: vimHost.vim)
                 Button("Create") { create() }
-                    .keyboardShortcut(.defaultAction)
+                    .keyboardShortcut(vimHost.isActive ? nil : .defaultAction)
                     .disabled(name.isEmpty)
             }
             .padding()
@@ -252,6 +269,7 @@ struct NewRunbookSheet: View {
         }
         .onAppear {
             content = selectedChoice.content
+            vimHost.onSubmit = { create() }
         }
     }
 

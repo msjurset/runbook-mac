@@ -32,6 +32,12 @@ clean:
 test:
 	swift test
 
+.PHONY: update-vim
+update-vim:
+	@echo "Updating swift-vim-engine to the latest tagged release..."
+	@swift package update swift-vim-engine
+	@echo "Review Package.resolved, smoke test, then commit."
+
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=1.2.0"; exit 1; fi
 	@if ! git diff --quiet || ! git diff --cached --quiet; then \

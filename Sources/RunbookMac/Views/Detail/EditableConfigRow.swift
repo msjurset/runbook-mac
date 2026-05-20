@@ -17,6 +17,9 @@ struct EditableConfigRow: View {
     /// Bump to request focus on the FilterField after we flip into edit
     /// mode. A FocusState binding doesn't reach into NSViewRepresentable.
     @State private var focusBump = 0
+    /// Per-edit-session vim/slash state for the inline editor. Reset on
+    /// cancel/save so each row's edit starts with vim OFF.
+    @State private var inlineHost = VimEditorHost()
 
     private var lineCount: Int {
         max(1, editValue.components(separatedBy: "\n").count)
@@ -53,31 +56,46 @@ struct EditableConfigRow: View {
                 // one-liners often grow into multi-line shell snippets, so
                 // plain Return inserts a newline; Cmd+Return saves; Escape
                 // cancels; clicking outside saves via textDidEndEditing.
-                InlineMultilineEditor(
-                    text: $editValue,
-                    onSave: { save() },
-                    onCancel: { cancel() },
-                    focusTrigger: focusBump
-                )
-                .padding(4)
-                .background(
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(.background)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(.blue.opacity(0.5), lineWidth: 1)
-                )
-                .frame(height: editorHeight)
+                // Vim is OFF by default; toggle via the keyboard icon to
+                // the right of the editor, or by typing `/vim` inside.
+                HStack(alignment: .top, spacing: 4) {
+                    InlineMultilineEditor(
+                        text: $editValue,
+                        onSave: { save() },
+                        onCancel: { cancel() },
+                        focusTrigger: focusBump,
+                        vimEngine: inlineHost.vim.engine,
+                        slashPrefix: $inlineHost.slashPrefix,
+                        onSlashKeyEvent: { inlineHost.handleSlashKey($0, text: $editValue) }
+                    )
+                    .padding(4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(.background)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(.blue.opacity(0.5), lineWidth: 1)
+                    )
+                    .frame(height: editorHeight)
+
+                    VimToolbarItem(controller: inlineHost.vim)
+                        .padding(.top, 4)
+                }
+                .vimSlashOverlay(inlineHost)
             } else if let lang = codeLanguage {
                 CodeBlockView(source: value, language: lang)
                     .contentShape(Rectangle())
                     .onTapGesture(count: 2) { startPopoutEditing() }
                     .help("Double-click anywhere to edit")
                     .popover(isPresented: $isPopoutOpen, arrowEdge: .top) {
-                        CodePopoutEditor(text: $editValue, language: lang)
-                            .frame(width: 900, height: 520)
-                            .onDisappear { save() }
+                        VimHostedPopoutEditor(
+                            text: $editValue,
+                            language: lang,
+                            onClose: { isPopoutOpen = false }
+                        )
+                        .frame(width: 900, height: 520)
+                        .onDisappear { save() }
                     }
             } else {
                 Text(value)
@@ -112,6 +130,8 @@ struct EditableConfigRow: View {
         // Bump the trigger so FilterField becomes first responder after the
         // SwiftUI render flushes the .editing branch into the view tree.
         focusBump += 1
+        inlineHost.reset()
+        inlineHost.onSubmit = { save() }
     }
 
     private func startPopoutEditing() {
@@ -122,12 +142,14 @@ struct EditableConfigRow: View {
     private func cancel() {
         isEditing = false
         isPopoutOpen = false
+        inlineHost.reset()
     }
 
     private func save() {
         // Exit any active edit state; downstream write is idempotent.
         isEditing = false
         isPopoutOpen = false
+        inlineHost.reset()
 
         let oldIsBlock = value.contains("\n")
         // Whether the NEW value is genuinely multi-line: collapse trailing

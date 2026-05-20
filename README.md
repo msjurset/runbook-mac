@@ -36,6 +36,7 @@ For the underlying CLI's docs (YAML schema, step types, variable resolution, sch
 - **YAML Editor** — Syntax-highlighted editor with color-coded keys, strings, booleans, numbers, comments, template expressions, and `op://` references
 - **Auto-Complete** — Press Tab for context-aware YAML completions (top-level keys, step fields, type values, error policies)
 - **Auto-Indent** — Smart indentation after colon-terminated lines
+- **Vim Mode (opt-in)** — Optional vim keybindings in the YAML editor, the inline code-block popout, and the inline single-value edit field. Off by default; turn on per editor with the keyboard icon next to it, or by typing `/vim` followed by space/Enter inside the editor. Full normal/insert/visual/command modes (hjkl, w/b/e, dd/yy/p, i/a/o, R, v, `/search`, marks, text objects, `gU{motion}`, `.` repeat). A mode badge (VIM:N / VIM:I / `:q` / `/term`) shows the current submode; the `?` next to it opens a full cheatsheet. While on, Escape belongs to vim — dismiss-on-Esc (sheet, popover, inline-edit cancel) is suspended; exit vim via the badge, `:q`, or another `/vim`. `:w` and `:wq` trigger the editor's Save.
 - **Templates** — Runbooks in `templates/` directories are shown separately with visual distinction; all discovered templates appear in the New Runbook dialog and as right-click actions
 - **Pin Runbooks** — Pin frequently-used runbooks to the top of the list; persisted across sessions
 - **Keyboard Navigation** — ⌘1-4 for sidebar sections, ⌘K to quick-jump to any runbook by name

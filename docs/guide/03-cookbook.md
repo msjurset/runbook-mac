@@ -306,6 +306,27 @@ When you've found a recipe you want to try, the Mac app workflows below tell you
 
 ---
 
+### Edit YAML with vim keybindings
+
+**When to reach for this:** you're a vim user and want modal editing in the YAML editor or the inline code-block popout — for fast cursor motion, text-object operations, search, marks, `.` repeat. Vim is **OFF by default** and is opt-in per editor.
+
+**How:**
+
+1. Open any text editor surface: the pencil from the runbook detail view (full YAML editor), New Runbook, double-click a single-line value (inline edit), or double-click a multi-line value (code popout).
+2. **Either** click the keyboard icon next to the editor **or** type `/vim` followed by space or Enter inside the editor. A `VIM:N` badge appears next to the icon and the caret turns into a translucent block.
+3. Use vim's normal commands: `hjkl`, `w`/`b`/`e`, `dd`/`yy`/`p`, `i`/`a`/`o`, `R`, `v`/`V`, `/term<Enter>`, `f<x>`, `gU{motion}`, text objects `iw`/`i"`/`i(`, marks `m<a-z>` / `'<a-z>`, `.` to repeat, etc. The `?` button next to the badge opens a full cheatsheet.
+4. Exit vim by clicking the badge, typing `:q<Enter>`, typing `:wq<Enter>` (saves + exits), or typing `/vim` again. `:w<Enter>` triggers the Save action without exiting.
+
+**Gotchas:**
+
+- **Escape belongs to vim while active.** The normal "Esc dismisses the editor sheet" / "Esc closes the popover" convenience is suspended — you must exit vim first. This is by design (vim's Esc is load-bearing for canceling pending operators, leaving insert mode, etc.).
+- **The activation is per-editor instance.** Opening another runbook in a new editor starts with vim off again — there's no app-wide vim toggle.
+- **YAML auto-complete on Tab is suspended while in vim normal mode.** Insert mode (after `i`/`a`/`o`) restores normal typing behavior including Tab → completion.
+
+**Notes:** the vim engine is the same component used by `jrnlbar`. Deliberate limitations: no named registers, no macros (`q…q`/`@reg`), no sentence motions, no `:%s///`, no insert-mode replay inside `.`.
+
+---
+
 ### Validate before saving
 
 **When to reach for this:** complex YAML where a typo could be expensive to discover by running.

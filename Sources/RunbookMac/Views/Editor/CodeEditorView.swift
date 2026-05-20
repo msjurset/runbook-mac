@@ -1,9 +1,25 @@
 import AppKit
 import SwiftUI
+import VimEngine
 
-/// A syntax-highlighted YAML editor with auto-completion.
+/// A syntax-highlighted YAML editor with auto-completion. Optionally
+/// hands the keyboard off to `VimEngine` when the host passes a non-nil
+/// `vimEngine` binding (set by clicking the vim icon or typing `/vim`).
 struct CodeEditorView: NSViewRepresentable {
     @Binding var text: String
+    /// Non-nil = vim mode is active. The engine owns key routing while set.
+    var vimEngine: VimEngine? = nil
+    /// Current `/partial` slash-command run at the caret. Empty when the
+    /// caret isn't inside a slash context. The host renders the
+    /// suggestion pill from this; the editor writes to it.
+    var slashPrefix: Binding<String>? = nil
+    /// Host-side handler for arrow/Enter/Tab/Esc/Space while the slash
+    /// pill is visible. Returning true marks the event as consumed.
+    var onSlashKeyEvent: ((SuggestionKeyEvent) -> Bool)? = nil
+
+    enum SuggestionKeyEvent {
+        case arrowUp, arrowDown, enter, escape, tab, space
+    }
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
@@ -40,6 +56,12 @@ struct CodeEditorView: NSViewRepresentable {
         ]
 
         textView.delegate = context.coordinator
+        let coordinator = context.coordinator
+        textView.vimEngineProvider = { coordinator.parent?.vimEngine }
+        textView.isShowingSlash = { !(coordinator.parent?.slashPrefix?.wrappedValue ?? "").isEmpty }
+        textView.slashKeyHandler = { event in
+            coordinator.parent?.onSlashKeyEvent?(event) ?? false
+        }
         context.coordinator.textView = textView
 
         context.coordinator.setTextAndHighlight(text)
@@ -48,22 +70,46 @@ struct CodeEditorView: NSViewRepresentable {
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        guard let textView = scrollView.documentView as? NSTextView else { return }
+        guard let textView = scrollView.documentView as? YAMLTextView else { return }
+        // Refresh the coordinator's parent so non-@Binding values (vim
+        // engine, slash bindings, slash handler) read live across
+        // re-renders. @Binding storage already routes through its
+        // wrapper, but plain `var` fields would otherwise see the stale
+        // struct captured at makeCoordinator() time.
+        context.coordinator.parent = self
+
         if textView.string != text {
             context.coordinator.setTextAndHighlight(text)
         }
+
+        // On vim→off transition, restore first responder and repaint the
+        // cursor cell so the lingering block clears.
+        let vimActiveNow = (vimEngine != nil)
+        if context.coordinator.lastVimActive && !vimActiveNow {
+            DispatchQueue.main.async {
+                if let window = textView.window {
+                    window.makeFirstResponder(textView)
+                }
+                textView.refreshCursorArea()
+            }
+        }
+        context.coordinator.lastVimActive = vimActiveNow
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text)
+        let c = Coordinator(text: $text)
+        c.parent = self
+        return c
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         var text: Binding<String>
+        var parent: CodeEditorView?
         weak var textView: NSTextView?
         let highlighter = YAMLHighlighter()
         let completionProvider = YAMLCompletionProvider()
         private var isUpdating = false
+        var lastVimActive = false
 
         private let baseAttrs: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedSystemFont(ofSize: CGFloat(AppSettings.editorFontSize), weight: .regular),
@@ -116,8 +162,16 @@ struct CodeEditorView: NSViewRepresentable {
             textView.typingAttributes = baseAttrs
 
             isUpdating = false
-        }
 
+            // Slash-command detection — suspended while /vim is active so
+            // vim's normal-mode `/` (search) doesn't fight the app-level
+            // dropdown.
+            if let parent, let binding = parent.slashPrefix {
+                binding.wrappedValue = parent.vimEngine != nil
+                    ? ""
+                    : SlashPrefixDetector.detect(in: textView)
+            }
+        }
         // MARK: - Completion
 
         func textView(_ textView: NSTextView, completions words: [String],
@@ -136,6 +190,13 @@ struct CodeEditorView: NSViewRepresentable {
         }
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+            // While vim is active, the engine has already had a chance to
+            // consume the key in keyDown — anything reaching doCommandBy
+            // belongs to AppKit's default behavior (insert-mode typing,
+            // newline insertion etc.), so don't trigger YAML completion
+            // or auto-indent here.
+            if parent?.vimEngine != nil { return false }
+
             // Tab: insert 2 spaces (YAML indent) or trigger completion if line has content
             if commandSelector == #selector(NSResponder.insertTab(_:)) {
                 let nsText = textView.string as NSString
@@ -311,7 +372,10 @@ struct CodeEditorView: NSViewRepresentable {
 /// `key:`) replaces only the value text, not the key. Including `:` in the
 /// word set causes "type:" + Tab to replace the whole "type:" with the
 /// chosen value, producing a broken document.
-final class YAMLTextView: NSTextView {
+///
+/// All the vim/slash plumbing (block cursor, scroll-on-cursor-move,
+/// replace-mode overwrite, keyDown forwarding) lives in `VimAwareTextView`.
+final class YAMLTextView: VimAwareTextView {
     private static let wordChars = CharacterSet.alphanumerics
         .union(CharacterSet(charactersIn: "_-."))
 

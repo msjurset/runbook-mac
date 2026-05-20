@@ -309,6 +309,10 @@ enum HelpTopic: String, CaseIterable, Identifiable {
                 .heading("Inline Code Block Editor"),
                 .paragraph("In the runbook detail view, multi-line command/body values render as code blocks with muted syntax highlighting. Double-click anywhere in the block to open a popout editor with full-vibrancy colors and live Bash/JSON highlighting."),
                 .paragraph("The popout saves on any of: clicking outside, Esc, or Cmd-W. The detail view refreshes immediately — no need to reselect the runbook. Edits are written back to YAML block-scalars with their original indentation preserved, scoped to the step you were editing so multiple steps with the same key (e.g. two `command:` blocks) can't collide."),
+                .heading("Vim Mode (opt-in)"),
+                .paragraph("Three editor surfaces support an optional vim keybindings mode: the full YAML editor, the inline code-block popout, and the inline-edit field that appears when you double-click a single value in the runbook detail view. Vim is OFF by default in all three; turn it on per editor by either clicking the keyboard icon next to it, or typing /vim followed by space/Enter inside the editor."),
+                .paragraph("When active, the keystrokes behave like vim's normal / insert / visual / command modes (hjkl, w/b/e, dd/yy/p, i/a/o, R, v, /search, f<x>, marks, text objects, gU{motion}, `.` repeat, …). The mode badge (VIM:N / VIM:I / `:q` / `/term`) shows the current submode; the `?` button next to the badge opens a full cheatsheet. Click the badge or type `:q` / `:wq` to exit."),
+                .paragraph("While vim is on, Escape belongs to vim and will NOT dismiss the editor sheet, popover, or inline edit. To leave the editor you must first exit vim (badge, `:q`, or click the keyboard icon again). Vim's `:w` and `:wq` trigger the editor's Save."),
             ]
 
         case .running:
