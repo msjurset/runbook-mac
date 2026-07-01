@@ -105,7 +105,7 @@ struct RunbookDetailView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if let desc = runbook.description, !desc.isEmpty {
+            if let desc = runbook.cleanedDescription, !desc.isEmpty {
                 Text(desc)
                     .font(.title3)
                     .foregroundStyle(.secondary)

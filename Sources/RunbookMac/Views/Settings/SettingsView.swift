@@ -99,9 +99,9 @@ struct SettingsView: View {
             Section("Credentials") {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Pre-warm goback secrets")
+                        Text("Pre-warm secrets")
                             .fontWeight(.medium)
-                        Text("Resolves op:// secrets and caches them in the login keychain so scheduled (cron) runs can read them without an interactive session.")
+                        Text("Resolves op:// secrets and caches them in the login keychain so scheduled (cron/launchd) runs can read them without an interactive session.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -111,7 +111,6 @@ struct SettingsView: View {
                         ProgressView().controlSize(.small)
                     } else {
                         Button("Pre-warm") { prewarmCredentials() }
-                            .disabled(!GobackCLI.isInstalled)
                     }
                 }
                 if !GobackCLI.isInstalled {
@@ -165,9 +164,18 @@ struct SettingsView: View {
         warmError = nil
         Task {
             do {
-                let output = try await GobackCLI.auth()
+                var output = ""
+                if GobackCLI.isInstalled {
+                    output += "--- goback ---\n"
+                    let gobOut = try await GobackCLI.auth()
+                    output += gobOut.isEmpty ? "No new secrets needed caching.\n\n" : gobOut + "\n\n"
+                }
+                output += "--- runbook ---\n"
+                let rbOut = try await RunbookCLI.shared.auth()
+                output += rbOut.isEmpty ? "No new secrets needed caching.\n" : rbOut + "\n"
+                
                 await MainActor.run {
-                    warmOutput = output.isEmpty ? "Done. No new secrets needed caching." : output
+                    warmOutput = output
                     isWarming = false
                 }
             } catch {

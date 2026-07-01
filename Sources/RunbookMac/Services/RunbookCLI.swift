@@ -76,6 +76,11 @@ actor RunbookCLI {
         return try await captureOutput(args: args)
     }
 
+    /// Pre-resolve and cache 1Password secrets in the system keychain for all runbooks.
+    func auth() async throws -> String {
+        try await captureOutput(args: ["auth"])
+    }
+
     /// Pull a repo or file.
     func pull(url: String) async throws -> String {
         try await captureOutput(args: ["pull", url])

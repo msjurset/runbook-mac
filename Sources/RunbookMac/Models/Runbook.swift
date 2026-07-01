@@ -12,6 +12,20 @@ struct Runbook: Identifiable, Codable, Hashable {
     /// Resolved file path on disk (not from YAML)
     var filePath: String?
 
+    /// A version of the description with single newlines replaced by spaces,
+    /// preserving paragraph breaks (double newlines).
+    var cleanedDescription: String? {
+        guard let description = description else { return nil }
+        return description.replacingOccurrences(of: "\r\n", with: "\n")
+            .components(separatedBy: "\n\n")
+            .map { paragraph in
+                paragraph.components(separatedBy: "\n")
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                    .joined(separator: " ")
+            }
+            .joined(separator: "\n\n")
+    }
+
     enum CodingKeys: String, CodingKey {
         case name, description, variables, steps, notify, log
     }

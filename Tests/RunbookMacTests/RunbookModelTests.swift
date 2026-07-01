@@ -131,6 +131,22 @@ struct RunbookModelTests {
         #expect(decoded.name == book.name)
         #expect(decoded.steps.count == 1)
     }
+
+    @Test("Cleaned description normalizes single newlines but preserves double newlines")
+    func cleanedDescription() throws {
+        var book = Runbook(
+            name: "test",
+            description: "Line 1\nLine 2\r\nLine 3\n\nParagraph 2 line 1\nParagraph 2 line 2",
+            steps: []
+        )
+        #expect(book.cleanedDescription == "Line 1 Line 2 Line 3\n\nParagraph 2 line 1 Paragraph 2 line 2")
+        
+        book.description = nil
+        #expect(book.cleanedDescription == nil)
+        
+        book.description = ""
+        #expect(book.cleanedDescription == "")
+    }
 }
 
 @Suite("History Record")

@@ -110,6 +110,20 @@ struct HistoryRowView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .contextMenu {
+                if let log = logFile {
+                    Button("View Full Log", systemImage: "doc.text") {
+                        showLog = true
+                    }
+                    Button("Reveal Log in Finder", systemImage: "folder") {
+                        NSWorkspace.shared.selectFile(log.path, inFileViewerRootedAtPath: "")
+                    }
+                    Button("Copy Log Path", systemImage: "doc.on.doc") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(log.path, forType: .string)
+                    }
+                }
+            }
 
             if expanded {
                 VStack(alignment: .leading, spacing: 2) {

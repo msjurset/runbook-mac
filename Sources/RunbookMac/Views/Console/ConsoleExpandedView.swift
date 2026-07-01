@@ -9,6 +9,8 @@ struct ConsoleExpandedView: View {
     @Environment(RunSessionStore.self) private var store
     @Environment(RunbookStore.self) private var runbookStore
 
+    @State private var dragStartHeight: CGFloat = 0
+
     var body: some View {
         guard let session = store.current else { return AnyView(EmptyView()) }
 
@@ -20,7 +22,33 @@ struct ConsoleExpandedView: View {
 
         return AnyView(
             VStack(spacing: 0) {
-                Divider()
+                Color.clear
+                    .frame(height: 6)
+                    .contentShape(Rectangle())
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.resizeUpDown.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { gesture in
+                                if dragStartHeight == 0 {
+                                    dragStartHeight = store.consoleHeight
+                                }
+                                let newHeight = dragStartHeight - gesture.translation.height
+                                store.consoleHeight = max(120, min(600, newHeight))
+                            }
+                            .onEnded { _ in
+                                dragStartHeight = 0
+                            }
+                    )
+                    .overlay(
+                        Divider(),
+                        alignment: .center
+                    )
 
                 // Tab strip — each session gets an equal share of the bar.
                 HStack(spacing: 6) {
@@ -50,7 +78,7 @@ struct ConsoleExpandedView: View {
                         : nil,
                     retryInitialDryRun: session.dryRun
                 )
-                .frame(height: 280)
+                .frame(height: store.consoleHeight)
             }
             .background(.ultraThickMaterial)
         )

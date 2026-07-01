@@ -22,6 +22,16 @@ final class RunSessionStore {
     /// status line). Defaults to expanded on first run.
     var isExpanded: Bool = true
 
+    /// Height of the expanded console output.
+    var consoleHeight: CGFloat = {
+        let val = UserDefaults.standard.double(forKey: "consoleHeight")
+        return val > 0 ? CGFloat(val) : 280.0
+    }() {
+        didSet {
+            UserDefaults.standard.set(Double(consoleHeight), forKey: "consoleHeight")
+        }
+    }
+
     private var runTasks: [UUID: Task<Void, Never>] = [:]
     private let terminalRetention = 5
 

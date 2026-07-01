@@ -147,11 +147,12 @@ struct RunbookListView: View {
                         .help("From repo: \(repoName(book) ?? "unknown")\n\(book.filePath ?? "")")
                 }
             }
-            if let desc = book.description, !desc.isEmpty {
+            if let desc = book.cleanedDescription, !desc.isEmpty {
                 Text(desc)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(nil)
+                    .help(book.description ?? "")
             }
             HStack(spacing: 8) {
                 Label("\(book.steps.count) steps", systemImage: "list.number")
@@ -188,6 +189,16 @@ struct RunbookListView: View {
             Button("Delete", role: .destructive) {
                 deleteRunbook(book)
             }
+            if let path = book.filePath {
+                Divider()
+                Button("Reveal in Finder", systemImage: "folder") {
+                    NSWorkspace.shared.selectFile(path, inFileViewerRootedAtPath: "")
+                }
+                Button("Copy Path", systemImage: "doc.on.doc") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(path, forType: .string)
+                }
+            }
         }
     }
 
@@ -205,11 +216,12 @@ struct RunbookListView: View {
                     .foregroundStyle(.orange)
                     .clipShape(Capsule())
             }
-            if let desc = book.description, !desc.isEmpty {
+            if let desc = book.cleanedDescription, !desc.isEmpty {
                 Text(desc)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-                    .lineLimit(1)
+                    .lineLimit(nil)
+                    .help(book.description ?? "")
             }
             HStack(spacing: 8) {
                 Label("\(book.steps.count) steps", systemImage: "list.number")
@@ -225,6 +237,16 @@ struct RunbookListView: View {
         .contextMenu {
             Button("New from Template", systemImage: "plus.doc.on.doc") {
                 templateToCreate = book
+            }
+            if let path = book.filePath {
+                Divider()
+                Button("Reveal in Finder", systemImage: "folder") {
+                    NSWorkspace.shared.selectFile(path, inFileViewerRootedAtPath: "")
+                }
+                Button("Copy Path", systemImage: "doc.on.doc") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(path, forType: .string)
+                }
             }
         }
     }

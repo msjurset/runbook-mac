@@ -4,19 +4,53 @@ import SwiftUI
 /// A text field that suppresses macOS autofill/autocomplete popups.
 /// Use this instead of SwiftUI TextField for every text input on macOS —
 /// SwiftUI TextField shows a phantom autocomplete dropdown no modifier can kill.
-struct FilterField: NSViewRepresentable {
+struct FilterField: View {
     let placeholder: String
     @Binding var text: String
     var onCommit: (() -> Void)?
     var autoFocus = false
     var isDisabled = false
-    /// Bumping this integer requests that the field become first responder.
-    /// Use instead of SwiftUI @FocusState, which doesn't bind to NSViewRepresentable.
     var focusTrigger: Int = 0
-    /// Visual style — .rounded for form/sheet inputs, .plain for inline search bars.
     var style: Style = .rounded
 
     enum Style { case rounded, plain }
+
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            FilterFieldRepresentable(
+                placeholder: placeholder,
+                text: $text,
+                onCommit: onCommit,
+                autoFocus: autoFocus,
+                isDisabled: isDisabled,
+                focusTrigger: focusTrigger,
+                style: style
+            )
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, style == .rounded ? 8 : 4)
+                .transition(.opacity)
+                .help("Clear")
+            }
+        }
+    }
+}
+
+struct FilterFieldRepresentable: NSViewRepresentable {
+    let placeholder: String
+    @Binding var text: String
+    var onCommit: (() -> Void)?
+    var autoFocus = false
+    var isDisabled = false
+    var focusTrigger: Int = 0
+    var style: FilterField.Style
 
     func makeNSView(context: Context) -> NoAutoFillTextField {
         let field = NoAutoFillTextField()
