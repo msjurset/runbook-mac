@@ -191,6 +191,14 @@ final class RunSessionStore {
     /// Toggle expanded/collapsed.
     func toggle() { isExpanded.toggle() }
 
+    /// Inject a pre-constructed session directly into the store (used by unit
+    /// and screenshot tests so no CLI subprocess is spawned).
+    func injectSession(_ session: RunSession) {
+        sessions.insert(session, at: 0)
+        currentID = session.id
+        isExpanded = true
+    }
+
     // MARK: - Mutations (main actor)
 
     private func append(_ line: String, to sessionID: UUID) {

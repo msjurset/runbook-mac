@@ -10,10 +10,11 @@ struct RunbookDetailView: View {
     @State private var showRunConfirm = false
     @State private var showCreateFromTemplate = false
     @State private var showSchedule = false
-    @State private var expandedSteps: Set<Int> = []
+    @State private var expandedSteps: Set<Int>
 
-    init(runbook: Runbook) {
+    init(runbook: Runbook, initialExpandedSteps: Set<Int> = []) {
         self.initialRunbook = runbook
+        self._expandedSteps = State(initialValue: initialExpandedSteps)
     }
 
     /// Resolve the latest Runbook instance from the store by name so that
@@ -104,10 +105,13 @@ struct RunbookDetailView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if let desc = runbook.cleanedDescription, !desc.isEmpty {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(runbook.name)
+                .font(.title2)
+                .fontWeight(.bold)
+            if let desc = runbook.cleanedDescription ?? runbook.displaySummary, !desc.isEmpty {
                 Text(desc)
-                    .font(.title3)
+                    .font(.body)
                     .foregroundStyle(.secondary)
             }
             HStack {

@@ -82,7 +82,7 @@ struct CronView: View {
         }
     }
 
-    @State private var schedules: [ScheduleEntry] = []
+    @State private var schedules: [ScheduleEntry]
     @State private var isLoading = false
     @State private var showAdd = false
     @State private var newName = ""
@@ -103,6 +103,17 @@ struct CronView: View {
     /// Drives single-row legend visibility — entering a row clears any other
     /// row's legend by virtue of the binding holding only one id at a time.
     @State private var hoveredRowID: String?
+    private let autoLoad: Bool
+
+    init(
+        initialSchedules: [ScheduleEntry] = [],
+        initialHoveredRowID: String? = nil,
+        autoLoad: Bool = true
+    ) {
+        self._schedules = State(initialValue: initialSchedules)
+        self._hoveredRowID = State(initialValue: initialHoveredRowID)
+        self.autoLoad = autoLoad
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -184,7 +195,11 @@ struct CronView: View {
                 ContextualHelpButton(topic: .scheduling)
             }
         }
-        .onAppear { loadCronList() }
+        .onAppear {
+            if autoLoad {
+                loadCronList()
+            }
+        }
     }
 
     // MARK: - Data

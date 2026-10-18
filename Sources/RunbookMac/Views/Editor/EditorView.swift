@@ -8,8 +8,22 @@ struct EditorView: View {
     @State private var originalContent: String = ""
     @State private var errorMessage: String?
     @State private var validationSuccess = false
-    @State private var showDiff = false
+    @State private var showDiff: Bool
     @State private var vimHost = VimEditorHost()
+    private let initialVimActive: Bool
+    private let initialModifiedContent: String?
+
+    init(
+        runbook: Runbook,
+        initialVimActive: Bool = false,
+        initialShowDiff: Bool = false,
+        initialModifiedContent: String? = nil
+    ) {
+        self.runbook = runbook
+        self._showDiff = State(initialValue: initialShowDiff)
+        self.initialVimActive = initialVimActive
+        self.initialModifiedContent = initialModifiedContent
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,9 +41,12 @@ struct EditorView: View {
         .frame(minWidth: 600, minHeight: 500)
         .onAppear {
             let yaml = store.readRawYAML(for: runbook) ?? ""
-            content = yaml
             originalContent = yaml
+            content = initialModifiedContent ?? yaml
             vimHost.onSubmit = { reviewChanges() }
+            if initialVimActive {
+                vimHost.vim.activate()
+            }
         }
     }
 

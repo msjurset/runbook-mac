@@ -3,6 +3,10 @@ import SwiftUI
 struct HistoryListView: View {
     @Environment(RunbookStore.self) private var store
     @State private var filterName = ""
+    var initialExpandedRecordIDs: Set<String> = []
+    var initialExpandedSteps: [String: Set<String>] = [:]
+    var preloadedStepLogs: [String: String] = [:]
+    var customLogURLs: [String: URL] = [:]
 
     private var filteredRecords: [HistoryRecord] {
         if filterName.isEmpty {
@@ -36,9 +40,15 @@ struct HistoryListView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(filteredRecords) { record in
-                            HistoryRowView(record: record)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 4)
+                            HistoryRowView(
+                                record: record,
+                                initialExpanded: initialExpandedRecordIDs.contains(record.id),
+                                initialExpandedSteps: initialExpandedSteps[record.id] ?? [],
+                                preloadedStepLogs: preloadedStepLogs,
+                                overrideLogURL: customLogURLs[record.id]
+                            )
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 4)
                             Divider()
                         }
                     }
@@ -58,11 +68,28 @@ struct HistoryListView: View {
 struct HistoryRowView: View {
     @Environment(RunbookStore.self) private var store
     let record: HistoryRecord
-    @State private var expanded = false
+    @State private var expanded: Bool
     @State private var showLog = false
+    let initialExpandedSteps: Set<String>
+    let preloadedStepLogs: [String: String]
+    let overrideLogURL: URL?
+
+    init(
+        record: HistoryRecord,
+        initialExpanded: Bool = false,
+        initialExpandedSteps: Set<String> = [],
+        preloadedStepLogs: [String: String] = [:],
+        overrideLogURL: URL? = nil
+    ) {
+        self.record = record
+        self._expanded = State(initialValue: initialExpanded)
+        self.initialExpandedSteps = initialExpandedSteps
+        self.preloadedStepLogs = preloadedStepLogs
+        self.overrideLogURL = overrideLogURL
+    }
 
     private var logFile: URL? {
-        StepLogExtractor.findLogURL(for: record)
+        overrideLogURL ?? StepLogExtractor.findLogURL(for: record)
     }
 
     /// Position of this record in the runbook's history sorted newest-first.
@@ -132,7 +159,9 @@ struct HistoryRowView: View {
                             step: step,
                             record: record,
                             logFile: logFile,
-                            runIndexFromEnd: runIndexFromEnd
+                            runIndexFromEnd: runIndexFromEnd,
+                            initialExpanded: initialExpandedSteps.contains(step.name),
+                            preloadedLogText: preloadedStepLogs["\(record.id)|\(step.name)"]
                         )
                     }
 
@@ -184,12 +213,29 @@ struct StepHistoryRow: View {
     let logFile: URL?
     let runIndexFromEnd: Int
 
-    @State private var expanded = false
+    @State private var expanded: Bool
     @State private var stepLogText: String?
-    @State private var loadState: LoadState = .idle
+    @State private var loadState: LoadState
     @State private var justCopied = false
 
     private enum LoadState { case idle, loading, loaded }
+
+    init(
+        step: StepRecord,
+        record: HistoryRecord,
+        logFile: URL?,
+        runIndexFromEnd: Int,
+        initialExpanded: Bool = false,
+        preloadedLogText: String? = nil
+    ) {
+        self.step = step
+        self.record = record
+        self.logFile = logFile
+        self.runIndexFromEnd = runIndexFromEnd
+        self._expanded = State(initialValue: initialExpanded)
+        self._stepLogText = State(initialValue: preloadedLogText)
+        self._loadState = State(initialValue: preloadedLogText != nil ? .loaded : .idle)
+    }
 
     private var statusIcon: String {
         switch step.status {
