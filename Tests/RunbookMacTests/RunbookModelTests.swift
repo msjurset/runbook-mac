@@ -147,6 +147,41 @@ struct RunbookModelTests {
         book.description = ""
         #expect(book.cleanedDescription == "")
     }
+
+    @Test("Decode runbook with summary field and displaySummary behavior")
+    func summaryAndDisplaySummary() throws {
+        let yamlWithSummary = """
+        name: test-summary
+        summary: A short concise summary
+        description: A much longer description with full details
+        steps:
+          - name: s1
+            type: shell
+            shell:
+              command: echo hi
+        """
+        let bookWithSummary = try YAMLDecoder().decode(Runbook.self, from: yamlWithSummary)
+        #expect(bookWithSummary.summary == "A short concise summary")
+        #expect(bookWithSummary.displaySummary == "A short concise summary")
+
+        let yamlWithoutSummary = """
+        name: test-no-summary
+        description: Fallback to description
+        steps:
+          - name: s1
+            type: shell
+            shell:
+              command: echo hi
+        """
+        let bookWithoutSummary = try YAMLDecoder().decode(Runbook.self, from: yamlWithoutSummary)
+        #expect(bookWithoutSummary.summary == nil)
+        #expect(bookWithoutSummary.displaySummary == "Fallback to description")
+
+        let encoded = try YAMLEncoder().encode(bookWithSummary)
+        let roundtrip = try YAMLDecoder().decode(Runbook.self, from: encoded)
+        #expect(roundtrip.summary == "A short concise summary")
+        #expect(roundtrip.description == "A much longer description with full details")
+    }
 }
 
 @Suite("History Record")

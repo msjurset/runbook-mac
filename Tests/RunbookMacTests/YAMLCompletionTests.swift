@@ -9,6 +9,7 @@ struct YAMLCompletionTests {
     func topLevel() {
         let results = provider.completions(for: "", cursorPosition: 0)
         #expect(results.contains("name:"))
+        #expect(results.contains("summary:"))
         #expect(results.contains("steps:"))
         #expect(results.contains("variables:"))
         #expect(results.contains("notify:"))

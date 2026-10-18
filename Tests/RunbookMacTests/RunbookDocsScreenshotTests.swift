@@ -201,6 +201,10 @@ final class RunbookDocsScreenshotTests: XCTestCase {
         let url = URL(fileURLWithPath: outputPath)
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try pngData.write(to: url)
+
+        if !callouts.isEmpty && outputPath.hasSuffix(".png") {
+            try renderAnnotatedSnapshot(view, callouts: [], size: size, to: String(outputPath.dropLast(4)) + "_clean.png")
+        }
     }
 
     @MainActor
