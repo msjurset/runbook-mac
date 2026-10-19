@@ -74,11 +74,12 @@ enum HelpTopic: String, CaseIterable, Identifiable {
         case .runbookFormat:
             return [
                 .paragraph("Every runbook is a YAML file with these top-level fields:"),
-                .code("name: my-runbook\ndescription: What it does\n\nvariables:\n  - name: host\n    default: \"localhost\"\n\nnotify:\n  on: failure\n  desktop: true\n\nsteps:\n  - name: Step 1\n    type: shell\n    shell:\n      command: \"echo hello\""),
+                .code("name: my-runbook\nsummary: Short 1-2 line summary for list views\ndescription: Detailed description of what it does\n\nvariables:\n  - name: host\n    default: \"localhost\"\n\nnotify:\n  on: failure\n  desktop: true\n\nsteps:\n  - name: Step 1\n    type: shell\n    shell:\n      command: \"echo hello\""),
                 .heading("Top-Level Fields"),
                 .table(headers: ["Field", "Required", "Description"], rows: [
                     ["name", "Yes", "Unique runbook name"],
-                    ["description", "No", "Human-readable description"],
+                    ["summary", "No", "Concise 1–2 line summary for list and quick-jump views"],
+                    ["description", "No", "Full human-readable details shown in detail view"],
                     ["variables", "No", "Input parameters with defaults"],
                     ["steps", "Yes", "Ordered list of steps to execute"],
                     ["notify", "No", "Notification configuration"],

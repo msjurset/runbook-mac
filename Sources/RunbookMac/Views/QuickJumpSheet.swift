@@ -47,7 +47,7 @@ struct QuickJumpSheet: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(book.name)
                                         .fontWeight(.medium)
-                                    if let desc = book.description, !desc.isEmpty {
+                                    if let desc = book.displaySummary ?? book.description, !desc.isEmpty {
                                         Text(desc)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)

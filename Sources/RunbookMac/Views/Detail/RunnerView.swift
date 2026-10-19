@@ -29,7 +29,7 @@ struct RunnerView: View {
                                 .clipShape(Capsule())
                         }
                     }
-                    if let desc = runbook.description {
+                    if let desc = runbook.displaySummary ?? runbook.description {
                         Text(desc).font(.caption).foregroundStyle(.secondary)
                     }
                 }

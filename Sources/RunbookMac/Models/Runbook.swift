@@ -3,6 +3,7 @@ import Foundation
 struct Runbook: Identifiable, Codable, Hashable {
     var id: String { name }
     var name: String
+    var summary: String?
     var description: String?
     var variables: [VariableDef]?
     var steps: [Step]
@@ -11,6 +12,39 @@ struct Runbook: Identifiable, Codable, Hashable {
 
     /// Resolved file path on disk (not from YAML)
     var filePath: String?
+
+    init(
+        name: String,
+        summary: String? = nil,
+        description: String? = nil,
+        variables: [VariableDef]? = nil,
+        steps: [Step] = [],
+        notify: NotifyConfig? = nil,
+        log: LogConfig? = nil,
+        filePath: String? = nil
+    ) {
+        self.name = name
+        self.summary = summary
+        self.description = description
+        self.variables = variables
+        self.steps = steps
+        self.notify = notify
+        self.log = log
+        self.filePath = filePath
+    }
+
+    /// A concise 1-2 line summary. If `summary` is provided, returns single-spaced text.
+    /// Falls back to `cleanedDescription` if `summary` is omitted.
+    var displaySummary: String? {
+        if let s = summary?.trimmingCharacters(in: .whitespacesAndNewlines), !s.isEmpty {
+            return s.replacingOccurrences(of: "\r\n", with: "\n")
+                .components(separatedBy: "\n")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .filter { !$0.isEmpty }
+                .joined(separator: " ")
+        }
+        return cleanedDescription
+    }
 
     /// A version of the description with single newlines replaced by spaces,
     /// preserving paragraph breaks (double newlines).
@@ -27,7 +61,7 @@ struct Runbook: Identifiable, Codable, Hashable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case name, description, variables, steps, notify, log
+        case name, summary, description, variables, steps, notify, log
     }
 }
 

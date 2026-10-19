@@ -147,12 +147,12 @@ struct RunbookListView: View {
                         .help("From repo: \(repoName(book) ?? "unknown")\n\(book.filePath ?? "")")
                 }
             }
-            if let desc = book.cleanedDescription, !desc.isEmpty {
+            if let desc = book.displaySummary, !desc.isEmpty {
                 Text(desc)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(nil)
-                    .help(book.description ?? "")
+                    .lineLimit(3)
+                    .help(book.displaySummary ?? book.description ?? "")
             }
             HStack(spacing: 8) {
                 Label("\(book.steps.count) steps", systemImage: "list.number")
@@ -216,12 +216,12 @@ struct RunbookListView: View {
                     .foregroundStyle(.orange)
                     .clipShape(Capsule())
             }
-            if let desc = book.cleanedDescription, !desc.isEmpty {
+            if let desc = book.displaySummary, !desc.isEmpty {
                 Text(desc)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-                    .lineLimit(nil)
-                    .help(book.description ?? "")
+                    .lineLimit(3)
+                    .help(book.displaySummary ?? book.description ?? "")
             }
             HStack(spacing: 8) {
                 Label("\(book.steps.count) steps", systemImage: "list.number")

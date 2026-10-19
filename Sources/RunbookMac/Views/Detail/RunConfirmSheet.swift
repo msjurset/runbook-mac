@@ -23,11 +23,11 @@ struct RunConfirmSheet: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Run: \(runbook.name)")
                         .font(.headline)
-                    if let desc = runbook.description {
+                    if let desc = runbook.displaySummary ?? runbook.description {
                         Text(desc)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            .lineLimit(2)
+                            .lineLimit(3)
                     }
                 }
                 Spacer()

@@ -59,7 +59,7 @@ struct YAMLCompletionProvider {
     }
 
     private let topLevelKeys = [
-        "name:", "description:", "variables:", "steps:", "notify:", "log:",
+        "name:", "summary:", "description:", "variables:", "steps:", "notify:", "log:",
     ]
 
     private let variableKeys = [
